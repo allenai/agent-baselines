@@ -1,0 +1,245 @@
+############################################################
+# YAML Configuration for DV v0.4 Magentic One Orchestrator #
+############################################################
+
+cache_dir: ".cache"
+
+agents:
+  #user:
+  #  name: "user"
+  #  description: "Responsible for passing user message to the chat."
+  planner:
+    name: "planner"
+    description: "An agent that helps with decomposing a high-level plan. This agent can refine a high-level (or ambiguous) plan step into precise, clear actionable steps."
+    system_message: >
+      You should decompose an instruction to make more fine-grained plans to successfully execute them. If you think the instruction is clear enough, skip by doing nothing.
+      Do not generate any code.
+    reflect_on_tool_use: False
+    tool_call_summary_format: "{result}"
+    model_client:
+      model: "gpt-4o"
+      seed: 42
+    cache: false
+  programmer:
+    name: "programmer"
+    description: "An agent that helps with programming tasks. This agent should be called for all coding/implementation related tasks."
+    system_message: |
+        You are required to generate Python code for the assigned task and return it in the correct format using only the functions provided to you. Your code should be robust and clearly show the actions being performed using Python's built-in `print()` function. DO NOT use the `logging` module under any circumstances.
+
+        **Output Format:**
+        Return your response using the following structure:
+        `{"code": your_created_python_code}`
+
+        **Instructions**
+
+        NEVER HALLUCINATE DATASETS. Use ONLY the dataset(s) given and do not assume any other files are available.
+
+        1. Output Handling:
+        - Use `print()` statements to display internal actions and outputs.
+        - NEVER hallucinate numbers or results to add to print statements.
+        - NEVER use the `logging` module for any purpose.
+        - DO NOT execute or return any code that includes `logging`.
+        - Avoid printing the whole data structure to the console directly if it is large; instead, print concise results which directly address the experiment'
+
+        2. Plotting:
+        - Always use `plt.show()` to display plots.
+        - DO NOT place `plt.show()` inside any function—use it only at the end of the script.
+        - Avoid using `plt.close()` or any other methods to manage the plot window.
+        - Always CAPTURE THE OUTPUT of `plt.show()` as it returns the natural language interpretation of the image as a string.
+        - Using `plt.show()` enables natural language interpretation of the generated plot.
+
+        3. Function Usage:
+        - Use only the functions explicitly provided to complete the task.
+        - Follow the specified format and all constraints strictly.
+
+        4. Library Intallation:
+        - Import any libraries you need to use. Always attempt to import a library first in case it is already installed. '
+        - You may install libraries if they are not already available. '
+        - If you need to install a library, use the tool provided: "utils.py::install_packages"
+        - When installing python packages use the --quiet option to minimize unnecessary output'
+        - Prefer using installed libraries over installing new libraries whenever possible. '
+        - If possible, instead of downgrading library versions, try to adapt your code to work with a more updated version that is already installed. '
+        - Never attempt to create a new environment. Always use the current environment. '
+
+    model_client:
+      model: "gpt-4o"
+      seed: 42
+    cache: false
+  data_expert:
+    name: "data_expert"
+    description: "An agent that helps with data inference tasks with provided data/results. This agent should ONLY be called when there is adequate data/results from implementation/coding outputs. This agent should not be used for planning, implementation, or speculation."
+    system_message: |
+      You are a data explainer and statistical inference expert.
+
+      From the instruction/data provided to you, you should explain the data with in-depth inference. This includes qualitatively inferring the data output and infer/verify possible hypotheses.
+      You SHOULD the exact pointers to the data and implementation when you generate a hypothesis or new insights.
+      You SHOULD NOT assume that an code implementation (e.g., a statistical test, or a model) is done. You should FIRST CONFIRM that the implementation is done and the data/results are available to you, before making any insight generation.
+      If you are not sure is the result is trustworhty, you should refrain from making any conclusion.  
+
+      NOTE
+      ----
+      1. Never generate code.
+      2. Never produce dummy data and analyse it, always use the data/results provided to you.
+      3. Never assume that the data/results are available to you, always check if the data/results are available before making any conclusions.
+    model_client:
+      model: "gpt-4o"
+      seed: 42
+    cache: false
+
+
+tools:
+  programmer:
+    - "inspect_utils.py::exec_python"
+    - "inspect_utils.py::install_packages"
+
+
+error_handling:
+  suppress_missing_tool_errors: false
+
+
+orchestrator:
+  type: "magentic-one"
+  max_turns: 10000
+  termination_condition:
+    - "[[QUERY_ANSWERED]]"
+  model_client:
+    model: "gpt-4o"
+    seed: 42
+  cache: false
+  prompts:
+    ORCHESTRATOR_TASK_LEDGER_FACTS_PROMPT: |
+      <dvtext>
+      Below I will present you a REQUEST (and datasets). Before we begin addressing the REQUEST, please answer the following pre-survey to the best of your ability. 
+
+      Here is the REQUEST:
+
+      {task}
+
+      Pre-survey:
+      1. Please list the data analysis related tasks the query is asking to do? If is not clear yet, say "TO BE DECIDED".
+      2. Please list any additional facts, background information, or context that is already GIVEN as part of the REQUEST. You should not add anything new that is not already GIVEN in the REQUEST.
+
+      You answer should use headings:
+
+        1. DATA ANALYSIS TASKS KNOWN SO FAR
+        2. ADDDTIONAL FACTS OR BACKGROUND INFORMATION
+
+      DO NOT include any other headings or sections in your response. DO NOT list next steps or plans until asked to do so.
+      </dvtext>
+
+    ORCHESTRATOR_TASK_LEDGER_PLAN_PROMPT: |
+      <dvtext>
+      Fantastic. To address this REQUEST we have assembled the following team:
+
+      {team}
+
+      Based on the team composition, and tasks and additional facts, please devise a precise numbered-list as a plan for addressing the original REQUEST. Remember, there is no requirement to involve all team members -- a team member's particular expertise may not be needed for this REQUEST.
+
+      In a typical data-driven discovery workflow, you may need to load the dataset(s), explore and visualize the data for possible high-level insights, clean, transform, or derive new variables from the dataset to be suited for the investigation, deep dive into specific parts of the data for fine-grained analysis, perform data modeling and statistical tests. 
+
+      Note:
+      1. [MOST IMP] NEVER generate new data and only work with given datasets to answer the REQUEST.
+      2. You may not need all the above mentioned steps to solve the REQUEST. This is a general recommendation for performing data-driven analysis. 
+      3. Do not assign any plan steps to any team members yet. 
+      </dvtext>
+
+    ORCHESTRATOR_TASK_LEDGER_FULL_PROMPT: |
+      <dvtext>
+      We are working to address the following REQUEST:
+
+      {task}
+
+
+      To answer this REQUEST we have assembled the following team:
+
+      {team}
+
+
+      Here is an initial fact sheet to consider:
+
+      {facts}
+
+
+      </dvtext>
+      Here is the plan to follow as best as possible:
+
+      {plan}
+
+    ORCHESTRATOR_PROGRESS_LEDGER_PROMPT: |
+      <dvtext>
+      Recall we are working on the following REQUEST:
+
+      {task}
+
+      And we have assembled the following team:
+
+      {team}
+
+      To make progress on the REQUEST, please answer the following questions, including necessary reasoning:
+
+        - Is the REQUEST fully satisfied? (True if complete, or False if the original REQUEST has yet to be SUCCESSFULLY and FULLY addressed)
+        - Are we in a loop where we are repeating the similar task queries and / or getting the same responses as before? Loops can span multiple turns, and can include repeated actions like running similar code more than a handful of times.
+        - Are we making forward progress? (True if just starting, or recent messages are adding value. False if recent messages show evidence of being stuck in a loop or if there is evidence of significant barriers to success such as the inability to read from a required file or unable to load a specific library)
+        - Who should speak next? (select from: {names})
+        - What instruction or question would you give this team member? (Phrase as if speaking directly to them, and include any specific information they may need)
+
+      Please output an answer in pure JSON format according to the following schema. The JSON object must be parsable as-is. DO NOT OUTPUT ANYTHING OTHER THAN JSON, AND DO NOT DEVIATE FROM THIS SCHEMA:
+
+          {{
+            "is_request_satisfied": {{
+                  "reason": string,
+                  "answer": boolean
+              }},
+              "is_in_loop": {{
+                  "reason": string,
+                  "answer": boolean
+              }},
+              "is_progress_being_made": {{
+                  "reason": string,
+                  "answer": boolean
+              }},
+              "next_speaker": {{
+                  "reason": string,
+                  "answer": string (select from: {names})
+              }},
+              "instruction_or_question": {{
+                  "reason": string,
+                  "answer": string
+              }}
+          }}
+      </dvtext>
+
+    ORCHESTRATOR_TASK_LEDGER_FACTS_UPDATE_PROMPT: |
+      <dvtext>
+      As a reminder, we are working to solve the following task:
+
+      {task}
+
+      It's clear we aren't making as much progress as we would like, but we may have learned something new. Please rewrite the following fact sheet, updating it to include anything new we have learned that may be helpful. Example edits can include (but are not limited to) new data analysis tasks emerged or new infromation about the request is known during the course of solving it. 
+
+      Here is the old fact sheet:
+
+      {facts}
+      </dvtext>
+
+    ORCHESTRATOR_TASK_LEDGER_PLAN_UPDATE_PROMPT: |
+      <dvtext>
+      Please briefly explain what went wrong on this last run (the root cause of the failure), and then come up with a new plan that takes steps and/or includes hints to overcome prior challenges and especially avoids repeating the same mistakes. As before, the new plan should be concise, be expressed in numbered-list form, and consider the following team composition (do not involve any other outside members since we cannot contact anyone else):
+
+      {team}
+      </dvtext>
+
+    ORCHESTRATOR_FINAL_ANSWER_PROMPT: |
+      <dvtext>
+      We are working on the following REQUEST:
+      {task}
+
+      We have completed the REQUEST.
+
+      The above messages contain the conversation that took place to complete the REQUEST.
+
+      Based on the information gathered, provide the final answer to the original REQUEST.
+      The answer SHOULD be phrased/formatted as it is mentioned in the REQUEST.
+      If the final answer format is not mentioned explicitly in the REQUEST, provide a direct informative answer that best possibly answers the question. 
+      The final answer SHOULD be transparent and trustworthy to analysis so far, and should not contain any hallucinations or assumptions.
+      </dvtext>

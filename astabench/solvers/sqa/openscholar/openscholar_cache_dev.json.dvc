@@ -1,0 +1,5 @@
+outs:
+- md5: 410ac85e6438cc7af42324089a26e871
+  size: 1283854
+  hash: md5
+  path: openscholar_cache_dev.json

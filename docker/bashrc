@@ -1,0 +1,16 @@
+PS1='\[\e[1;32m\]\u\[\e[m\]:\[\e[1;36m\]\w\[\e[m\]\$ '
+
+# You may uncomment the following lines if you want `ls' to be colorized:
+export LS_OPTIONS='--color=auto'
+# eval "$(dircolors)"
+alias ls='ls $LS_OPTIONS'
+alias ll='ls $LS_OPTIONS -l'
+alias l='ls $LS_OPTIONS -lA'
+
+# Some more alias to avoid making mistakes:
+# alias rm='rm -i'
+# alias cp='cp -i'
+# alias mv='mv -i'
+
+export HISTCONTROL=ignoreboth
+export HISTFILE=~/.astabench/bash_history

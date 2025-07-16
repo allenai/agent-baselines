@@ -1,0 +1,11 @@
+services:
+  default: 
+    image: astabench-sandbox
+    init: true
+    command: tail -f /dev/null
+    cpus: 2.0
+    network_mode: none
+    working_dir: /workspace
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+      - TZ=Etc/UTC
