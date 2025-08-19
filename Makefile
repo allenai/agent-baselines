@@ -17,6 +17,7 @@ TARGET := --target astabench-base
 ifdef SOLVER
 	  TARGET := --target $(SOLVER)
 	  ASTABENCH_TAG := $(ASTABENCH_TAG)-$(SOLVER)
+	  ENV_ARGS += --env-file solvers/$(SOLVER)/env
 endif
 
 # Add each env var only if it's defined
