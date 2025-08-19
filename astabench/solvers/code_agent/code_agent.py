@@ -1,10 +1,11 @@
 import json
-from typing import Dict, List, Any, Optional, Type
-from astabench.solvers.code_agent.environment import Environment, EditACI
+from typing import Optional, Type
+
+from inspect_ai.model import Model, get_model
+
+from astabench.solvers.code_agent.environment import EditACI, Environment
 from astabench.solvers.code_agent.llm_agent import Agent
-from astabench.solvers.sandbox_util.sandbox_jupyter import SandboxJupyter
-from inspect_ai.model import get_model
-from contextvars import ContextVar
+from astabench.util.sandbox.sandbox_jupyter import SandboxJupyter
 
 
 class CodeAgent:
@@ -26,6 +27,7 @@ class CodeAgent:
         json_output: Optional[bool] = False,
         precompute_cells: Optional[list] = [],
         cell_timeout: Optional[int] = 500,
+        model_override: str | Model | None = None,
         **kwargs,
     ) -> None:
         """Creates instance with acccess to an execution environment (`env`) with
@@ -45,6 +47,7 @@ class CodeAgent:
             prompt_config_path=prompt_config_path,
             model_engine=get_model().name,
             json_output=json_output,
+            model_override=model_override,
             **kwargs,
         )
         self.env = Environment(**kwargs)

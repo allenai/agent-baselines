@@ -15,7 +15,7 @@ from pathlib import Path
 from textwrap import dedent
 from websocket import create_connection, WebSocketTimeoutException
 from typing import Dict, Tuple, List, Callable, Optional, Type, Self, Any, Union
-from astabench.solvers.sandbox_util.sandbox_jupyter import SandboxJupyter
+from astabench.util.sandbox.sandbox_jupyter import SandboxJupyter
 
 logger = logging.getLogger(__name__)
 

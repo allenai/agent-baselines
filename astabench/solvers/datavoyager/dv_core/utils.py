@@ -111,7 +111,7 @@ def remove_ansi_escape_sequences(text: str) -> str:
     return ansi_escape.sub("", text)
 
 
-def exec_python(code: str):
+def exec_python(code: str) -> str:
     """
     Execute python code and return the output or error message.
 

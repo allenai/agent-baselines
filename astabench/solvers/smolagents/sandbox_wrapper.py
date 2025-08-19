@@ -7,7 +7,7 @@ from inspect_ai.util import sandbox
 from smolagents import Tool as SmolTool
 from smolagents.utils import BASE_BUILTIN_MODULES
 
-from astabench.solvers.sandbox_util import SandboxJupyter, SandboxToolManager
+from astabench.util.sandbox import SandboxJupyter, SandboxToolManager
 
 logger = logging.getLogger(__name__)
 

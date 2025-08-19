@@ -14,6 +14,7 @@ from inspect_ai.model import (
     ChatMessageAssistant,
     ChatMessageTool,
     ChatMessageUser,
+    Model,
     call_tools,
     get_model,
 )
@@ -21,7 +22,7 @@ from inspect_ai.solver import Generate, Solver, TaskState, chain, solver, system
 from inspect_ai.tool import Tool, ToolCall, ToolDef, ToolInfo, tool_with
 from inspect_ai.util import LimitExceededError
 
-from astabench.solvers.util import merge_tools_with_state
+from astabench.util.state import merge_tools_with_state
 from astabench.tools import ToolsetConfig
 from astabench.tools.submission import get_submission_manager, submit_tool
 
@@ -143,6 +144,7 @@ def basic_agent(
     submit_name: str = DEFAULT_SUBMIT_NAME,
     submit_description: str = DEFAULT_SUBMIT_DESCRIPTION,
     tool_call_format: Literal["text", "native"] = "native",
+    model_override: str | Model | None = None,
 ) -> Solver:
     """Basic ReAct agent.
 
@@ -177,6 +179,9 @@ def basic_agent(
           llm will use the built-in tool calling mechanism, e.g. attaching
           calls to the tool_calls field of it's messages and receiving
           responses as ToolMessages.
+        model_override: Optional model override. If provided, will use this
+            model instead of the default one (prefer `--model` instead of this,
+            unless this agent is being used in a multi-agent system).
 
     Returns:
         Plan for agent.
@@ -234,7 +239,7 @@ def basic_agent(
                             )
                         )
                     # generate output and append assistant message
-                    state.output = await get_model().generate(
+                    state.output = await get_model(model_override).generate(
                         input=state.messages,
                         cache=cache,
                         tools=(state.tools if tool_call_format == "native" else []),
@@ -319,12 +324,16 @@ def basic_agent(
 @solver
 def instantiated_basic_agent(
     max_steps: int = 10,
+    model_override: str | Model | None = None,
     **tool_options,
 ):
     """Basic ReAct agent with configurable tools.
 
     Args:
         max_steps: Maximum number of reasoning steps before terminating.
+        model_override: Optional model override. If provided, will use this
+            model instead of the default one (prefer `--model` instead of this,
+            unless this agent is being used in a multi-agent system).
         **tool_options: Tool configuration options. See ToolsetConfig in
             astabench.tools for available options (with_search_tools,
             with_stateful_python, with_report_editor, with_table_editor,
@@ -334,7 +343,6 @@ def instantiated_basic_agent(
             (necessary to maintain e.g. date restrictions on search tools where
             they apply)
     """
-    tool_options.setdefault("with_stateful_python", True)
     config = ToolsetConfig.model_validate(tool_options)
     tools = config.create_tools()
 
@@ -346,4 +354,5 @@ def instantiated_basic_agent(
         tool_call_format="native",
         max_steps=max_steps,
         add_submit_tool=not config.with_editor_submit,
+        model_override=model_override,
     )

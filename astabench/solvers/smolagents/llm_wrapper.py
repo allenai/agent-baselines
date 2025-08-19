@@ -27,8 +27,25 @@ class AsyncOpenAIModel(Model):
         # override the `inspect_ai` model settings.  It also causes issues for
         # Anthropic reasoning mode, which needs `max_tokens > reasoning tokens`
         max_tokens=None,
+        prune_stop_sequences: bool = False,
         **kwargs,
     ):
+        """
+        Initialize an AsyncOpenAIModel.
+
+        Args:
+            async_loop (asyncio.AbstractEventLoop): The event loop to run async operations.
+            model_id (str): The model identifier to use (e.g., "gpt-4", "gpt-5", etc.).
+            api_base (Optional[str]): The base URL for the OpenAI API.
+            api_key (Optional[str]): The API key for authentication.
+            custom_role_conversions (Optional[Dict[str, str]]): Custom role conversions for chat messages.
+            max_tokens: Maximum number of tokens to generate.
+            prune_stop_sequences (bool): If True, removes the "stop" parameter from the completion arguments.
+                This is necessary for certain models (notably GPT-5 and O-series models) that do not support
+                the "stop" parameter or may produce errors if it is present. Set this to True when using
+                GPT-5 or O-series models, or any model where stop sequences should not be sent to the API.
+            **kwargs: Additional keyword arguments.
+        """
         super().__init__(max_tokens=max_tokens, **kwargs)
         try:
             from openai import AsyncOpenAI
@@ -44,6 +61,7 @@ class AsyncOpenAIModel(Model):
         )
         self.custom_role_conversions = custom_role_conversions
         self.loop = async_loop
+        self.prune_stop_sequences = prune_stop_sequences
 
     async def acall(
         self,
@@ -63,6 +81,9 @@ class AsyncOpenAIModel(Model):
                 custom_role_conversions=self.custom_role_conversions,
                 **kwargs,
             )
+
+            if "stop" in completion_kwargs and self.prune_stop_sequences:
+                del completion_kwargs["stop"]
 
             response = await self.client.chat.completions.create(**completion_kwargs)
             self._last_input_token_count = response.usage.prompt_tokens
