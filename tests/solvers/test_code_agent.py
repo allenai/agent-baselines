@@ -2,7 +2,7 @@ import logging
 import re
 import time
 
-from astabench.solvers.code_agent.llm_agent import (
+from agent_baselines.solvers.code_agent.llm_agent import (
     clean_observation,
     delete_lines_containing,
 )

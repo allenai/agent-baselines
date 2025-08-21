@@ -3,12 +3,12 @@ requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agent-baselines"
+name = "agent_baselines"
 version = "0.0.1"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "astabench==0.0.2",
+    "astabench==0.1.5",
 ]
 
 [project.optional-dependencies]
@@ -27,14 +27,14 @@ azure = [
     "azure-ai-inference"
 ]
 sqa = [
-    "ai2-scholar-qa==0.6.15",
+    "ai2-scholar-qa==0.7.0",
 ]
 smolagents = [
     "smolagents==1.17.0",
 ]
 datavoyager = [
-    "autogen-agentchat==0.4.4",
-    "autogen-ext[openai, diskcache, azure]==0.4.4",
+    "autogen-agentchat==0.6.4",
+    "autogen-ext[openai, diskcache, azure, anthropic]==0.6.4",
     "ipython~=8.18",
     "matplotlib==3.10.0",
     "nest_asyncio==1.6.0",
@@ -54,17 +54,13 @@ super = [
 ]
 
 [project.scripts]
-astabench = "astabench.cli:cli"
 inspect = "inspect_ai._cli.main:main"
-
-[project.entry-points.inspect_ai]
-astabench = "astabench.evals._registry"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = [
-    "astabench",
-    "astabench.*",
+    "agent_baselines",
+    "agent_baselines.*",
 ]
 
 [tool.uv]
@@ -98,7 +94,7 @@ ignore = [
 ]
 
 [tool.setuptools.package-data]
-"astabench" = ["config/*.yml", "evals/inspect_eval_wrappers/ds1000_splits.json", "solvers/sandbox_util/sandbox_compose.yaml", "solvers/sandbox_util/Dockerfile", "solvers/sandbox_util/*.txt", "solvers/datavoyager/dv_core/config/*.yaml", "solvers/code_agent/*.yaml", "evals/demo/code_execution/*.yaml"]
+"agent_baselines" = ["solvers/datavoyager/dv_core/config/*.yaml", "solvers/code_agent/*.yaml"]
 
 [tool.uv.sources]
 knowledge-storm = { git = "https://github.com/gituser768/storm", branch = "dh-fix-youcom" }

@@ -22,4 +22,4 @@ jobs:
 
       - name: Run flake8
         run: |
-          flake8 astabench/ tests/
+          flake8 agent_baselines/ tests/

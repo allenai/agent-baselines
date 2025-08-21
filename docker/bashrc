@@ -13,4 +13,4 @@ alias l='ls $LS_OPTIONS -lA'
 # alias mv='mv -i'
 
 export HISTCONTROL=ignoreboth
-export HISTFILE=~/.astabench/bash_history
+export HISTFILE=~/.agent-baselines/bash_history

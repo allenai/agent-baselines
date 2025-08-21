@@ -3,8 +3,8 @@
 # allow passing extra pytest args, e.g. make test-expensive PYTEST_ARGS="-k EVAL_NAME"
 PYTEST_ARGS ?=
 
-ASTABENCH_TAG    := astabench
-CONTAINER_NAME   := astabench-container
+AGENT_BASELINES_TAG	:= agent-baselines
+CONTAINER_NAME		:= agent-baselines-container
 DOCKER_SOCKET_PATH ?= $(if $(XDG_RUNTIME_DIR),$(XDG_RUNTIME_DIR)/docker.sock,/var/run/docker.sock)
 
 ENV_ARGS :=
@@ -12,11 +12,11 @@ ENV_ARGS :=
 # Name of solver to build Docker container for
 SOLVER :=
 # Docker image tag for the solver
-TARGET := --target astabench-base
+TARGET := --target agent-baselines-base
 
 ifdef SOLVER
 	  TARGET := --target $(SOLVER)
-	  ASTABENCH_TAG := $(ASTABENCH_TAG)-$(SOLVER)
+	  AGENT_BASELINES_TAG := $(AGENT_BASELINES_TAG)-$(SOLVER)
 	  ENV_ARGS += --env-file solvers/$(SOLVER)/env
 endif
 
@@ -33,17 +33,9 @@ ifdef HF_TOKEN
   ENV_ARGS += -e HF_TOKEN
 endif
 
-ifdef GITHUB_ACCESS_TOKEN
-  ENV_ARGS += -e GITHUB_ACCESS_TOKEN
-endif
-
 # Also support .env file if it exists
 ifneq ("$(wildcard .env)","")
   ENV_ARGS += --env-file .env
-  # Load GITHUB_ACCESS_TOKEN from .env if not already set
-  ifndef GITHUB_ACCESS_TOKEN
-    GITHUB_ACCESS_TOKEN := $(shell grep '^GITHUB_ACCESS_TOKEN=' .env 2>/dev/null | cut -d'=' -f2)
-  endif
 endif
 
 # -----------------------------------------------------------------------------
@@ -52,35 +44,30 @@ endif
 ifeq ($(IS_CI),true)
   LOCAL_MOUNTS :=
   ENV_ARGS += -e IS_CI
-  TEST_RUN := docker run --rm $(ENV_ARGS) -v /var/run/docker.sock:/var/run/docker.sock $(ASTABENCH_TAG)
+  TEST_RUN := docker run --rm $(ENV_ARGS) -v /var/run/docker.sock:/var/run/docker.sock $(AGENT_BASELINES_TAG)
   BUILD_QUIET := --quiet
 else
   LOCAL_MOUNTS := \
     -v $(DOCKER_SOCKET_PATH):/var/run/docker.sock \
-    -v $$(pwd)/pyproject.toml:/astabench/pyproject.toml:ro \
-    -v $$(pwd)/astabench:/astabench/astabench \
-    -v $$(pwd)/tests:/astabench/tests \
-    -v $$(pwd)/logs:/astabench/logs \
-    -v astabench-cache:/root/.cache
-  TEST_RUN := docker run --rm $(ENV_ARGS) $(LOCAL_MOUNTS) $(ASTABENCH_TAG)
+    -v $$(pwd)/pyproject.toml:/agent-baselines/pyproject.toml:ro \
+    -v $$(pwd)/agent_baselines:/agent-baselines/agent_baselines \
+    -v $$(pwd)/tests:/agent-baselines/tests \
+    -v $$(pwd)/logs:/agent-baselines/logs \
+    -v agent-baselines-cache:/root/.cache
+  TEST_RUN := docker run --rm $(ENV_ARGS) $(LOCAL_MOUNTS) $(AGENT_BASELINES_TAG)
   BUILD_QUIET ?=
 endif
 
 # -----------------------------------------------------------------------------
 # Build the Docker image (primary target)
 # -----------------------------------------------------------------------------
-# Build args for GitHub authentication
-BUILD_ARGS :=
-ifdef GITHUB_ACCESS_TOKEN
-	BUILD_ARGS := --build-arg GITHUB_ACCESS_TOKEN=$(GITHUB_ACCESS_TOKEN)
-endif
 
 build-image:
 	@if [ -z "$(GITHUB_ACCESS_TOKEN)" ]; then \
 		echo "Warning: GITHUB_ACCESS_TOKEN not set. This may cause issues with private GitHub repositories."; \
 		echo "To set it, export GITHUB_ACCESS_TOKEN=<your_token> or add it to .env file"; \
 	fi
-	docker build $(BUILD_QUIET) $(BUILD_ARGS) $(TARGET) . --tag $(ASTABENCH_TAG) -f ./docker/Dockerfile
+	docker build $(BUILD_QUIET) $(TARGET) . --tag $(AGENT_BASELINES_TAG) -f ./docker/Dockerfile
 
 # -----------------------------------------------------------------------------
 # Interactive shell in container
@@ -88,9 +75,9 @@ build-image:
 shell: build-image
 	@docker run --rm -it --name $(CONTAINER_NAME) \
 		$(LOCAL_MOUNTS) \
-		-v astabench-home:/root/.astabench \
+		-v agent-baselines-home:/root/.agent-baselines \
 		$(ENV_ARGS) -p 7575:7575 \
-		$(ASTABENCH_TAG) \
+		$(AGENT_BASELINES_TAG) \
 		/bin/bash
 
 # -----------------------------------------------------------------------------
@@ -109,8 +96,8 @@ endif
 
 format:
 	docker run --rm \
-		-v $$(pwd):/astabench \
-		$(ASTABENCH_TAG) \
+		-v $$(pwd):/agent-baselines \
+		$(AGENT_BASELINES_TAG) \
 		sh -c "pip install --no-cache-dir black && black ."
 
 ifneq ($(IS_CI),true)
@@ -119,9 +106,9 @@ endif
 
 mypy:
 	docker run --rm \
-		-v $$(pwd):/astabench \
-		$(ASTABENCH_TAG) \
-		uv run mypy astabench/ tests/
+		-v $$(pwd):/agent-baselines \
+		$(AGENT_BASELINES_TAG) \
+		uv run mypy agent-baselines/ tests/
 
 ifneq ($(IS_CI),true)
 flake: build-image
@@ -129,16 +116,16 @@ endif
 
 flake:
 	docker run --rm \
-		$(ASTABENCH_TAG) \
-		uv run flake8 astabench/ tests/
+		$(AGENT_BASELINES_TAG) \
+		uv run flake8 agent-baselines/ tests/
 
 ifneq ($(IS_CI),true)
 test: build-image
 endif
 
 test:
-	@$(TEST_RUN) uv run --no-sync --extra dev --extra inspect_evals --extra smolagents \
-		-m pytest $(PYTEST_ARGS) -vv /astabench/tests
+	@$(TEST_RUN) uv run --no-sync --extra dev --extra smolagents \
+		-m pytest $(PYTEST_ARGS) -vv /agent-baselines/tests
 
 ifneq ($(IS_CI),true)
 test-expensive: build-image
@@ -146,4 +133,4 @@ endif
 
 test-expensive:
 	@$(TEST_RUN) uv run --no-sync --extra dev --extra inspect_evals --extra smolagents \
-		-m pytest $(PYTEST_ARGS) -vv -o addopts= -m expensive /astabench/tests
+		-m pytest $(PYTEST_ARGS) -vv -o addopts= -m expensive /agent-baselines/tests
