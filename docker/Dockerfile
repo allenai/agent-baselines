@@ -31,20 +31,7 @@ ENV PATH="/root/.cargo/bin:$PATH"
 WORKDIR /astabench
 COPY pyproject.toml /astabench/
 
-# Set up GitHub authentication
-ARG GITHUB_ACCESS_TOKEN
-
 RUN mkdir -p /astabench/astabench
-
-# Configure git with authentication if token is provided
-RUN if [ -n "$GITHUB_ACCESS_TOKEN" ]; then \
-        # Create a simple git credential helper \
-        echo '#!/bin/sh' > /usr/local/bin/git-credential-helper; \
-        echo 'echo username=token' >> /usr/local/bin/git-credential-helper; \
-        echo "echo password=$GITHUB_ACCESS_TOKEN" >> /usr/local/bin/git-credential-helper; \
-        chmod +x /usr/local/bin/git-credential-helper; \
-        git config --global credential.helper /usr/local/bin/git-credential-helper; \
-    fi
 
 RUN uv sync --extra dev
 
