@@ -68,14 +68,14 @@ jobs:
           load: true  # Make the image available for later steps
 
       # Build the image that will run the sandbox (needed for some tests)
-      - name: Build sandbox Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./astabench/util/sandbox/
-          tags: astabench-sandbox:latest
-          cache-from: type=gha,scope=astabench-sandbox
-          cache-to: type=gha,mode=max,scope=astabench-sandbox
-          load: true
+#      - name: Build sandbox Docker image
+#        uses: docker/build-push-action@v5
+#        with:
+#          context: ./astabench/util/sandbox/
+#          tags: astabench-sandbox:latest
+#          cache-from: type=gha,scope=astabench-sandbox
+#          cache-to: type=gha,mode=max,scope=astabench-sandbox
+#          load: true
 
       - name: Check space
         run: |
