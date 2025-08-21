@@ -98,7 +98,7 @@ ignore = [
 ]
 
 [tool.setuptools.package-data]
-"astabench" = ["config/*.yml", "evals/inspect_eval_wrappers/ds1000_splits.json", "solvers/sandbox_util/sandbox_compose.yaml", "solvers/sandbox_util/Dockerfile", "solvers/sandbox_util/*.txt", "solvers/datavoyager/dv_core/config/*.yaml", "solvers/code_agent/*.yaml", "evals/demo/code_execution/*.yaml"]
+"astabench" = ["solvers/datavoyager/dv_core/config/*.yaml", "solvers/code_agent/*.yaml"]
 
 [tool.uv.sources]
 knowledge-storm = { git = "https://github.com/gituser768/storm", branch = "dh-fix-youcom" }
