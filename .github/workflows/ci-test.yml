@@ -67,15 +67,24 @@ jobs:
           cache-to: type=gha,mode=max,scope=astabench
           load: true  # Make the image available for later steps
 
+      # Copy sandbox files from installed astabench package
+      - name: Copy astabench sandbox files
+        run: |
+          # Find the astabench installation and copy sandbox files
+          ASTABENCH_PATH=$(uv run python -c "import astabench; import os; print(os.path.dirname(astabench.__file__))")
+          mkdir -p ./temp-sandbox/
+          cp -r "$ASTABENCH_PATH/util/sandbox/"* ./temp-sandbox/
+          ls -la ./temp-sandbox/
+
       # Build the image that will run the sandbox (needed for some tests)
-#      - name: Build sandbox Docker image
-#        uses: docker/build-push-action@v5
-#        with:
-#          context: ./astabench/util/sandbox/
-#          tags: astabench-sandbox:latest
-#          cache-from: type=gha,scope=astabench-sandbox
-#          cache-to: type=gha,mode=max,scope=astabench-sandbox
-#          load: true
+      - name: Build sandbox Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./temp-sandbox/
+          tags: astabench-sandbox:latest
+          cache-from: type=gha,scope=astabench-sandbox
+          cache-to: type=gha,mode=max,scope=astabench-sandbox
+          load: true
 
       - name: Check space
         run: |
