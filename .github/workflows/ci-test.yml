@@ -67,6 +67,10 @@ jobs:
           cache-to: type=gha,mode=max,scope=astabench
           load: true  # Make the image available for later steps
 
+      # Install uv for Python package management
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
       # Copy sandbox files from installed astabench package
       - name: Copy astabench sandbox files
         run: |
