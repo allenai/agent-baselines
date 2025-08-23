@@ -1,23 +1,20 @@
 import json
-import os
-from typing import Dict, List, Optional
-import re
-from itertools import groupby
 from pathlib import Path
 
-import aiohttp
+from astabench.types.sqa import SQAResponse, SQAResponseWithUsage
+from astabench.util.model import record_model_usage_with_inspect
 from inspect_ai.model import ChatMessageAssistant, ModelUsage
 from inspect_ai.solver import Generate, Solver, TaskState, solver
-from agent_baselines.solvers.sqa.general_memorized.memorized_solver import load_os_dataset
-from pydantic import create_model
-from pydantic.fields import PydanticUndefined
 
-from astabench.types.sqa import SQASection, SQAResponse, Citation, SQAResponseWithUsage
-from astabench.util.model import record_model_usage_with_inspect
+from agent_baselines.solvers.sqa.general_memorized.memorized_solver import (
+    load_os_dataset,
+)
 
 
 def read_q_result(question: str):
-    from agent_baselines.solvers.sqa.general_memorized.memorized_solver import os_dataset
+    from agent_baselines.solvers.sqa.general_memorized.memorized_solver import (
+        os_dataset,
+    )
 
     results = os_dataset
     resps = [a for a in results if a["question"] == question]

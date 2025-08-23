@@ -4,6 +4,8 @@ import os
 import uuid
 from typing import List
 
+from astabench.evals.arxivdigestables.task import Cell, Table
+from astabench.util.model import record_model_usage_with_inspect
 from inspect_ai.model import ChatMessageAssistant, ModelUsage
 from inspect_ai.solver import Generate, Solver, TaskState, solver
 from scholarqa.config.config_setup import LogsConfig
@@ -13,9 +15,6 @@ from scholarqa.rag.retriever_base import FullTextRetriever
 from scholarqa.state_mgmt.local_state_mgr import LocalStateMgrClient
 from scholarqa.table_generation.table_generator import TableGenerator
 from scholarqa.table_generation.table_model import TableWidget
-
-from astabench.evals.arxivdigestables.task import Cell, Table
-from astabench.util.model import record_model_usage_with_inspect
 
 logger = logging.getLogger(__name__)
 

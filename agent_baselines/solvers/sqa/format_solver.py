@@ -1,7 +1,10 @@
 import json
 import re
-from typing import Type, List
+from typing import List
 
+from astabench.evals.sqa.citation_eval import clean_citation
+from astabench.evals.sqa.retry_utils import generate_with_retry
+from astabench.types.sqa import Citation, SQAResponse, SQASection
 from inspect_ai.model import (
     ChatMessageAssistant,
     ChatMessageSystem,
@@ -13,10 +16,6 @@ from inspect_ai.model import (
 from inspect_ai.solver import Solver, solver
 from inspect_ai.util import json_schema
 from pydantic import BaseModel
-
-from astabench.types.sqa import SQAResponse, SQASection, Citation
-from astabench.evals.sqa.citation_eval import clean_citation
-from astabench.evals.sqa.retry_utils import generate_with_retry
 
 max_tokens_lookup = {
     "openai/gpt-4.1": 32_000,

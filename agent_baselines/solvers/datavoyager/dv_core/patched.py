@@ -4,7 +4,6 @@ import logging
 import sys
 import time
 import uuid
-from inspect import signature
 from io import BytesIO
 from logging import Logger
 from typing import Any, AsyncGenerator, List, Optional, Sequence, Union
@@ -40,7 +39,7 @@ from autogen_core.models import (
 )
 from autogen_core.tools import BaseTool, Workbench
 from autogen_ext.models.openai import OpenAIChatCompletionClient
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel
 
 from .models import ExecutePython, InstallPackages
 

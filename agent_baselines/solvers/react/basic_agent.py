@@ -9,6 +9,9 @@ import uuid
 from logging import getLogger
 from typing import Literal
 
+from astabench.tools import ToolsetConfig
+from astabench.tools.submission import get_submission_manager, submit_tool
+from astabench.util.state import merge_tools_with_state
 from inspect_ai.model import (
     CachePolicy,
     ChatMessageAssistant,
@@ -21,10 +24,6 @@ from inspect_ai.model import (
 from inspect_ai.solver import Generate, Solver, TaskState, chain, solver, system_message
 from inspect_ai.tool import Tool, ToolCall, ToolDef, ToolInfo, tool_with
 from inspect_ai.util import LimitExceededError
-
-from astabench.util.state import merge_tools_with_state
-from astabench.tools import ToolsetConfig
-from astabench.tools.submission import get_submission_manager, submit_tool
 
 logger = getLogger(__name__)
 

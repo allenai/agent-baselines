@@ -1,10 +1,11 @@
-import aiohttp
-from inspect_ai.solver import Solver, solver, TaskState, Generate
-from inspect_ai.model import ChatMessageAssistant
 import json
+import logging
 import os
 from uuid import uuid4
-import logging
+
+import aiohttp
+from inspect_ai.model import ChatMessageAssistant
+from inspect_ai.solver import Generate, Solver, TaskState, solver
 
 logger = logging.getLogger(__name__)
 YOUCOM_API_KEY = os.environ["YOUCOM_API_KEY"]

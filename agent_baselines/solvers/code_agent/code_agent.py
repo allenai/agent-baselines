@@ -1,11 +1,11 @@
 import json
 from typing import Optional, Type
 
+from astabench.util.sandbox.sandbox_jupyter import SandboxJupyter
 from inspect_ai.model import Model, get_model
 
 from agent_baselines.solvers.code_agent.environment import EditACI, Environment
 from agent_baselines.solvers.code_agent.llm_agent import Agent
-from astabench.util.sandbox.sandbox_jupyter import SandboxJupyter
 
 
 class CodeAgent:

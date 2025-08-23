@@ -1,5 +1,6 @@
-import sys
 import json
+import sys
+
 from agent_baselines.solvers.sqa.sqa import query_sqa
 
 

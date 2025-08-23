@@ -1,21 +1,9 @@
-import uuid
-import base64
-import signal
 import datetime
 import logging
-import json
-import pickle
-import re
-import time
-import requests
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+
 from inspect_ai.log import transcript
-from dataclasses import dataclass, fields
-from io import BytesIO
-from pathlib import Path
-from textwrap import dedent
-from websocket import create_connection, WebSocketTimeoutException
-from typing import Dict, Tuple, List, Callable, Optional, Type, Self, Any, Union
-from astabench.util.sandbox.sandbox_jupyter import SandboxJupyter
 
 logger = logging.getLogger(__name__)
 

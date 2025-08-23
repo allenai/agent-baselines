@@ -1,13 +1,11 @@
 import asyncio
-import json
 import logging
 import os
-from typing import TYPE_CHECKING, Dict, Any
-
-from inspect_ai.model import ChatMessageAssistant, ModelUsage
-from inspect_ai.solver import Generate, Solver, TaskState, solver
+from typing import TYPE_CHECKING, Any, Dict
 
 from astabench.util.model import record_model_usage_with_inspect
+from inspect_ai.model import ChatMessageAssistant, ModelUsage
+from inspect_ai.solver import Generate, Solver, TaskState, solver
 
 if TYPE_CHECKING:
     from futurehouse_client import FutureHouseClient, JobNames

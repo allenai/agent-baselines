@@ -1,9 +1,9 @@
+import json
 import logging
 import os
-import json
 
-from inspect_ai.solver import Solver, solver, TaskState, Generate, chain
 from inspect_ai.model import ChatMessageAssistant
+from inspect_ai.solver import Generate, Solver, TaskState, chain, solver
 
 from agent_baselines.solvers.sqa.format_solver import format_solver
 from agent_baselines.solvers.youcom import query_youcom

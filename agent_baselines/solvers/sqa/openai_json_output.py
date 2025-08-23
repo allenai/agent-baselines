@@ -1,17 +1,15 @@
 import json
 
+from astabench.types.sqa import SQAResponse
 from inspect_ai.model import (
     ChatMessageAssistant,
     ChatMessageSystem,
     GenerateConfig,
-    Model,
     ResponseSchema,
     get_model,
 )
 from inspect_ai.solver import Generate, Solver, TaskState, solver
 from inspect_ai.util import json_schema
-
-from astabench.types.sqa import SQAResponse
 
 
 async def query_openai(

@@ -4,15 +4,15 @@ from unittest import skip
 from unittest.mock import patch
 
 import pytest
-from inspect_ai import eval as inspect_ai_eval
-
 from astabench.evals.paper_finder.paper_finder_utils import (
     litqa2_query_ids_in_vespa_fulltext,
 )
 from astabench.evals.paper_finder.task import (
-    paper_finder_validation,
     paper_finder_litqa2,
+    paper_finder_validation,
 )
+from inspect_ai import eval as inspect_ai_eval
+
 from agent_baselines.solvers.search.paper_finder import ai2i_paper_finder
 
 

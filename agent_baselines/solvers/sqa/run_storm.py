@@ -20,23 +20,23 @@ args.output_dir/
 """
 
 import os
-
 from argparse import ArgumentParser
+
 from knowledge_storm import (
-    STORMWikiRunnerArguments,
-    STORMWikiRunner,
     STORMWikiLMConfigs,
+    STORMWikiRunner,
+    STORMWikiRunnerArguments,
 )
 from knowledge_storm.lm import OpenAIModel
 from knowledge_storm.rm import (
-    YouRM,
+    AzureAISearch,
     BingSearch,
     BraveRM,
-    SerperRM,
     DuckDuckGoSearchRM,
-    TavilySearchRM,
     SearXNG,
-    AzureAISearch,
+    SerperRM,
+    TavilySearchRM,
+    YouRM,
 )
 from knowledge_storm.utils import load_api_key
 

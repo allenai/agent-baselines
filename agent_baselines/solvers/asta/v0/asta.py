@@ -8,6 +8,7 @@ from logging import getLogger
 from pathlib import Path
 from typing import Callable
 
+from astabench.constants import ASTA_SOLVER_DATA_REPO, ASTA_SOLVER_DATA_REVISION
 from huggingface_hub import hf_hub_download
 from inspect_ai.model import (
     ChatMessage,
@@ -19,8 +20,6 @@ from inspect_ai.model import (
 from inspect_ai.solver import Generate, Solver, TaskState, solver
 from inspect_ai.tool import Tool, ToolCall, ToolDef, ToolError, tool
 from pydantic import BaseModel
-
-from astabench.constants import ASTA_SOLVER_DATA_REPO, ASTA_SOLVER_DATA_REVISION
 
 logger = getLogger(__name__)
 
@@ -190,11 +189,14 @@ def fewshot_textsim_router() -> Solver:
 
     async def solve(state: TaskState, generate: Generate) -> TaskState:
         # Import solvers here to avoid dependency issues when just importing the module
-        import agent_baselines.solvers.datavoyager.agent
         from astabench.evals.e2e_discovery.solvers.autoasta.autoasta_cached import (
             autoasta_cached_solver,
         )
-        from agent_baselines.solvers.arxivdigestables.asta_table_agent import tables_solver
+
+        import agent_baselines.solvers.datavoyager.agent
+        from agent_baselines.solvers.arxivdigestables.asta_table_agent import (
+            tables_solver,
+        )
         from agent_baselines.solvers.code_agent.agent import code_agent
         from agent_baselines.solvers.datavoyager.agent import datavoyager_solver
         from agent_baselines.solvers.react.basic_agent import instantiated_basic_agent

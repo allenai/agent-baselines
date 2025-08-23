@@ -2,12 +2,11 @@ import asyncio
 import logging
 from typing import Any, Dict, List, Optional, Tuple
 
+from astabench.util.sandbox import SandboxJupyter, SandboxToolManager
 from inspect_ai.tool import ToolDef
 from inspect_ai.util import sandbox
 from smolagents import Tool as SmolTool
 from smolagents.utils import BASE_BUILTIN_MODULES
-
-from astabench.util.sandbox import SandboxJupyter, SandboxToolManager
 
 logger = logging.getLogger(__name__)
 

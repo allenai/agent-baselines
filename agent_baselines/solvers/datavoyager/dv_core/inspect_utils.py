@@ -2,8 +2,8 @@ import asyncio
 from contextvars import ContextVar
 from pathlib import Path
 
-from astabench.util.sandbox import SandboxJupyter
 from astabench.tools.stateful_python import exec_python_session
+from astabench.util.sandbox import SandboxJupyter
 
 sandbox_jupyter = ContextVar[SandboxJupyter]("sandbox_jupyter")
 

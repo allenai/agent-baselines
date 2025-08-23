@@ -1,15 +1,15 @@
-from inspect_ai.solver import Solver, solver, TaskState, Generate
-from inspect_ai.model import ChatMessageAssistant
-from inspect_ai.util import subprocess
 import json
-import os
-from uuid import uuid4
-from astabench.types.sqa import SQAResponse
-import re
 import logging
-from pathlib import Path
+import os
+import re
 import sys
+from pathlib import Path
+from uuid import uuid4
 
+from astabench.types.sqa import SQAResponse
+from inspect_ai.model import ChatMessageAssistant
+from inspect_ai.solver import Generate, Solver, TaskState, solver
+from inspect_ai.util import subprocess
 
 logger = logging.getLogger(__name__)
 

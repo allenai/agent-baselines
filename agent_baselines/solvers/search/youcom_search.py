@@ -1,13 +1,14 @@
 import asyncio
+import json
+import logging
+import os
+
 import aiohttp
 import requests
-from huggingface_hub import hf_hub_download
-from inspect_ai.solver import Solver, solver, TaskState, Generate
-import json
-import os
-import logging
-from inspect_ai.model import get_model
 from astabench.constants import ASTA_BENCH_DATASET_REPO, ASTA_BENCH_DATASET_REVISION
+from huggingface_hub import hf_hub_download
+from inspect_ai.model import get_model
+from inspect_ai.solver import Generate, Solver, TaskState, solver
 
 logger = logging.getLogger(__name__)
 YOUCOM_SEARCH_API_KEY = os.environ["YOUCOM_SEARCH_API_KEY"]

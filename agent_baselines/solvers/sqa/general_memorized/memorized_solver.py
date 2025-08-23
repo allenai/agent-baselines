@@ -2,11 +2,12 @@ from typing import Dict
 
 from datasets.utils.logging import set_verbosity_error
 from inspect_ai.model import ChatMessageAssistant
-from inspect_ai.solver import Generate, Solver, TaskState, solver, chain
+from inspect_ai.solver import Generate, Solver, TaskState, chain, solver
 
 set_verbosity_error()
-from datasets import load_dataset
 import os
+
+from datasets import load_dataset
 
 from agent_baselines.solvers.sqa.format_solver import format_solver
 

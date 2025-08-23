@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Any, Dict
 
 import pandas as pd
+from astabench.types.sqa import SQAResponseWithTable, SQAResponseWithUsage
+from astabench.util.model import record_model_usage_with_inspect
 from inspect_ai.model import ChatMessageAssistant, ModelUsage
 from inspect_ai.solver import Generate, Solver, TaskState, solver
 from inspect_ai.util import subprocess
@@ -12,9 +14,6 @@ from scholarqa import ScholarQA
 from scholarqa.rag.reranker.modal_engine import ModalReranker
 from scholarqa.rag.retrieval import PaperFinderWithReranker
 from scholarqa.rag.retriever_base import FullTextRetriever
-
-from astabench.util.model import record_model_usage_with_inspect
-from astabench.types.sqa import SQAResponseWithTable, SQAResponseWithUsage
 
 logger = logging.getLogger(__name__)
 

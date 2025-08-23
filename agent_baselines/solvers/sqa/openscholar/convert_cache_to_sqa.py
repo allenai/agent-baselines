@@ -3,12 +3,12 @@
 Script to convert openscholar_cache.json format to SQAResponse format.
 Each case_id key should correspond to a SQAResponse value.
 """
-import sys
 import json
+import sys
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
-from astabench.types.sqa import SQAResponse, SQASection, Citation
+from astabench.types.sqa import Citation, SQAResponse, SQASection
 
 
 def convert_citation(citation_data: Dict[str, Any]) -> Citation:

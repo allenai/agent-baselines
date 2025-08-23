@@ -1,9 +1,9 @@
 import asyncio
 import json
-import os
 import sys
+from typing import Any, Dict
+
 import aiohttp
-from typing import Dict, Any, List
 
 # Add parent directories to path to import from task.py
 from astabench.evals.sqa.task import load_rubrics_data

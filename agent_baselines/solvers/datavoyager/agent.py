@@ -8,10 +8,9 @@ import os
 import tempfile
 from pathlib import Path
 
+from astabench.util.model import record_model_usage_with_inspect
 from inspect_ai.model import ModelUsage
 from inspect_ai.solver import Generate, Solver, TaskState, solver
-
-from astabench.util.model import record_model_usage_with_inspect
 
 logger = logging.getLogger(__name__)
 

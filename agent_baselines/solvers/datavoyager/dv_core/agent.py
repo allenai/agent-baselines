@@ -22,13 +22,13 @@ from autogen_ext.models.openai import OpenAIChatCompletionClient
 from diskcache import Cache
 
 from .logger import DVLogger, log_to_console, log_to_json_file, log_to_markdown_file
+from .models import ToolCall
 from .patched import (
     AssistantAgentWithStructuredToolCalling,
     MagenticOneOrchestratorPatch,
     PlotPatcher,
 )
 from .utils import DataVoyagerShell
-from .models import ToolCall
 
 if TYPE_CHECKING:
     from autogen_agentchat.teams import MagenticOneGroupChat, SelectorGroupChat

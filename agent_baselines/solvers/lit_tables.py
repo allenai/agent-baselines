@@ -1,3 +1,4 @@
+from astabench.evals.arxivdigestables.task import Table
 from inspect_ai.model import (
     ChatMessageSystem,
     GenerateConfig,
@@ -6,8 +7,6 @@ from inspect_ai.model import (
 )
 from inspect_ai.solver import Solver, solver
 from inspect_ai.util import json_schema
-
-from astabench.evals.arxivdigestables.task import Table
 
 
 @solver

@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict, List, Optional
 
+from astabench.types.sqa import Citation, SQAResponse, SQASection
 from inspect_ai.model import ResponseSchema, get_model
 from inspect_ai.model._providers.perplexity import PerplexityAPI
 from inspect_ai.solver import Solver, chain, generate
@@ -10,8 +11,6 @@ from inspect_ai.solver import system_message as system_message_solver
 from inspect_ai.util import json_schema
 from pydantic import create_model
 from pydantic_core import PydanticUndefined
-
-from astabench.types.sqa import Citation, SQAResponse, SQASection
 
 logger = logging.getLogger(__name__)
 
