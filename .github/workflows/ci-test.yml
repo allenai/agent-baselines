@@ -61,10 +61,10 @@ jobs:
         with:
           context: .
           file: ./docker/Dockerfile
-          tags: astabench:latest
-          target: astabench-base
-          cache-from: type=gha,scope=astabench  # Use GitHub Actions cache
-          cache-to: type=gha,mode=max,scope=astabench
+          tags: agent-baselines:latest
+          target: agent-baselines-base
+          cache-from: type=gha,scope=agent-baselines  # Use GitHub Actions cache
+          cache-to: type=gha,mode=max,scope=agent-baselines
           load: true  # Make the image available for later steps
 
       # Install uv for Python package management
