@@ -8,7 +8,7 @@ set_verbosity_error()
 from datasets import load_dataset
 import os
 
-from astabench.solvers.sqa.format_solver import format_solver
+from agent_baselines.solvers.sqa.format_solver import format_solver
 
 os_dataset = None
 

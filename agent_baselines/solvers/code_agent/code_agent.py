@@ -3,8 +3,8 @@ from typing import Optional, Type
 
 from inspect_ai.model import Model, get_model
 
-from astabench.solvers.code_agent.environment import EditACI, Environment
-from astabench.solvers.code_agent.llm_agent import Agent
+from agent_baselines.solvers.code_agent.environment import EditACI, Environment
+from agent_baselines.solvers.code_agent.llm_agent import Agent
 from astabench.util.sandbox.sandbox_jupyter import SandboxJupyter
 
 

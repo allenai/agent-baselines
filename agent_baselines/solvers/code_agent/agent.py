@@ -36,7 +36,7 @@ def code_agent(
 
     """
     try:
-        from astabench.solvers.code_agent.code_agent import InteractiveCodeAgent
+        from agent_baselines.solvers.code_agent.code_agent import InteractiveCodeAgent
     except ImportError:
         logger.exception(
             (

@@ -13,7 +13,7 @@ pip install -e ".[dev,smolagents]"
 ```sh
 inspect eval astabench/evals/demo/arithmetic/task.py \
     --model openai/gpt-4o-mini \
-    --solver astabench/solvers/smolagents/agent.py@smolagents_coder \
+    --solver agent_baselines/solvers/smolagents/agent.py@smolagents_coder \
     -S sandbox_type="inspect"
 ```
 

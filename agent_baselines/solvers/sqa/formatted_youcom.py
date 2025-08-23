@@ -5,8 +5,8 @@ import json
 from inspect_ai.solver import Solver, solver, TaskState, Generate, chain
 from inspect_ai.model import ChatMessageAssistant
 
-from astabench.solvers.sqa.format_solver import format_solver
-from astabench.solvers.youcom import query_youcom
+from agent_baselines.solvers.sqa.format_solver import format_solver
+from agent_baselines.solvers.youcom import query_youcom
 
 logger = logging.getLogger(__name__)
 

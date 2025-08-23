@@ -2,8 +2,8 @@ import logging
 
 from inspect_ai.solver import Solver, chain, solver
 
-from astabench.solvers.sqa.format_solver import format_solver
-from astabench.solvers.sqa.perplexity_base import perplexity_solver
+from agent_baselines.solvers.sqa.format_solver import format_solver
+from agent_baselines.solvers.sqa.perplexity_base import perplexity_solver
 
 logger = logging.getLogger(__name__)
 

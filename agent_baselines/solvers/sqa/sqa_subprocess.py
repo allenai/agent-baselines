@@ -1,6 +1,6 @@
 import sys
 import json
-from astabench.solvers.sqa.sqa import query_sqa
+from agent_baselines.solvers.sqa.sqa import query_sqa
 
 
 def main():

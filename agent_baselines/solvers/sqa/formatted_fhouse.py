@@ -2,8 +2,8 @@ import logging
 
 from inspect_ai.solver import Solver, chain, solver
 
-from astabench.solvers.sqa.format_solver import format_solver
-from astabench.solvers.futurehouse import futurehouse_solver
+from agent_baselines.solvers.sqa.format_solver import format_solver
+from agent_baselines.solvers.futurehouse import futurehouse_solver
 
 logger = logging.getLogger(__name__)
 

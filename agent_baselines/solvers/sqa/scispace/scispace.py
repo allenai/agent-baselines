@@ -2,7 +2,7 @@ import json
 from inspect_ai.solver import Solver, chain, solver
 from inspect_ai.model import ChatMessageAssistant
 
-from astabench.solvers.sqa.format_solver import format_solver
+from agent_baselines.solvers.sqa.format_solver import format_solver
 from datasets.utils.logging import set_verbosity_error
 
 set_verbosity_error()

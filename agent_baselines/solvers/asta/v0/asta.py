@@ -190,16 +190,16 @@ def fewshot_textsim_router() -> Solver:
 
     async def solve(state: TaskState, generate: Generate) -> TaskState:
         # Import solvers here to avoid dependency issues when just importing the module
-        import astabench.solvers.datavoyager.agent
+        import agent_baselines.solvers.datavoyager.agent
         from astabench.evals.e2e_discovery.solvers.autoasta.autoasta_cached import (
             autoasta_cached_solver,
         )
-        from astabench.solvers.arxivdigestables.asta_table_agent import tables_solver
-        from astabench.solvers.code_agent.agent import code_agent
-        from astabench.solvers.datavoyager.agent import datavoyager_solver
-        from astabench.solvers.react.basic_agent import instantiated_basic_agent
-        from astabench.solvers.search.paper_finder import ai2i_paper_finder
-        from astabench.solvers.sqa.sqa import sqa_solver
+        from agent_baselines.solvers.arxivdigestables.asta_table_agent import tables_solver
+        from agent_baselines.solvers.code_agent.agent import code_agent
+        from agent_baselines.solvers.datavoyager.agent import datavoyager_solver
+        from agent_baselines.solvers.react.basic_agent import instantiated_basic_agent
+        from agent_baselines.solvers.search.paper_finder import ai2i_paper_finder
+        from agent_baselines.solvers.sqa.sqa import sqa_solver
 
         logger.info("Starting sample %s", state.sample_id)
 
@@ -241,7 +241,7 @@ def fewshot_textsim_router() -> Solver:
             "discoverybench",
             datavoyager_solver(
                 config_file=(
-                    Path(astabench.solvers.datavoyager.agent.__file__).parent
+                    Path(agent_baselines.solvers.datavoyager.agent.__file__).parent
                     / "dv_core"
                     / "config"
                     / "datavoyager_modal_deployment_magentic_one_config_20250617_o3.yaml"

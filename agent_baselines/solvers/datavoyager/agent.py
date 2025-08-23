@@ -30,7 +30,7 @@ def datavoyager_solver(
     """This solver wraps the DataVoyager-core agent via bridge()."""
 
     try:
-        from astabench.solvers.datavoyager.dv_core.agent import DataVoyager
+        from agent_baselines.solvers.datavoyager.dv_core.agent import DataVoyager
     except ImportError as e:
         logger.error(
             (

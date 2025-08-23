@@ -1,6 +1,6 @@
 from inspect_ai.solver import Solver, chain, solver
-from astabench.solvers.llm import llm_with_prompt
-from astabench.solvers.sqa.format_solver import format_solver
+from agent_baselines.solvers.llm import llm_with_prompt
+from agent_baselines.solvers.sqa.format_solver import format_solver
 
 
 @solver

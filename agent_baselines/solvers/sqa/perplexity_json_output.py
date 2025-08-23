@@ -2,7 +2,7 @@ import logging
 
 from inspect_ai.solver import Solver, solver
 
-from astabench.solvers.sqa.perplexity_base import (
+from agent_baselines.solvers.sqa.perplexity_base import (
     perplexity_solver as perplexity_solver_base,
 )
 
