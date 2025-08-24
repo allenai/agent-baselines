@@ -27,7 +27,7 @@ azure = [
     "azure-ai-inference"
 ]
 sqa = [
-    "ai2-scholar-qa==0.6.15",
+    "ai2-scholar-qa==0.7.0",
 ]
 smolagents = [
     "smolagents==1.17.0",
