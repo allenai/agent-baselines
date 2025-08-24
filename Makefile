@@ -50,7 +50,7 @@ else
   LOCAL_MOUNTS := \
     -v $(DOCKER_SOCKET_PATH):/var/run/docker.sock \
     -v $$(pwd)/pyproject.toml:/agent-baselines/pyproject.toml:ro \
-    -v $$(pwd)/agent_baselines:/agent-baselines/agent-baselines \
+    -v $$(pwd)/agent_baselines:/agent-baselines/agent_baselines \
     -v $$(pwd)/tests:/agent-baselines/tests \
     -v $$(pwd)/logs:/agent-baselines/logs \
     -v agent-baselines-cache:/root/.cache
