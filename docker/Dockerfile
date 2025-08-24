@@ -31,7 +31,7 @@ ENV PATH="/root/.cargo/bin:$PATH"
 WORKDIR /agent-baselines
 COPY pyproject.toml /agent-baselines/
 
-RUN mkdir -p /agent-baselines/agent-baselines
+RUN mkdir -p /agent-baselines/agent_baselines
 
 RUN uv sync --extra dev
 
