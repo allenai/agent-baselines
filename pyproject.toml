@@ -3,7 +3,7 @@ requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agent-baselines"
+name = "agent_baselines"
 version = "0.0.1"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -54,17 +54,13 @@ super = [
 ]
 
 [project.scripts]
-astabench = "astabench.cli:cli"
 inspect = "inspect_ai._cli.main:main"
-
-[project.entry-points.inspect_ai]
-astabench = "astabench.evals._registry"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = [
-    "astabench",
-    "astabench.*",
+    "agent_baselines",
+    "agent_baselines.*",
 ]
 
 [tool.uv]
@@ -98,7 +94,7 @@ ignore = [
 ]
 
 [tool.setuptools.package-data]
-"astabench" = ["solvers/datavoyager/dv_core/config/*.yaml", "solvers/code_agent/*.yaml"]
+"agent_baselines" = ["solvers/datavoyager/dv_core/config/*.yaml", "solvers/code_agent/*.yaml"]
 
 [tool.uv.sources]
 knowledge-storm = { git = "https://github.com/gituser768/storm", branch = "dh-fix-youcom" }
