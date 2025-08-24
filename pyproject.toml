@@ -8,7 +8,7 @@ version = "0.0.1"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "astabench==0.1.1",
+    "astabench==0.1.2",
 ]
 
 [project.optional-dependencies]
