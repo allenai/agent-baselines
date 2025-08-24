@@ -33,8 +33,8 @@ smolagents = [
     "smolagents==1.17.0",
 ]
 datavoyager = [
-    "autogen-agentchat==0.4.4",
-    "autogen-ext[openai, diskcache, azure]==0.4.4",
+    "autogen-agentchat==0.6.4",
+    "autogen-ext[openai, diskcache, azure, anthropic]==0.6.4",
     "ipython~=8.18",
     "matplotlib==3.10.0",
     "nest_asyncio==1.6.0",
