@@ -17,10 +17,12 @@ if [ -z "MABOOL_URL" ]; then
     echo "Warning: MABOOL_URL must be set for paper-finder"
 fi
 
+# Note the use of 'mockllm/model' because models are directly configured for
+# each sub-agent, top-level `--model` settings will not be applied.
 
 uv run astabench eval \
 --solver agent_baselines/solvers/asta/v0/asta.py@fewshot_textsim_router \
---model openai/gpt-4.1 \
+--model mockllm/model \
 --split validation \
 --ignore-git \
 --limit 1 \
