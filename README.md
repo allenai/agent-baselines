@@ -29,7 +29,7 @@ AstaBench includes several built-in solvers. Look in the `solvers` directory for
 
 ### General agent baselines
 
-- [**Basic ReAct agent**](/solvers/react/): a simple ReAct implementation that uses LLM tool-calling in a loop. It supports all [AstaBench tool options](/astabench/tools/__init__.py) and configurable `max_steps`.
+- [**Basic ReAct agent**](/solvers/react/): a simple ReAct implementation that uses LLM tool-calling in a loop. It supports all [AstaBench tool options](https://github.com/allenai/asta-bench?tab=readme-ov-file#tools-and-utilities) and configurable `max_steps`.
 - [**Smolagents coder**](/solvers/smolagents/): integrates HuggingFace's [CodeAgent](https://github.com/huggingface/smolagents), which takes actions by writing Python code rather than using JSON tool-calling. Requires a sandbox and uses `SandboxToolManager` to access tools from sandboxed code.
 
 ### Asta Science Agents
