@@ -35,9 +35,9 @@ AstaBench includes several built-in solvers. Look in the `solvers` directory for
 
 ### Asta Science Agents
 - [**Asta-v0**](/agent_baselines/solvers/asta/v0/asta.py): an agent that routes tasks to specialized agents based on the detected task type.
-- [**Asta ScholarQA**](/agent_baselines/solvers/sqa/sqa.py): Long-form question answering system with retrieval and reranking, designed for the SQA task
+- [**Asta ScholarQA**](/agent_baselines/solvers/sqa/sqa.py): Long-form question answering system with retrieval and reranking, designed for the SQA task.  This is a variant of the system that powers [Asta Summarize Literature](https://asta.allen.ai/synthesize).
 - [**Asta DataVoyager**](/agent_baselines/solvers/datavoyager/): Agent for data analysis and exploration tasks, designed for the DiscoveryBench task
-- [**Asta Paper Finder**](/agent_baselines/solvers/search/paper_finder.py): Agent for paper search and recommendation, designed for the PaperFinder task
+- [**Asta Paper Finder**](/agent_baselines/solvers/search/paper_finder.py): Agent for paper search and recommendation, designed for the PaperFinder task.   This is a variant of the system that powers [Asta Find Papers](https://asta.allen.ai/discover).
 - [**Asta Tables**](/agent_baselines/solvers/arxivdigestables/asta_table_agent.py): Agent for building lit-review tables, designed for the ArxivDIGESTables task
 - [**Asta Code**](/agent_baselines/solvers/code_agent/agent.py): a ReAct-style agent designed specifically for SUPER-style repository reproduction tasks.
 - [**Asta Panda**](https://github.com/allenai/asta-bench/blob/e197ad871bfa6eca24f4bf85ae839be590bdf761/astabench/evals/e2e_discovery/solvers/autoasta/autoasta_cached.py#L21): Agent for the E2E-discovery task (note: this one is not yet fully integrated into the baseline suite and currently uses cached results from the real solver instead)
