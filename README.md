@@ -27,21 +27,25 @@ See documentation in [asta-bench](https://github.com/allenai/asta-bench) for det
 
 AstaBench includes several built-in solvers. Look in the `solvers` directory for setup and demo scripts.
 
-### ReAct Agent
-The [basic react agent](/astabench/solvers/react/basic_agent.py) is a simple ReAct implementation that uses LLM tool-calling in a loop. It supports all [AstaBench tool options](/astabench/tools/__init__.py) and configurable `max_steps`.
+### General agent baselines
 
-### Code Agent
-The [code agent](/astabench/solvers/code_agent/) is a ReAct-style agent optimized for coding tasks with sandbox execution. Supports multiple agent types (react, llm) with configurable retries.
+- [**Basic ReAct agent**](/agent_baselines/solvers/react/basic_agent.py): a simple ReAct implementation that uses LLM tool-calling in a loop. It supports all [AstaBench tool options](/astabench/tools/__init__.py) and configurable `max_steps`.
 
-### Smolagents
-The [smolagents coder](/astabench/solvers/smolagents/agent.py) integrates HuggingFace's CodeAgent, which takes actions by writing Python code rather than using JSON tool-calling. Requires a sandbox and uses `SandboxToolManager` to access tools from sandboxed code.
+- [**Smolagents coder**](/agent_baselines/solvers/smolagents/): integrates HuggingFace's [CodeAgent](https://github.com/huggingface/smolagents), which takes actions by writing Python code rather than using JSON tool-calling. Requires a sandbox and uses `SandboxToolManager` to access tools from sandboxed code.
 
-### Task-Specific Solvers
-- **SQA**: Long-form question answering system with retrieval and reranking, designed for the SQA task
-- **DataVoyager**: Agent for data analysis and exploration tasks
-- **STORM**: Knowledge curation system for comprehensive report generation
-- **FutureHouse**: Literature review and scientific writing agent
-- **SUPER**: Agent designed specifically for SUPER benchmark tasks
+### Asta Scientific Solvers
+- [**Asta-v0**](/agent_baselines/solvers/asta/v0/asta.py) is an agent that routes tasks to specialized agents based on the detected task type.
+- [**Asta ScholarQA**](/agent_baselines/solvers/sqa/sqa.py): Long-form question answering system with retrieval and reranking, designed for the SQA task
+- [**Asta DataVoyager**](/agent_baselines/solvers/datavoyager/): Agent for data analysis and exploration tasks, designed for the DiscoveryBench task
+- [**Asta Paper Finder**](/agent_baselines/solvers/search/paper_finder.py): Agent for paper search and recommendation, designed for the PaperFinder task
+- [**Asta Tables**](/agent_baselines/solvers/arxivdigestables/asta_table_agent.py): Agent for building lit-review tables, designed for the ArxivDIGESTables task
+- [**Asta Code**](/agent_baselines/solvers/code_agent/agent.py) is a ReAct-style agent designed specifically for SUPER-style repository reproduction tasks.
+- [**Asta Panda**](https://github.com/allenai/asta-bench/blob/e197ad871bfa6eca24f4bf85ae839be590bdf761/astabench/evals/e2e_discovery/solvers/autoasta/autoasta_cached.py#L21): Agent for the E2E-discovery task (note: this one is not yet fully integrated into the baseline suite and currently uses cached results from the real solver instead)
+
+
+### Other baselines
+- [**STORM**](/agent_baselines/solvers/sqa/storm_solver.py): Knowledge curation system for comprehensive report generation
+- [**FutureHouse**](/agent_baselines/solvers/futurehouse/futurehouse_solver.py): Literature review and scientific writing agent
 
 Each solver directory contains `setup.sh` for installation and `demo.sh` with example commands.
 
