@@ -71,11 +71,14 @@ conflicts = [
 ]
 override-dependencies = [
     # sqa pins openai to a lower version than inspect requires
-    "openai==1.78.0",
+    "openai==1.99.7",
 
     # STORM pretends to require a lower version, but doesn't actually need it:
     # https://github.com/allenai/asta-bench/issues/31#issuecomment-3045978008
     "datasets~=3.2.0",
+
+    # temp, for testing
+    "inspect_ai==0.3.123",
 ]
 
 [tool.flake8]
