@@ -12,43 +12,6 @@ jobs:
       OPENAI_API_KEY: "Fake key, but the var needs to be set or else Inspect will complain at import time"
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
     steps:
-      - name: Free up disk space
-        run: |
-          echo "Freeing up disk space. We need to do this or else there won't be enough space to build the docker images."
-          echo "Initial disk space:"
-          df -h
-
-          # Try removing packages via rm; if this breaks something or isn't
-          # thorough enough, uncomment the `apt-get` remove cmds; note that
-          # `rm` is much faster when it works so we default to this way
-          sudo rm -rf /usr/lib/llvm-*
-          sudo rm -rf /usr/lib/dotnet
-          sudo rm -rf /usr/local/share/chromium
-
-          # Remove large packages via apt
-          #sudo apt-get remove -y 'openjdk-.*' '^dotnet-.*' '^llvm-.*' google-cloud-sdk google-chrome-stable microsoft-edge-stable azure-cli powershell firefox firefox-locale-en 
-          #sudo apt-get autoremove -y
-          #sudo apt-get clean
-
-          # Remove large directories directly
-          echo "Removing unnecessary tool directories..."
-          sudo rm -rf /usr/local/julia*
-          sudo rm -rf /usr/share/swift
-          sudo rm -rf /usr/lib/jvm
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /usr/local/lib/node_modules
-          sudo rm -rf /usr/local/share/powershell
-
-          # Clean /opt directories
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo rm -rf /opt/hostedtoolcache/go
-          sudo rm -rf /opt/hostedtoolcache/Ruby
-          sudo rm -rf /opt/microsoft/msedge
-          sudo rm -rf /opt/az
-
-          # Show available space after cleanup
-          echo "Disk space after cleanup:"
-          df -h
       - uses: actions/checkout@v4
 
       # Set up Docker Buildx for caching
@@ -66,36 +29,6 @@ jobs:
           cache-from: type=gha,scope=agent-baselines  # Use GitHub Actions cache
           cache-to: type=gha,mode=max,scope=agent-baselines
           load: true  # Make the image available for later steps
-
-      # Install uv for Python package management
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
-
-      # Copy sandbox files from installed astabench package
-      - name: Copy astabench sandbox files
-        run: |
-          # Find the astabench installation and copy sandbox files
-          ASTABENCH_PATH=$(uv run python -c "import astabench; import os; print(os.path.dirname(astabench.__file__))")
-          mkdir -p ./temp-sandbox/
-          cp -r "$ASTABENCH_PATH/util/sandbox/"* ./temp-sandbox/
-          ls -la ./temp-sandbox/
-
-      # Build the image that will run the sandbox (needed for some tests)
-      - name: Build sandbox Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./temp-sandbox/
-          tags: astabench-sandbox:latest
-          cache-from: type=gha,scope=astabench-sandbox
-          cache-to: type=gha,mode=max,scope=astabench-sandbox
-          load: true
-
-      - name: Check space
-        run: |
-          # This step will help us keep an eye on whether we're pushing the
-          # limit of our available space
-          echo "Disk space after building images:"
-          df -h
 
       - name: Run tests
         run: |
