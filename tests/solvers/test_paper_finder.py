@@ -13,7 +13,7 @@ from astabench.evals.paper_finder.task import (
     paper_finder_validation,
     paper_finder_litqa2,
 )
-from astabench.solvers.search.paper_finder import ai2i_paper_finder
+from agent_baselines.solvers.search.paper_finder import ai2i_paper_finder
 
 
 @pytest.fixture
