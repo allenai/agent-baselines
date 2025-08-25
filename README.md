@@ -1,6 +1,6 @@
 # agent-baselines
 
-The repo contains baseline implementations of a variety of agents to as reported in [AstaBench]().  
+The repo contains baseline implementations of a variety of agents to as reported in [AstaBench](https://github.com/allenai/asta-bench).
 
 These agents are implemented as InspectAI solvers and can be run on the AstaBench suit with the `astabench eval` command.
 
