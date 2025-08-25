@@ -33,7 +33,7 @@ AstaBench includes several built-in solvers. Look in the `solvers` directory for
 
 - [**Smolagents coder**](/agent_baselines/solvers/smolagents/): integrates HuggingFace's [CodeAgent](https://github.com/huggingface/smolagents), which takes actions by writing Python code rather than using JSON tool-calling. Requires a sandbox and uses `SandboxToolManager` to access tools from sandboxed code.
 
-### Asta Scientific Solvers
+### Asta Science Agents
 - [**Asta-v0**](/agent_baselines/solvers/asta/v0/asta.py) is an agent that routes tasks to specialized agents based on the detected task type.
 - [**Asta ScholarQA**](/agent_baselines/solvers/sqa/sqa.py): Long-form question answering system with retrieval and reranking, designed for the SQA task
 - [**Asta DataVoyager**](/agent_baselines/solvers/datavoyager/): Agent for data analysis and exploration tasks, designed for the DiscoveryBench task
