@@ -10,7 +10,7 @@ fi
 if [ -z "$MODAL_TOKEN_SECRET" ]; then
     echo "Warning: MODAL_TOKEN_SECRET must be set"
 fi
-if [ -z "S2_API_KEY" ]; then
+if [ -z "$S2_API_KEY" ]; then
     echo "Warning: S2_API_KEY must be set"
 fi
 

@@ -225,14 +225,14 @@ def fewshot_textsim_router() -> Solver:
             )
             return task_type_tools[name]
 
-        if "MABOOL_URL" not in os.environ:
+        if "PAPER_FINDER_URL" not in os.environ:
             raise KeyError(
-                "Cannot initialize paper-finder sub-solver: MABOOL_URL environment variable is not set."
+                "Cannot initialize paper-finder sub-solver: PAPER_FINDER_URL environment variable is not set."
             )
         mkhandoff(
             "paper_finder",
             ai2i_paper_finder(
-                base_url=os.environ["MABOOL_URL"],
+                base_url=os.environ["PAPER_FINDER_URL"],
                 read_results_from_cache=True,
             ),
         )

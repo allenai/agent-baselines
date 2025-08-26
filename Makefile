@@ -63,10 +63,6 @@ endif
 # -----------------------------------------------------------------------------
 
 build-image:
-	@if [ -z "$(GITHUB_ACCESS_TOKEN)" ]; then \
-		echo "Warning: GITHUB_ACCESS_TOKEN not set. This may cause issues with private GitHub repositories."; \
-		echo "To set it, export GITHUB_ACCESS_TOKEN=<your_token> or add it to .env file"; \
-	fi
 	docker build $(BUILD_QUIET) $(TARGET) . --tag $(AGENT_BASELINES_TAG) -f ./docker/Dockerfile
 
 # -----------------------------------------------------------------------------
