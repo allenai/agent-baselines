@@ -26,7 +26,9 @@ def load_os_dataset(sys_name_or_path: str, split: str):
         else:
             try:
                 os_dataset = load_dataset(
-                    f"allenai/asta-bench-solver-data", data_files=f"sqa/{sys_name_or_path}/{split}.json", split="train"
+                    f"allenai/asta-bench-solver-data",
+                    data_files=f"sqa/{sys_name_or_path}/{split}.json",
+                    split="train",
                 )
             except:
                 os_dataset = load_dataset(sys_name_or_path, split=split)

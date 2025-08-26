@@ -9,7 +9,9 @@ from agent_baselines.solvers.sqa.format_solver import format_solver
 set_verbosity_error()
 from datasets import load_dataset
 
-scispace_memorized = load_dataset("allenai/asta-bench-solver-data", data_files="sqa/scispace/test.json", split="train")
+scispace_memorized = load_dataset(
+    "allenai/asta-bench-solver-data", data_files="sqa/scispace/test.json", split="train"
+)
 
 
 def read_q_result(case_id: str):

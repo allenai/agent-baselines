@@ -10,7 +10,11 @@ set_verbosity_error()
 from astabench.types.sqa import SQAResponse
 from datasets import load_dataset
 
-elicit_memorized = load_dataset("allenai/asta-bench-solver-data", data_files="sqa/elicit/responses.json", split="train")
+elicit_memorized = load_dataset(
+    "allenai/asta-bench-solver-data",
+    data_files="sqa/elicit/responses.json",
+    split="train",
+)
 
 
 def read_q_result(question: str) -> Dict:
