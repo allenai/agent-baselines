@@ -4,13 +4,6 @@ from unittest import skip
 from unittest.mock import patch
 
 import pytest
-from astabench.evals.paper_finder.paper_finder_utils import (
-    litqa2_query_ids_in_vespa_fulltext,
-)
-from astabench.evals.paper_finder.task import (
-    paper_finder_litqa2,
-    paper_finder_validation,
-)
 from inspect_ai import eval as inspect_ai_eval
 
 from agent_baselines.solvers.search.paper_finder import ai2i_paper_finder
@@ -98,6 +91,10 @@ def get_average_recalls(
 @patch("astabench.tools.paper_finder_ai2i.find_papers")
 def test_paper_finder_end_to_end(mock_find_papers, mock_paper_finder_response) -> None:
     """Test paper finder end-to-end with mocked find_papers function."""
+    from astabench.evals.paper_finder.task import (
+        paper_finder_validation,
+    )
+
     # Mock the find_papers function to return our test response
     mock_find_papers.return_value = mock_paper_finder_response
 
@@ -125,6 +122,10 @@ def test_paper_finder_end_to_end(mock_find_papers, mock_paper_finder_response) -
 @patch("astabench.tools.paper_finder_ai2i.find_papers")
 def test_paper_finder_litqa2(mock_find_papers, mock_paper_finder_response) -> None:
     """Test paper finder litqa2 with mocked find_papers function."""
+    from astabench.evals.paper_finder.task import (
+        paper_finder_litqa2,
+    )
+
     # Mock the find_papers function to return our test response
     mock_find_papers.return_value = mock_paper_finder_response
 
@@ -150,6 +151,10 @@ def test_paper_finder_litqa2(mock_find_papers, mock_paper_finder_response) -> No
 )
 def test_paper_finder_end_to_end_no_mocks() -> None:
     """Test paper finder end-to-end without mocks."""
+    from astabench.evals.paper_finder.task import (
+        paper_finder_validation,
+    )
+
     log = inspect_ai_eval(
         tasks=paper_finder_validation(with_search_tools=False),
         model="openai/gpt-4o-mini",
