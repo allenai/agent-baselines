@@ -33,6 +33,10 @@ def mock_paper_finder_response():
 def get_average_recalls(
     recall_results: dict[str, dict[str, float]],
 ) -> tuple[dict[str, float], dict[str, float], dict[str, float], dict[str, float]]:
+    from astabench.evals.paper_finder.paper_finder_utils import (
+        litqa2_query_ids_in_vespa_fulltext,
+    )
+
     average_dict = defaultdict(list)
     average_dict_full_text = defaultdict(list)
     average_dict_full_text_dev = defaultdict(list)

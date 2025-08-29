@@ -113,7 +113,7 @@ endif
 flake:
 	docker run --rm \
 		$(AGENT_BASELINES_TAG) \
-		uv run flake8 agent-baselines/ tests/
+		uv run flake8 agent_baselines/ tests/
 
 ifneq ($(IS_CI),true)
 test: build-image
