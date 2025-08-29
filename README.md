@@ -13,14 +13,24 @@ git clone https://github.com/allenai/agent-baselines.git
 The `solvers` directory has descriptions of each of the baseline agents, along with sample scripts to set up the environment required by that solver and
 run against a limit number of eval samples.
 
-If you have trouble setting up an environment on your local system, a Docker image is provided
+If you have trouble setting up an environment on your local system, a Docker image is provided.  For a given `<solver_name>` (e.g. `react`):
 
 ```commandline
 make shell SOLVER=<solver_name>
-root:/astabench# ./solvers/<solver_name>/demo.sh
+```
+This should put you in a Docker shell like `root:/agent-baselines# `; then you can set up your environment (either via `.env` for Docker or `export` in the shell; see [asta-bench](https://github.com/allenai/asta-bench) for more details and how to get HF and S2 keys) and run the solver:
+
+```commandline
+export OPENAI_API_KEY=<your-openai-key>
+export ANTHROPIC_API_KEY=<your-anthropic-key>
+export GOOGLE_API_KEY=<your-google-key>
+export S2_API_KEY=<your-semantic-scholar-key>
+export HF_TOKEN=<your-huggingface-key>
+
+./solvers/<solver_name>/demo.sh
 ```
 
-See documentation in [asta-bench](https://github.com/allenai/asta-bench) for details on how to run the suite.
+See documentation in [asta-bench](https://github.com/allenai/asta-bench) for more details on how to run the suite.
 
 
 ## Available Agents
