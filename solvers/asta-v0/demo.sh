@@ -10,10 +10,10 @@ fi
 if [ -z "$MODAL_TOKEN_SECRET" ]; then
     echo "Warning: MODAL_TOKEN_SECRET must be set"
 fi
-if [ -z "ASTA_TOOL_KEY" ]; then
+if [ -z "$ASTA_TOOL_KEY" ]; then
     echo "Warning: ASTA_TOOL_KEY must be set"
 fi
-if [ -z "PAPER_FINDER_URL" ]; then
+if [ -z "$PAPER_FINDER_URL" ]; then
     echo "Warning: PAPER_FINDER_URL must be set for paper-finder"
 fi
 
