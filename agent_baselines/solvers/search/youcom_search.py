@@ -12,7 +12,7 @@ from inspect_ai.solver import Generate, Solver, TaskState, solver
 
 logger = logging.getLogger(__name__)
 YOUCOM_SEARCH_API_KEY = os.environ["YOUCOM_SEARCH_API_KEY"]
-S2_API_KEY = os.environ["S2_API_KEY"]
+ASTA_TOOL_KEY = os.environ["ASTA_TOOL_KEY"]
 MAX_YOUCOM_RESULTS = 20
 grader_model = get_model("openai/gpt-4o-mini")
 
@@ -119,7 +119,7 @@ def youcom_solver() -> Solver:
                     r = requests.get(
                         "https://api.semanticscholar.org/graph/v1/paper/search/match",
                         params={"query": title, "fields": "title,corpusId"},
-                        headers={"X-API-Key": S2_API_KEY},
+                        headers={"X-API-Key": ASTA_TOOL_KEY},
                         timeout=60,
                     )
 
@@ -137,7 +137,7 @@ def youcom_solver() -> Solver:
                         r_pmc = requests.get(
                             f"https://api.semanticscholar.org/graph/v1/paper/{pmc_id}",
                             params={"fields": "corpusId"},
-                            headers={"X-API-Key": S2_API_KEY},
+                            headers={"X-API-Key": ASTA_TOOL_KEY},
                             timeout=60,
                         )
                         if r_pmc.status_code == 200:

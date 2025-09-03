@@ -18,13 +18,13 @@ If you have trouble setting up an environment on your local system, a Docker ima
 ```commandline
 make shell SOLVER=<solver_name>
 ```
-This should put you in a Docker shell like `root:/agent-baselines# `; then you can set up your environment (either via `.env` for Docker or `export` in the shell; see [asta-bench](https://github.com/allenai/asta-bench) for more details and how to get HF and S2 keys) and run the solver:
+This should put you in a Docker shell like `root:/agent-baselines# `; then you can set up your environment (either via `.env` for Docker or `export` in the shell; see [asta-bench](https://github.com/allenai/asta-bench) for more details and how to get HF and Asta keys) and run the solver:
 
 ```commandline
 export OPENAI_API_KEY=<your-openai-key>
 export ANTHROPIC_API_KEY=<your-anthropic-key>
 export GOOGLE_API_KEY=<your-google-key>
-export S2_API_KEY=<your-semantic-scholar-key>
+export ASTA_TOOL_KEY=<your-asta-tool-key>
 export HF_TOKEN=<your-huggingface-key>
 
 ./solvers/<solver_name>/demo.sh

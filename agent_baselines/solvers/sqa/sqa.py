@@ -132,9 +132,11 @@ def query_sqa(completion_model: str, question: str):
     if not (
         os.getenv("MODAL_TOKEN")
         and os.getenv("MODAL_TOKEN_SECRET")
-        and os.getenv("S2_API_KEY")
+        and os.getenv("ASTA_TOOL_KEY")
     ):
-        raise RuntimeError("MODAL_TOKEN, MODAL_TOKEN_SECRET, or S2_API_KEY is not set")
+        raise RuntimeError(
+            "MODAL_TOKEN, MODAL_TOKEN_SECRET, or ASTA_TOOL_KEY is not set"
+        )
     retriever = FullTextRetriever(n_retrieval=256, n_keyword_srch=20)
     reranker = ModalReranker(
         app_name="ai2-scholar-qa",
@@ -169,8 +171,8 @@ def sqa_solver(completion_model: str = "claude-3.7") -> Solver:
         assert (
             os.getenv("MODAL_TOKEN")
             and os.getenv("MODAL_TOKEN_SECRET")
-            and os.getenv("S2_API_KEY")
-        ), "MODAL_TOKEN or MODAL_TOKEN_SECRET or S2_API_KEY is not set"
+            and os.getenv("ASTA_TOOL_KEY")
+        ), "MODAL_TOKEN or MODAL_TOKEN_SECRET or ASTA_TOOL_KEY is not set"
         question = state.metadata["initial_prompt"]
         proc_result = await subprocess(
             [

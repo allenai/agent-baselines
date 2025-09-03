@@ -49,8 +49,8 @@ def reformat_table_object(table: TableWidget) -> dict:
 async def generate_table(
     input_prompt: str, corpus_ids: List[str], model: str
 ) -> TableWidget:
-    if not (os.getenv("S2_API_KEY")):
-        raise RuntimeError("S2_API_KEY is not set")
+    if not (os.getenv("ASTA_TOOL_KEY")):
+        raise RuntimeError("ASTA_TOOL_KEY is not set")
     retriever = FullTextRetriever(n_retrieval=256, n_keyword_srch=20)
     logger = logging.getLogger(__name__)
     logger.info("initializing the log configs")
@@ -138,7 +138,7 @@ async def generate_table(
 def tables_solver(model: str = "openai/gpt-4.1") -> Solver:
     async def solve(state: TaskState, generate: Generate) -> TaskState:
         # check for required API keys:
-        assert os.getenv("S2_API_KEY"), "S2_API_KEY is not set"
+        assert os.getenv("ASTA_TOOL_KEY"), "ASTA_TOOL_KEY is not set"
         table_prompt = state.input
         proc_result = await generate_table(
             table_prompt, state.metadata["corpus_ids"], model
