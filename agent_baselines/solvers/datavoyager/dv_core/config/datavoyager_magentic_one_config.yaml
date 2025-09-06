@@ -5,9 +5,9 @@
 cache_dir: ".cache"
 
 agents:
-  user:
-    name: "user"
-    description: "Responsible for passing user message to the chat."
+  #user:
+  #  name: "user"
+  #  description: "Responsible for passing user message to the chat."
   planner:
     name: "planner"
     description: "An agent that helps with decomposing a high-level plan."
@@ -17,9 +17,9 @@ agents:
     reflect_on_tool_use: False
     tool_call_summary_format: "{result}"
     model_client:
-      model: "gpt-4o"
+      model: "o3-2025-04-16"
       seed: 42
-    cache: true
+    cache: false
   programmer:
     name: "programmer"
     description: "An agent that helps with programming tasks."
@@ -36,9 +36,9 @@ agents:
       2. Always return the output as a string.
       3. Always use plt.show to display plots.
     model_client:
-      model: "gpt-4o"
+      model: "o3-2025-04-16"
       seed: 42
-    cache: true
+    cache: false
   data_expert:
     name: "data_expert"
     description: "An agent that helps with data inference tasks with provided data/results."
@@ -53,9 +53,9 @@ agents:
       1. Never generate code.
       2. Never produce dummy data and analyse it, always use the data/results provided to you.
     model_client:
-      model: "gpt-4o"
+      model: "o3-2025-04-16"
       seed: 42
-    cache: true
+    cache: false
 
 
 tools:
@@ -74,9 +74,9 @@ orchestrator:
     - "TERMINATE"
     - "exit"
   model_client:
-    model: "gpt-4o"
+    model: "o3-2025-04-16"
     seed: 42
-  cache: true
+  cache: false
   prompts:
     ORCHESTRATOR_TASK_LEDGER_FACTS_PROMPT: |
       Below I will present you a REQUEST (and datasets). Before we begin addressing the REQUEST, please answer the following pre-survey to the best of your ability. 
