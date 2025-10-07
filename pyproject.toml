@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent_baselines"
-version = "0.1.0"
+version = "0.1.1"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "astabench==0.3.0",
+    "astabench==0.3.1",
 ]
 
 [project.optional-dependencies]
@@ -22,6 +22,7 @@ dev = [
     "flake8-pyproject==1.2.3",
     "mypy==1.15",
     "pandas-stubs",
+    "httpx-sse>=0.4.2",
 ]
 azure = [
     "azure-ai-inference"
