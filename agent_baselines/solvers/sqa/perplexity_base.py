@@ -51,9 +51,10 @@ def perplexity_solver(
     system_message: str | None = None,
     use_structured_decoding: bool = False,
     search_context_size: str | None = None,
-    search_mode: str = "academic",
+    search_mode: str = "",
     # Date format can be flexible (e.g., '3/1/2025', 'March 1, 2025').
     search_before_date_filter: str | None = None,
+    reasoning_effort: str = "high",
 ) -> Solver:
     # Verify that we have a PerplexityAPI model
     model = get_model()
@@ -82,7 +83,10 @@ def perplexity_solver(
                 "search_context_size": search_context_size
             }
 
-        extra_body["search_mode"] = search_mode
+        if search_mode:
+            extra_body["search_mode"] = search_mode
+        if reasoning_effort:
+            extra_body["reasoning_effort"] = reasoning_effort
 
         if search_before_date_filter is not None:
             extra_body["search_before_date_filter"] = search_before_date_filter
