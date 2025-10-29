@@ -1,6 +1,14 @@
-"""Agent with an inner+outer loop; slightly similar to Magentic-one but doesn't
-do the dynamic agent team assembly, just keeps a ledger and has an outer loop
-monitoring progress of the inner loop."""
+"""Magentic-One style agent with outer loop orchestration.
+
+This implements a simplified version of the Magentic-One architecture with an outer
+loop (orchestrator) monitoring progress of an inner loop (sub-agent execution).
+Unlike the full Magentic-One, this uses a single assistant agent rather than a
+dynamic team assembly.
+
+The outer loop maintains a task ledger (facts and plan) and monitors progress,
+while the inner loop executes tool calls. When the agent stalls, the outer loop
+re-plans and restarts the inner loop with an updated ledger.
+"""
 
 from logging import getLogger
 from typing import Literal
@@ -199,6 +207,12 @@ async def _outer_loop_preamble(
     for sa in mstate.sub_agents:
         sa.reset_messages()
     mstate.orchestrator_messages.clear()
+
+    # Note: The autogen implementation
+    # (https://github.com/microsoft/autogen/blob/13e144e5476a76ca0d76bf4f07a6401d133a03ed/python/packages/autogen-agentchat/src/autogen_agentchat/teams/_group_chat/_magentic_one/_magentic_one_orchestrator.py#L402)
+    # doesn't seem to reset the stall counter on an outer loop reset.  But that
+    # causes it to keep trying to do error recovery in an infinite loop when it
+    # gets stuck, so we reset the counter here.
     mstate.stall_counter = 0
 
     ledger_prompt = ORCHESTRATOR_TASK_LEDGER_FULL_PROMPT.format(
@@ -490,7 +504,7 @@ def close_python_mcp():
 
 
 @solver
-def magentic_agent(
+def magentic_outer_loop(
     *,
     init: Solver | list[Solver] | None = None,
     tools: list[Tool] | None = None,
@@ -502,24 +516,36 @@ def magentic_agent(
     tool_call_format: Literal["text", "native"] = "native",
     model_override: str | Model | None = None,
 ) -> Solver:
-    """Self-reflecting ReAct-style agent.
+    """Magentic-One style agent with outer loop orchestration.
 
-    Agent that runs a tool use loop until the model submits an answer using the
-    `submit()` tool. Tailor the model's instructions by passing a `system_message()`
-    and/or other steps to `init` (if no `init` is specified then a default system
-    message will be used).
+    Implements a two-loop architecture inspired by Magentic-One:
+    - **Outer loop (Orchestrator)**: Maintains a task ledger (facts + plan), monitors
+      progress, and handles re-planning when the agent stalls
+    - **Inner loop (Sub-agent)**: Executes tool calls to make progress on the task
+
+    Unlike the full Magentic-One, this uses a single assistant agent rather than
+    dynamic multi-agent team assembly (primarily using the outer loop to detect
+    lack of progress and recover from errors), and some prompts have been
+    adjusted to reflect this.
+
+    Note that the inner loop sub-agent can do multiple tool calls before
+    returning, so outer loop interventions may be a bit less frequent than in
+    the normal magnetic-one.
 
     Args:
        init: Agent initialisation (defaults to system_message with basic ReAct prompt)
        tools: Tools available for the agent.
-       max_steps: Maximum number of total inner loop steps before terminating (irrespective of how many outer-loop steps this ends up being).
-       max_stalls: Maximum number of stalls allowed before re-planning. Defaults to 3.
+       max_steps: Maximum number of total inner loop steps before terminating
+          (total across all outer loop iterations).
+       max_stalls: Maximum number of stalls allowed before re-planning. The stall
+          counter increments when the agent is stuck or in a loop, and decrements
+          when progress is made. When reaching max_stalls, the outer loop triggers
+          re-planning.
        max_outer_loop_steps: Maximum number of outer loop steps before
           terminating (each outer loop step restarts the inner loop with
           a refreshed ledger; in short, this is how many times the agent can
           completely stall out before terminating).
-       submit_name: Name for tool used to make submissions
-          (defaults to 'submit')
+       submit_name: Name for tool used to make submissions (defaults to 'submit')
        submit_description: Description of submit tool (defaults to
           'Submit an answer for evaluation')
        tool_call_format: Format for tool calls in user messages. If 'text',
@@ -533,11 +559,11 @@ def magentic_agent(
             unless this agent is being used in a multi-agent system).
 
     Returns:
-        Plan for agent.
+        Solver implementing the outer loop orchestration.
     """
 
     @solver
-    def magentic_one_solver() -> Solver:
+    def outer_loop_solver() -> Solver:
         async def solve(state: TaskState, generate: Generate) -> TaskState:
             await init_python_mcp()(state, generate)
             initial_model = get_model(model_override)
@@ -629,7 +655,7 @@ def magentic_agent(
             submit_name=submit_name,
             submit_description=submit_description,
         )
-        + [magentic_one_solver()]
+        + [outer_loop_solver()]
     )
 
 
@@ -662,7 +688,7 @@ def magentic_init(
 
     logger.info("Tool configuration: %s", config.pretty_format())
 
-    return magentic_agent(
+    return magentic_outer_loop(
         init=None,
         tools=tools,
         tool_call_format="native",
