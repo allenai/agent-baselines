@@ -8,6 +8,10 @@ dynamic team assembly.
 The outer loop maintains a task ledger (facts and plan) and monitors progress,
 while the inner loop executes tool calls. When the agent stalls, the outer loop
 re-plans and restarts the inner loop with an updated ledger.
+
+Many of the prompts and functions here are based on the ones from
+https://github.com/microsoft/autogen/tree/13e144e5476a76ca0d76bf4f07a6401d133a03ed/python/packages/autogen-agentchat/src/autogen_agentchat/teams/_group_chat/_magentic_one,
+modified to work with Inspect and support our ReAct inner loop.
 """
 
 from logging import getLogger
