@@ -229,7 +229,13 @@ def magentic_autogen_bridge(
                 "vision": False,
                 "function_calling": True,
                 "json_output": True,
-                "family": ModelFamily.GPT_4O,  # Use GPT-4 family transformers
+                # Use UNKNOWN family so autogen doesn't make assumptions about the
+                # underlying model. Since bridge() intercepts all calls and routes
+                # through Inspect's model system, the actual model type (GPT-4, Claude,
+                # Gemini, etc.) is determined by Inspect's configuration, not autogen.
+                # Using UNKNOWN prevents autogen from applying model-specific message
+                # transformations that would be inappropriate for the actual model.
+                "family": ModelFamily.UNKNOWN,
                 "structured_output": False,  # Disabled - not compatible with bridge()
                 "multiple_system_messages": True,
             },
