@@ -60,3 +60,6 @@ RUN solvers/datavoyager/setup.sh
 
 FROM agent-baselines-base AS futurehouse
 RUN solvers/futurehouse/setup.sh
+
+FROM agent-baselines-base AS magenticone
+RUN solvers/magenticone/setup.sh
