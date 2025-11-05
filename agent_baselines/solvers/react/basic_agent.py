@@ -14,15 +14,16 @@ from astabench.tools.submission import get_submission_manager, submit_tool
 from astabench.util.state import merge_tools_with_state
 from inspect_ai.model import (
     CachePolicy,
+    ChatMessage,
     ChatMessageAssistant,
     ChatMessageTool,
     ChatMessageUser,
     Model,
-    call_tools,
+    execute_tools,
     get_model,
 )
 from inspect_ai.solver import Generate, Solver, TaskState, chain, solver, system_message
-from inspect_ai.tool import Tool, ToolCall, ToolDef, ToolInfo, tool_with
+from inspect_ai.tool import Tool, ToolCall, ToolDef, ToolError, ToolInfo, tool_with
 from inspect_ai.util import LimitExceededError
 
 logger = getLogger(__name__)
@@ -58,52 +59,6 @@ DEFAULT_SUBMIT_NAME = "submit"
 DEFAULT_SUBMIT_DESCRIPTION = "Submit an answer for evaluation."
 
 
-def extract_text_tool_calls(message: ChatMessageAssistant) -> ChatMessageAssistant:
-    """Extract tool calls from message text rather than the tool_calls arg.
-    Return a new message that is identical to the original except that the
-    tool_calls arg is set to the extracted tool calls.
-
-    Tool calls are recognized in the format:
-    CALL FUNCTION:
-    ```json
-    {
-        "function": "tool_name",
-        "arguments": {
-            "key": "value"
-        }
-    }
-    ```
-    """
-
-    # extract tool calls from message text
-    tool_calls = []
-    for match in re.finditer(
-        r"CALL FUNCTION:(\s*)```json\n(.*?)```", message.text, re.DOTALL
-    ):
-        try:
-            tool_call_json = json.loads(match.group(2))
-            tool_calls.append(
-                ToolCall(
-                    function=tool_call_json["function"],
-                    arguments=tool_call_json["arguments"],
-                    id=str(uuid.uuid4()),
-                    type="function",
-                )
-            )
-        except json.JSONDecodeError:
-            logger.warning("Failed to decode tool call: %s", match.group(2))
-        except KeyError as e:
-            logger.warning("Missing key in tool call: %s", e)
-
-    # Add back the original tool calls too
-    tool_calls.extend(message.tool_calls or [])
-
-    # create a new message with extracted tool calls
-    msg = message.copy()
-    msg.tool_calls = tool_calls
-    return msg
-
-
 def tool_message_to_text(message: ChatMessageTool) -> str:
     """Convert a tool message to a string representation that can be added to
     a user message string."""
@@ -128,6 +83,136 @@ def tools_to_prompt_text(tools: list[Tool]) -> str:
             s += f"  {k}: {v.description}\n"
         s += "\n"
     return s
+
+
+def native_extract_tool_calls(
+    assistant_message: ChatMessageAssistant,
+) -> list[ToolCall]:
+    """Extract tool calls directly from message.tool_calls for native format."""
+    return assistant_message.tool_calls or []
+
+
+def native_add_tool_responses(
+    tool_responses: list[ChatMessage], message_history: list[ChatMessage]
+) -> list[ChatMessage]:
+    """Add tool responses as-is to message history for native format."""
+    return message_history + tool_responses
+
+
+def text_extract_tool_calls(message: ChatMessageAssistant) -> list[ToolCall]:
+    """Extract tool calls from message text rather than the tool_calls arg.
+    Return a list of tool calls.
+
+    Tool calls are recognized in the format:
+    CALL FUNCTION:
+    ```json
+    {
+        "function": "tool_name",
+        "arguments": {
+            "key": "value"
+        }
+    }
+    ```
+    """
+
+    if message.tool_calls:
+        logger.warning(
+            "Message already has tool_calls set; these will be ignored in favor of extracting from text."
+        )
+        message = message.copy()
+        message.tool_calls = []
+
+    # extract tool calls from message text
+    tool_calls = []
+    for match in re.finditer(
+        r"CALL FUNCTION:(\s*)```json\n(?P<tool_call>.*?)```", message.text, re.DOTALL
+    ):
+        try:
+            tool_call_json = json.loads(match.group("tool_call"))
+            tool_calls.append(
+                ToolCall(
+                    function=tool_call_json["function"],
+                    arguments=tool_call_json["arguments"],
+                    id=str(uuid.uuid4()),
+                    type="function",
+                )
+            )
+        except json.JSONDecodeError as e:
+            logger.warning("Failed to decode tool call: %s", match.group("tool_call"))
+            raise ToolError(
+                f"Failed to decode tool call: {match.group('tool_call')}"
+            ) from e
+        except KeyError as e:
+            logger.warning("Missing key in tool call: %s", e)
+            raise ToolError(f"Missing key in tool call: {e}") from e
+
+    return tool_calls
+
+
+def text_add_tool_responses(
+    tool_responses: list[ChatMessage], message_history: list[ChatMessage]
+) -> list[ChatMessage]:
+    """Add tool responses as a single user message with text format."""
+    if not tool_responses:
+        return message_history
+
+    content = "The tool results are:\n" + "\n".join(
+        [tool_message_to_text(result) for result in tool_responses]
+    )
+    return message_history + [ChatMessageUser(content=content)]
+
+
+def resolve_agent_initializer_args(
+    *,
+    init: Solver | list[Solver] | None = None,
+    tools: list[Tool] | Solver | None = None,
+    add_submit_tool: bool = True,
+    submit_name: str = DEFAULT_SUBMIT_NAME,
+    submit_description: str = DEFAULT_SUBMIT_DESCRIPTION,
+) -> list[Solver]:
+    """Resolve common agent arguments.
+
+    Args:
+       init: Agent initialisation (defaults to system_message with basic ReAct prompt)
+       tools: Tools available for the agent. Either a list of tools or a Solver that
+          can yield dynamic tools per-sample.
+       cache: Caching behaviour for generate responses (defaults to no caching).
+       add_submit_tool: Whether to add a submit tool to the tools list.
+
+    Returns:
+        List of solvers to chain before the main agent loop.
+    """
+
+    # resolve init
+    if init is None:
+        init = system_message(DEFAULT_SYSTEM_MESSAGE, submit=DEFAULT_SUBMIT_NAME)
+    init = init if isinstance(init, list) else [init]
+
+    # resolve tools
+    if tools is None:
+        tools = []
+    tools_adder: Solver = (
+        tools
+        if isinstance(tools, Solver)
+        else merge_tools_with_state(tools, prefer_given_tools=False)
+    )
+
+    # solver that adds submission tool
+    @solver
+    def _add_submit_tool() -> Solver:
+        async def solve(state: TaskState, generate: Generate) -> TaskState:
+            state.tools.append(
+                tool_with(submit_tool(), submit_name, submit_description)
+            )
+            return state
+
+        return solve
+
+    pre_chained_solvers = [init, tools_adder] + (
+        [_add_submit_tool()] if add_submit_tool else []
+    )
+
+    return pre_chained_solvers
 
 
 @solver
@@ -186,40 +271,26 @@ def basic_agent(
         Plan for agent.
     """
 
-    # resolve init
-    if init is None:
-        init = system_message(DEFAULT_SYSTEM_MESSAGE, submit=submit_name)
-    init = init if isinstance(init, list) else [init]
-
-    # resolve tools
-    if tools is None:
-        tools = []
-    tools_adder: Solver = (
-        tools
-        if isinstance(tools, Solver)
-        else merge_tools_with_state(tools, prefer_given_tools=False)
-    )
-
-    # solver that adds submission tool
-    @solver
-    def _add_submit_tool() -> Solver:
-        async def solve(state: TaskState, generate: Generate) -> TaskState:
-            state.tools.append(
-                tool_with(submit_tool(), submit_name, submit_description)
-            )
-            return state
-
-        return solve
-
     # main agent loop
     @solver
     def basic_agent_loop() -> Solver:
         async def solve(state: TaskState, generate: Generate) -> TaskState:
             try:
+                # Set up tool calling functions based on format
                 if tool_call_format == "text":
                     await system_message(
                         f"{TEXT_TOOL_CALLS_PROMPT}\n\nThe tools available are:\n{tools_to_prompt_text(state.tools)}"
                     )(state, generate)
+                    extract_tool_calls_fn = text_extract_tool_calls
+                    add_tool_responses_fn = text_add_tool_responses
+                    tools_for_generate = []
+                elif tool_call_format == "native":
+                    extract_tool_calls_fn = native_extract_tool_calls
+                    add_tool_responses_fn = native_add_tool_responses
+                    tools_for_generate = state.tools
+                else:
+                    raise ValueError(f"Unknown tool_call_format: {tool_call_format}")
+
                 # main loop (state.completed checks task message_limit and token_limit)
                 cur_steps = 0
                 while not state.completed:
@@ -241,22 +312,20 @@ def basic_agent(
                     state.output = await get_model(model_override).generate(
                         input=state.messages,
                         cache=cache,
-                        tools=(state.tools if tool_call_format == "native" else []),
+                        tools=tools_for_generate,
                     )
+                    state.messages.append(state.output.message)
 
-                    if tool_call_format == "text":
-                        state.output.choices[0].message = extract_text_tool_calls(
-                            state.output.message
+                    # Extract tool calls
+                    try:
+                        tool_calls = extract_tool_calls_fn(state.output.message)
+                    except ToolError as e:
+                        state.messages.append(
+                            ChatMessageUser(
+                                content=f"The tool calls from your last message could not be processed due to an error: {e}."
+                            )
                         )
-                        revised_message = state.output.choices[0].message.copy()
-                        revised_message.tool_calls = []
-                        state.messages.append(revised_message)
-                    elif tool_call_format == "native":
-                        state.messages.append(state.output.message)
-                    else:
-                        raise ValueError(
-                            f"Invalid tool_call_format: {tool_call_format}"
-                        )
+                        continue
 
                     # check for context window overflow
                     if state.output.stop_reason == "model_length":
@@ -268,28 +337,17 @@ def basic_agent(
                         break
 
                     # resolve tools calls (if any)
-                    if state.output.message.tool_calls:
-                        # call tool functions
-                        tool_results = await call_tools(
-                            state.output.message,
+                    if tool_calls:
+                        tool_result = await execute_tools(
+                            # execute_tools wants a message, so we make one up
+                            [ChatMessageAssistant(content="", tool_calls=tool_calls)],
                             state.tools,
                             max_output=max_tool_output,
                         )
 
-                        if tool_call_format == "text":
-                            state.messages.append(
-                                ChatMessageUser(
-                                    content="The tool results are:"
-                                    + "\n".join(
-                                        [
-                                            tool_message_to_text(result)
-                                            for result in tool_results
-                                        ]
-                                    )
-                                )
-                            )
-                        else:
-                            state.messages.extend(tool_results)
+                        state.messages = add_tool_responses_fn(
+                            tool_result.messages, state.messages
+                        )
 
                         # was an answer submitted?
                         if get_submission_manager().has_submission():
@@ -313,9 +371,13 @@ def basic_agent(
 
     # return chain
     return chain(
-        init
-        + [tools_adder]
-        + ([_add_submit_tool()] if add_submit_tool else [])
+        resolve_agent_initializer_args(
+            init=init,
+            tools=tools,
+            add_submit_tool=add_submit_tool,
+            submit_name=submit_name,
+            submit_description=submit_description,
+        )
         + [basic_agent_loop()]
     )
 
