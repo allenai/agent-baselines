@@ -31,6 +31,7 @@ completion_model_map = {
 
 RERANKER_TYPES = list(RERANKER_MAPPING.keys())
 
+
 def set_citation_titles(resp):
     for section in resp["sections"]:
         for citation in section["citations"]:
@@ -130,7 +131,9 @@ def format_tables(resp: Dict[str, Any]):
             }
 
 
-def query_sqa(completion_model: str, question: str, reranker_type: str = "modal", **kwargs):
+def query_sqa(
+    completion_model: str, question: str, reranker_type: str = "modal", **kwargs
+):
     if not (
         os.getenv("MODAL_TOKEN")
         and os.getenv("MODAL_TOKEN_SECRET")
@@ -142,7 +145,11 @@ def query_sqa(completion_model: str, question: str, reranker_type: str = "modal"
     retriever = FullTextRetriever(n_retrieval=256, n_keyword_srch=20)
     if "modal" == reranker_type:
         if not kwargs:
-            kwargs = {"app_name": "ai2-scholar-qa", "api_name": "inference_api", "batch_size": 256}
+            kwargs = {
+                "app_name": "ai2-scholar-qa",
+                "api_name": "inference_api",
+                "batch_size": 256,
+            }
         reranker = ModalReranker(
             gen_options=dict(),
             **kwargs,
@@ -174,7 +181,11 @@ def query_sqa(completion_model: str, question: str, reranker_type: str = "modal"
 
 
 @solver
-def sqa_solver(completion_model: str = "claude-3.7", reranker_type: Literal[*RERANKER_TYPES] = "modal", **kwargs) -> Solver:
+def sqa_solver(
+    completion_model: str = "claude-3.7",
+    reranker_type: Literal[*RERANKER_TYPES] = "modal",
+    **kwargs,
+) -> Solver:
     async def solve(state: TaskState, generate: Generate) -> TaskState:
         # check for modal tokens:
         assert (
