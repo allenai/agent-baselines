@@ -16,6 +16,6 @@ fi
 
 uv run inspect eval \
 --solver agent_baselines/solvers/sqa/sqa.py@sqa_solver \
---limit 1 --display plain \
+--limit 1 \
 $* \
-astabench/sqa_test
+astabench/sqa_dev
