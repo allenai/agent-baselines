@@ -5,19 +5,17 @@ set -euo pipefail
 
 if [ -z "$MODAL_TOKEN" ]; then
     echo "MODAL_TOKEN must be set"
-    exit 1
 fi
-if [ -z "$MODAL_TOKEN_SECRET" ]; then
+if [ -z "${MODAL_TOKEN_SECRET:-}" ]; then
     echo "Warning: MODAL_TOKEN_SECRET must be set"
 fi
-if [ -z "$ASTA_TOOL_KEY" ]; then
+if [ -z "${ASTA_TOOL_KEY:-}" ]; then
     echo "Warning: ASTA_TOOL_KEY must be set"
 fi
 
 
 uv run inspect eval \
 --solver agent_baselines/solvers/sqa/sqa.py@sqa_solver \
---model openai/gpt-4.1-nano \
---limit 1 \
+--limit 1 --display plain \
 $* \
-astabench/sqa_dev
+astabench/sqa_test

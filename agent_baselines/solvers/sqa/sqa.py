@@ -2,7 +2,7 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Literal
 
 import pandas as pd
 from astabench.types.sqa import SQAResponseWithTable, SQAResponseWithUsage
@@ -14,6 +14,7 @@ from scholarqa import ScholarQA
 from scholarqa.rag.reranker.modal_engine import ModalReranker
 from scholarqa.rag.retrieval import PaperFinderWithReranker
 from scholarqa.rag.retriever_base import FullTextRetriever
+from scholarqa.rag.reranker.modal_engine import RERANKER_MAPPING
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,7 @@ completion_model_map = {
     "gemini-2.5-pro": gemini_2_5_pro,
 }
 
+RERANKER_TYPES = list(RERANKER_MAPPING.keys())
 
 def set_citation_titles(resp):
     for section in resp["sections"]:
@@ -128,7 +130,7 @@ def format_tables(resp: Dict[str, Any]):
             }
 
 
-def query_sqa(completion_model: str, question: str):
+def query_sqa(completion_model: str, question: str, reranker_type: str = "modal", **kwargs):
     if not (
         os.getenv("MODAL_TOKEN")
         and os.getenv("MODAL_TOKEN_SECRET")
@@ -138,12 +140,19 @@ def query_sqa(completion_model: str, question: str):
             "MODAL_TOKEN, MODAL_TOKEN_SECRET, or ASTA_TOOL_KEY is not set"
         )
     retriever = FullTextRetriever(n_retrieval=256, n_keyword_srch=20)
-    reranker = ModalReranker(
-        app_name="ai2-scholar-qa",
-        api_name="inference_api",
-        batch_size=256,
-        gen_options=dict(),
-    )
+    if "modal" == reranker_type:
+        if not kwargs:
+            kwargs = {"app_name": "ai2-scholar-qa", "api_name": "inference_api", "batch_size": 256}
+        reranker = ModalReranker(
+            gen_options=dict(),
+            **kwargs,
+        )
+        print("Initialized Modal Reranker")
+    else:
+        reranker_cls = RERANKER_MAPPING.get(reranker_type)
+        if reranker_cls is None:
+            raise ValueError(f"Unknown reranker type: {reranker_type}")
+        reranker = reranker_cls(**kwargs)
     paper_finder = PaperFinderWithReranker(
         retriever, reranker, n_rerank=50, context_threshold=0.0, max_date="2025-05"
     )
@@ -165,7 +174,7 @@ def query_sqa(completion_model: str, question: str):
 
 
 @solver
-def sqa_solver(completion_model: str = "claude-3.7") -> Solver:
+def sqa_solver(completion_model: str = "claude-3.7", reranker_type: Literal[*RERANKER_TYPES] = "modal", **kwargs) -> Solver:
     async def solve(state: TaskState, generate: Generate) -> TaskState:
         # check for modal tokens:
         assert (
@@ -180,6 +189,8 @@ def sqa_solver(completion_model: str = "claude-3.7") -> Solver:
                 str(Path(__file__).parent / "sqa_subprocess.py"),
                 completion_model,
                 question,
+                reranker_type,
+                json.dumps(kwargs),
             ],
             capture_output=True,
             text=True,
