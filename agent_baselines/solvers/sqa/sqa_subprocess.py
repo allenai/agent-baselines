@@ -13,8 +13,8 @@ def main():
     completion_model = sys.argv[1]
     question = sys.argv[2]
     reranker_type = sys.argv[3] if len(sys.argv) > 3 else "modal"
-    kwargs = json.loads(sys.argv[4]) if len(sys.argv) > 4 else {}
-    response = query_sqa(completion_model, question, reranker_type, **kwargs)
+    reranker_kwargs = json.loads(sys.argv[4]) if len(sys.argv) > 4 else {}
+    response = query_sqa(completion_model, question, reranker_type, **reranker_kwargs)
     print("<START>" + json.dumps(response.model_dump(mode="json")))
 
 

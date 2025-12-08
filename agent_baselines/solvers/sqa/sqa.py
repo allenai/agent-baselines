@@ -132,7 +132,10 @@ def format_tables(resp: Dict[str, Any]):
 
 
 def query_sqa(
-    completion_model: str, question: str, reranker_type: str = "modal", **kwargs
+    completion_model: str,
+    question: str,
+    reranker_type: str = "modal",
+    **reranker_kwargs,
 ):
     if not (
         os.getenv("MODAL_TOKEN")
@@ -144,22 +147,21 @@ def query_sqa(
         )
     retriever = FullTextRetriever(n_retrieval=256, n_keyword_srch=20)
     if "modal" == reranker_type:
-        if not kwargs:
-            kwargs = {
+        if not reranker_kwargs:
+            reranker_kwargs = {
                 "app_name": "ai2-scholar-qa",
                 "api_name": "inference_api",
                 "batch_size": 256,
             }
         reranker = ModalReranker(
             gen_options=dict(),
-            **kwargs,
+            **reranker_kwargs,
         )
-        print("Initialized Modal Reranker")
     else:
         reranker_cls = RERANKER_MAPPING.get(reranker_type)
         if reranker_cls is None:
             raise ValueError(f"Unknown reranker type: {reranker_type}")
-        reranker = reranker_cls(**kwargs)
+        reranker = reranker_cls(**reranker_kwargs)
     paper_finder = PaperFinderWithReranker(
         retriever, reranker, n_rerank=50, context_threshold=0.0, max_date="2025-05"
     )
@@ -184,7 +186,7 @@ def query_sqa(
 def sqa_solver(
     completion_model: str = "claude-3.7",
     reranker_type: Literal[*RERANKER_TYPES] = "modal",
-    **kwargs,
+    **reranker_kwargs,
 ) -> Solver:
     async def solve(state: TaskState, generate: Generate) -> TaskState:
         # check for modal tokens:
@@ -201,7 +203,7 @@ def sqa_solver(
                 completion_model,
                 question,
                 reranker_type,
-                json.dumps(kwargs),
+                json.dumps(reranker_kwargs),
             ],
             capture_output=True,
             text=True,
