@@ -5,7 +5,7 @@ set -euo pipefail
 
 test -z $ASTA_TOOL_KEY && echo "ASTA_TOOL_KEY is not set" && exit 1
 
-uv run astabench eval \
+uv run --project solvers/react astabench eval \
 --split validation \
 --solver agent_baselines/solvers/react/basic_agent.py@instantiated_basic_agent \
 --model openai/gpt-4.1-nano \

@@ -1,3 +1,9 @@
 #!/bin/bash
 
-echo "No extra setup required for react agent"
+set -euo pipefail
+
+if [ ! -f solvers/react/uv.lock ]; then
+    uv lock --project solvers/react
+fi
+
+uv sync --project solvers/react
