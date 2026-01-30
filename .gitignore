@@ -189,6 +189,7 @@ logs/
 /astabench/evals/sqa/storm/
 /storm/
 uv.lock
+!solvers/**/uv.lock
 
 # tmp files written by solvers/evals
 /generation_cache.db

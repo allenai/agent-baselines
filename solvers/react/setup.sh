@@ -2,8 +2,4 @@
 
 set -euo pipefail
 
-if [ ! -f solvers/react/uv.lock ]; then
-    uv lock --project solvers/react
-fi
-
-uv sync --project solvers/react
+./scripts/solver_uv.sh sync react
