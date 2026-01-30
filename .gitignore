@@ -185,6 +185,7 @@ logs/
 .DS_Store
 .mise.toml
 .vscode/
+.ccb_config/
 /astabench/evals/sqa/storm/
 /storm/
 uv.lock
