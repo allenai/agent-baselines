@@ -186,6 +186,7 @@ logs/
 .mise.toml
 .vscode/
 .ccb_config/
+.cq_config/
 /astabench/evals/sqa/storm/
 /storm/
 uv.lock
