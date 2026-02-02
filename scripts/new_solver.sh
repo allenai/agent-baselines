@@ -92,6 +92,9 @@ cat > "${solver_dir}/setup.sh" <<EOF
 
 set -euo pipefail
 
+repo_root="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "\${repo_root}"
+
 ./scripts/solver_uv.sh sync ${solver}
 EOF
 
@@ -99,6 +102,10 @@ cat > "${solver_dir}/demo.sh" <<EOF
 #!/usr/bin/env bash
 
 set -euo pipefail
+
+# Ensure this script works when invoked from any directory.
+repo_root="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "\${repo_root}"
 
 # Runs a tiny eval using inspect's built-in mock model so it works without API keys.
 ./scripts/solver_uv.sh run ${solver} -- inspect eval \\

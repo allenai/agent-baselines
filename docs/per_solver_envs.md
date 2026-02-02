@@ -16,7 +16,8 @@ Inspect version (and related deps) without impacting other solvers.
   Inspect versions requires an override or an `astabench` fork.
 - Solver code lives under `agent_baselines/solvers/…` in the repo root; we rely on
   running from repo root so Python can import `agent_baselines` without installing
-  it as a package.
+  it as a package. The helper scripts (`scripts/solver_uv.sh`, solver `setup.sh`,
+  and solver `demo.sh`) `cd` to repo root to make this reliable.
 - You cannot mix multiple `inspect_ai` versions **in the same Python process**.
   Per-solver isolation works because we run each solver as its own process/env.
 

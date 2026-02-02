@@ -13,7 +13,7 @@ Environment:
   SOLVER_UV_PYTHON   Python version for uv (default: 3.11)
 
 Notes:
-  - Run from repo root.
+  - Can be run from any directory within the repo.
   - Requires: uv
   - Expects: solvers/<solver>/pyproject.toml
 EOF
@@ -24,10 +24,26 @@ if ! command -v uv >/dev/null 2>&1; then
   exit 127
 fi
 
-if [ ! -f "pyproject.toml" ] || [ ! -d "solvers" ]; then
-  echo "error: must run from repo root (expected ./pyproject.toml and ./solvers/)" >&2
+find_repo_root() {
+  local dir="$PWD"
+  while true; do
+    if [ -f "${dir}/pyproject.toml" ] && [ -d "${dir}/solvers" ]; then
+      printf '%s\n' "${dir}"
+      return 0
+    fi
+    if [ "${dir}" = "/" ]; then
+      return 1
+    fi
+    dir="$(dirname "${dir}")"
+  done
+}
+
+repo_root="$(find_repo_root)" || {
+  echo "error: must run from within the repo (expected an ancestor dir with pyproject.toml + solvers/)" >&2
   exit 2
-fi
+}
+
+cd "${repo_root}"
 
 uv_python="${SOLVER_UV_PYTHON:-3.11}"
 uv_python_args=(--python "${uv_python}")

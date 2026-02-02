@@ -262,7 +262,31 @@ def test_not_repo_root_errors(tmp_path: Path) -> None:
 
     result = _run_solver_uv(cwd=root, env=env, args=["sync", "foo"])
     assert result.returncode == 2
-    assert "must run from repo root" in result.stderr
+    assert "must run from within the repo" in result.stderr
+
+
+def test_works_from_solver_subdir(tmp_path: Path) -> None:
+    root = tmp_path / "repo"
+    _make_repo_root(root)
+    _make_solver(root, "foo", with_lock=True)
+
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    log_file = tmp_path / "uv.log"
+    _make_fake_uv(bin_dir, log_file)
+
+    env = os.environ.copy()
+    env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
+    env["UV_LOG_FILE"] = str(log_file)
+
+    solver_subdir = root / "solvers" / "foo"
+    result = _run_solver_uv(cwd=solver_subdir, env=env, args=["sync", "foo"])
+    assert result.returncode == 0, result.stderr
+
+    calls = _read_uv_calls(log_file)
+    assert len(calls) == 1
+    assert calls[0][0:2] == ["uv", "sync"]
+    assert calls[0][2:6] == ["--project", "solvers/foo", "--python", "3.11"]
 
 
 def test_missing_uv_errors(tmp_path: Path) -> None:
