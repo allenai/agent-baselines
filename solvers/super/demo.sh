@@ -3,10 +3,12 @@
 
 set -euo pipefail
 
-uv run inspect eval \
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "${repo_root}"
+
+./scripts/solver_uv.sh run super -- inspect eval \
 --solver agent_baselines/solvers/code_agent/agent.py@code_agent \
 --model openai/gpt-4.1-nano \
 --limit 1 \
-$* \
+"$@" \
 astabench/super_validation
-

@@ -31,7 +31,7 @@ def test_uv_subprojects_have_required_files() -> None:
     missing: list[str] = []
 
     for solver_dir in _solver_dirs_with_pyproject(root):
-        for rel in ("uv.lock", "setup.sh", "demo.sh", "env"):
+        for rel in ("uv.lock", "setup.sh", "demo.sh", "env", "README.md"):
             if not (solver_dir / rel).exists():
                 missing.append(f"{solver_dir.name}: missing solvers/{solver_dir.name}/{rel}")
 
@@ -80,3 +80,20 @@ def test_uv_subproject_demo_uses_solver_uv_run() -> None:
             offenders.append(f"{solver_dir.name}: demo.sh does not call `./scripts/solver_uv.sh run {solver_dir.name} -- ...`")
 
     assert not offenders, "Invalid demo.sh for uv sub-project solvers:\n" + "\n".join(offenders)
+
+
+def test_uv_subproject_readme_mentions_pyproject() -> None:
+    root = _repo_root()
+    offenders: list[str] = []
+
+    for solver_dir in _solver_dirs_with_pyproject(root):
+        readme_md = solver_dir / "README.md"
+        if not readme_md.exists():
+            offenders.append(f"{solver_dir.name}: missing solvers/{solver_dir.name}/README.md")
+            continue
+        content = _read_text(readme_md)
+        expected = f"solvers/{solver_dir.name}/pyproject.toml"
+        if expected not in content:
+            offenders.append(f"{solver_dir.name}: README.md does not mention `{expected}`")
+
+    assert not offenders, "Invalid README.md for uv sub-project solvers:\n" + "\n".join(offenders)

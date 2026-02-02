@@ -1,6 +1,6 @@
 # Per‑Solver Environments (Sub‑Projects + Lockfiles)
 
-This repo is moving to **one uv sub‑project per solver**, each with its own
+This repo uses **one uv sub‑project per solver**, each with its own
 `pyproject.toml` and `uv.lock`. The goal is to let each solver pin a different
 Inspect version (and related deps) without impacting other solvers.
 
@@ -12,7 +12,7 @@ Inspect version (and related deps) without impacting other solvers.
 ## Constraints / Notes
 - Most solvers import `astabench`; `astabench` pins `inspect_ai` in its own
   dependencies (currently an **exact** pin). On PyPI today, all released
-  `astabench` versions pin `inspect_ai==0.3.114` (as of 2026-02-02), so changing
+  `astabench` versions pin `inspect_ai==0.3.114`, so changing
   Inspect versions requires an override or an `astabench` fork.
 - Solver code lives under `agent_baselines/solvers/…` in the repo root; we rely on
   running from repo root so Python can import `agent_baselines` without installing
@@ -32,7 +32,7 @@ solvers/<solver>/
   env
 ```
 
-## React pilot (initial scaffold)
+## Example: React solver
 `solvers/react/pyproject.toml` declares the deps for the React solver, including
 its chosen Inspect version. The lockfile should be generated via:
 ```

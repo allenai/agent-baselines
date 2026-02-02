@@ -14,7 +14,7 @@ The `solvers/` directory has descriptions of each baseline agent, plus scripts t
 set up the environment required by that solver and run a small demo.
 
 ## Per-solver environments (uv sub-projects)
-This repo is moving to **one uv sub-project per solver** (each solver has its own
+This repo uses **one uv sub-project per solver** (each solver has its own
 `solvers/<solver>/pyproject.toml` + committed `solvers/<solver>/uv.lock`).
 
 Why:
@@ -32,10 +32,6 @@ Adding a new solver:
 Inspect/AstaBench coupling:
 - `astabench` pins `inspect_ai` exactly (currently released astabench versions pin `inspect_ai==0.3.114`).
 - To diverge per-solver, use uv `override-dependencies`. See `docs/per_solver_envs.md`.
-
-Current migration status:
-- uv sub-project solvers: `react`, `paper_finder`
-- legacy (extras-based) solvers: everything else under `solvers/` (for now)
 
 If you have trouble setting up an environment on your local system, a Docker image is provided.  For a given `<solver_name>` (e.g. `react`):
 

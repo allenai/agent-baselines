@@ -3,7 +3,10 @@
 
 set -euo pipefail
 
-if [ -z "$MODAL_TOKEN" ]; then
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "${repo_root}"
+
+if [ -z "${MODAL_TOKEN:-}" ]; then
     echo "MODAL_TOKEN must be set"
 fi
 if [ -z "${MODAL_TOKEN_SECRET:-}" ]; then
@@ -14,8 +17,8 @@ if [ -z "${ASTA_TOOL_KEY:-}" ]; then
 fi
 
 
-uv run inspect eval \
+./scripts/solver_uv.sh run sqa -- inspect eval \
 --solver agent_baselines/solvers/sqa/sqa.py@sqa_solver \
 --limit 1 \
-$* \
+"$@" \
 astabench/sqa_dev

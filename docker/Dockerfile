@@ -69,36 +69,61 @@ RUN UV_FROZEN=1 solvers/paper_finder/setup.sh
 COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
 
 FROM agent-baselines-base AS smolagents
-COPY solvers/smolagents/setup.sh /agent-baselines/solvers/smolagents/setup.sh
-RUN solvers/smolagents/setup.sh
+COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
+COPY solvers/smolagents/pyproject.toml solvers/smolagents/uv.lock solvers/smolagents/setup.sh /agent-baselines/solvers/smolagents/
+RUN UV_FROZEN=1 solvers/smolagents/setup.sh
 COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
 
 FROM agent-baselines-base AS storm
-COPY solvers/storm/setup.sh /agent-baselines/solvers/storm/setup.sh
-RUN solvers/storm/setup.sh
+COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
+COPY solvers/storm/pyproject.toml solvers/storm/uv.lock solvers/storm/setup.sh /agent-baselines/solvers/storm/
+RUN UV_FROZEN=1 solvers/storm/setup.sh
 COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
 
 FROM agent-baselines-base AS sqa
-COPY solvers/sqa/setup.sh /agent-baselines/solvers/sqa/setup.sh
-RUN solvers/sqa/setup.sh
+COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
+COPY solvers/sqa/pyproject.toml solvers/sqa/uv.lock solvers/sqa/setup.sh /agent-baselines/solvers/sqa/
+RUN UV_FROZEN=1 solvers/sqa/setup.sh
 COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
 
 FROM agent-baselines-base AS super
-COPY solvers/super/setup.sh /agent-baselines/solvers/super/setup.sh
-RUN solvers/super/setup.sh
+COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
+COPY solvers/super/pyproject.toml solvers/super/uv.lock solvers/super/setup.sh /agent-baselines/solvers/super/
+RUN UV_FROZEN=1 solvers/super/setup.sh
 COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
 
 FROM agent-baselines-base AS datavoyager
-COPY solvers/datavoyager/setup.sh /agent-baselines/solvers/datavoyager/setup.sh
-RUN solvers/datavoyager/setup.sh
+COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
+COPY solvers/datavoyager/pyproject.toml solvers/datavoyager/uv.lock solvers/datavoyager/setup.sh /agent-baselines/solvers/datavoyager/
+RUN UV_FROZEN=1 solvers/datavoyager/setup.sh
 COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
 
 FROM agent-baselines-base AS futurehouse
-COPY solvers/futurehouse/setup.sh /agent-baselines/solvers/futurehouse/setup.sh
-RUN solvers/futurehouse/setup.sh
+COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
+COPY solvers/futurehouse/pyproject.toml solvers/futurehouse/uv.lock solvers/futurehouse/setup.sh /agent-baselines/solvers/futurehouse/
+RUN UV_FROZEN=1 solvers/futurehouse/setup.sh
 COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
 
 FROM agent-baselines-base AS magenticone
-COPY solvers/magenticone/setup.sh /agent-baselines/solvers/magenticone/setup.sh
-RUN solvers/magenticone/setup.sh
+COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
+COPY solvers/magenticone/pyproject.toml solvers/magenticone/uv.lock solvers/magenticone/setup.sh /agent-baselines/solvers/magenticone/
+RUN UV_FROZEN=1 solvers/magenticone/setup.sh
+COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
+
+FROM agent-baselines-base AS arxivdigestables
+COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
+COPY solvers/arxivdigestables/pyproject.toml solvers/arxivdigestables/uv.lock solvers/arxivdigestables/setup.sh /agent-baselines/solvers/arxivdigestables/
+RUN UV_FROZEN=1 solvers/arxivdigestables/setup.sh
+COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
+
+FROM agent-baselines-base AS asta-v0
+COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
+COPY solvers/asta-v0/pyproject.toml solvers/asta-v0/uv.lock solvers/asta-v0/setup.sh /agent-baselines/solvers/asta-v0/
+RUN UV_FROZEN=1 solvers/asta-v0/setup.sh
+COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
+
+FROM agent-baselines-base AS e2e_discovery
+COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
+COPY solvers/e2e_discovery/pyproject.toml solvers/e2e_discovery/uv.lock solvers/e2e_discovery/setup.sh /agent-baselines/solvers/e2e_discovery/
+RUN UV_FROZEN=1 solvers/e2e_discovery/setup.sh
 COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
