@@ -21,6 +21,13 @@ Inspect version (and related deps) without impacting other solvers.
 - You cannot mix multiple `inspect_ai` versions **in the same Python process**.
   Per-solver isolation works because we run each solver as its own process/env.
 
+## Helper: `scripts/solver_uv.sh`
+This repo standardizes per-solver environment operations through `scripts/solver_uv.sh`:
+- Wraps `uv` so solver commands consistently use the solver sub-project (`uv --project solvers/<solver>`).
+- Is repo-root aware (can be run from anywhere inside the repo) and `cd`s to the repo root before invoking `uv`.
+- Uses `uv run --frozen` so execution matches the committed `uv.lock` and doesn’t silently drift.
+- `sync` will generate a lockfile only if `solvers/<solver>/uv.lock` is missing; otherwise it respects the committed lockfile.
+
 ## Layout (per solver)
 ```
 solvers/<solver>/

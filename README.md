@@ -26,6 +26,11 @@ Key commands:
 - Sync solver env: `./scripts/solver_uv.sh sync <solver>`
 - Run command in solver env: `./scripts/solver_uv.sh run <solver> -- <cmd ...>`
 
+What `scripts/solver_uv.sh` does (and why it exists):
+- Standardizes `uv` usage for solver sub-projects (`uv --project solvers/<solver>`), so you don’t accidentally run a solver in the wrong dependency context.
+- Is repo-root aware (can be run from any directory inside the repo) and uses `uv run --frozen` so runs match the committed `uv.lock`.
+- On `sync`, generates `uv.lock` if it’s missing (but otherwise respects the committed lockfile).
+
 Adding a new solver:
 - Use `./scripts/new_solver.sh <solver>` (then run `./scripts/solver_uv.sh lock <solver>`).
 

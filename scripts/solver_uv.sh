@@ -1,5 +1,20 @@
 #!/usr/bin/env bash
 
+# Wrapper around `uv` for per-solver uv sub-projects (`solvers/<solver>/`).
+#
+# Why this exists:
+# - Ensures solver commands consistently use the correct dependency context
+#   (`uv --project solvers/<solver>`), avoiding cross-solver dependency pollution.
+# - Repo-root aware: can be run from anywhere inside the repo, and will `cd` to
+#   the repo root before invoking `uv` (so `agent_baselines` imports work).
+# - Reproducible runs: `run` uses `uv run --frozen` to match the committed lockfile.
+# - Convenience: `sync` auto-generates `uv.lock` only if it’s missing.
+#
+# Subcommands:
+# - lock <solver>  Generate/update `solvers/<solver>/uv.lock`
+# - sync <solver>  Install deps for the solver env (lock if missing)
+# - run  <solver> -- <cmd...>  Run a command in the solver env (frozen)
+
 set -euo pipefail
 
 usage() {
