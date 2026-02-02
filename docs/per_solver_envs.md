@@ -46,6 +46,15 @@ Run the solver using the per‑solver project:
 ```
 
 ## Adding a new solver sub‑project
+The recommended way is:
+```
+./scripts/new_solver.sh <solver>
+```
+Then review/edit the generated files and generate a lockfile:
+```
+./scripts/solver_uv.sh lock <solver>
+```
+
 1. Create `solvers/<solver>/pyproject.toml` with `astabench` and any solver‑specific deps.
 2. Run `./scripts/solver_uv.sh lock <solver>` to create `solvers/<solver>/uv.lock`.
 3. Create `solvers/<solver>/setup.sh` calling `./scripts/solver_uv.sh sync <solver>`.
