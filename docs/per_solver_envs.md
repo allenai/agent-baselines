@@ -107,6 +107,25 @@ If you need a version of `astabench` that relaxes its Inspect pin (or adds APIs)
 use a fork via uv sources (git or local path). This is higher maintenance and
 should be used sparingly.
 
+## Verify per-solver isolation (different Inspect versions)
+This is a simple “proof” that two solvers can run with different `inspect_ai`
+versions, as long as they run in separate environments/processes.
+
+From repo root:
+```
+./scripts/solver_uv.sh sync react
+./scripts/solver_uv.sh sync paper_finder
+
+./scripts/solver_uv.sh run react -- python -c 'import inspect_ai; print(inspect_ai.__version__)'
+./scripts/solver_uv.sh run paper_finder -- python -c 'import inspect_ai; print(inspect_ai.__version__)'
+```
+
+Expected output (today):
+- `react` prints `0.3.114`
+- `paper_finder` prints `0.3.169`
+
+(Expected versions should match what’s pinned in `solvers/<solver>/pyproject.toml`.)
+
 ## Smoke test (all solver sub‑projects)
 Run:
 ```
@@ -114,3 +133,23 @@ make smoke-solvers
 ```
 This iterates `solvers/*/pyproject.toml`, syncs each solver environment, and verifies
 imports for `astabench`, `inspect_ai`, and `agent_baselines`.
+
+## New solver checklist (uv sub-project)
+Use this checklist when adding a new solver.
+
+1. Scaffold
+   - Run: `./scripts/new_solver.sh <solver>`
+   - Review generated files (including `agent_baselines/solvers/<solver>/`), then commit the initial scaffold.
+2. Dependencies + lockfile
+   - Review/edit: `solvers/<solver>/pyproject.toml`
+   - Generate lockfile: `./scripts/solver_uv.sh lock <solver>` (commit `solvers/<solver>/uv.lock`)
+   - If you need a different `inspect_ai` than `astabench` pins, add `[tool.uv].override-dependencies` (see above), then re-lock.
+3. Setup + demo scripts
+   - Ensure `solvers/<solver>/setup.sh` calls `./scripts/solver_uv.sh sync <solver>`
+   - Ensure `solvers/<solver>/demo.sh` uses `./scripts/solver_uv.sh run <solver> -- ...`
+4. Env vars
+   - List required env vars in `solvers/<solver>/env`
+   - If running in Docker via `make shell SOLVER=<solver>`, this file is loaded automatically.
+5. Verify it works
+   - Run the solver’s demo: `./solvers/<solver>/demo.sh`
+   - Run smoke checks: `make smoke-solvers`

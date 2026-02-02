@@ -1,6 +1,6 @@
 # agent-baselines
 
-The repo contains baseline implementations of a variety of agents to as reported in [AstaBench](https://github.com/allenai/asta-bench).
+The repo contains baseline implementations of a variety of agents as reported in [AstaBench](https://github.com/allenai/asta-bench).
 
 These agents are implemented as InspectAI solvers and can be run on the AstaBench suit with the `astabench eval` command.
 
@@ -10,8 +10,32 @@ These agents are implemented as InspectAI solvers and can be run on the AstaBenc
 git clone https://github.com/allenai/agent-baselines.git
 ```
 
-The `solvers` directory has descriptions of each of the baseline agents, along with sample scripts to set up the environment required by that solver and
-run against a limit number of eval samples.
+The `solvers/` directory has descriptions of each baseline agent, plus scripts to
+set up the environment required by that solver and run a small demo.
+
+## Per-solver environments (uv sub-projects)
+This repo is moving to **one uv sub-project per solver** (each solver has its own
+`solvers/<solver>/pyproject.toml` + committed `solvers/<solver>/uv.lock`).
+
+Why:
+- Avoid dependency conflicts across solvers (especially different `inspect_ai` needs).
+- Make runs reproducible per solver via lockfiles.
+
+Key commands:
+- Create/update lockfile: `./scripts/solver_uv.sh lock <solver>`
+- Sync solver env: `./scripts/solver_uv.sh sync <solver>`
+- Run command in solver env: `./scripts/solver_uv.sh run <solver> -- <cmd ...>`
+
+Adding a new solver:
+- Use `./scripts/new_solver.sh <solver>` (then run `./scripts/solver_uv.sh lock <solver>`).
+
+Inspect/AstaBench coupling:
+- `astabench` pins `inspect_ai` exactly (currently released astabench versions pin `inspect_ai==0.3.114`).
+- To diverge per-solver, use uv `override-dependencies`. See `docs/per_solver_envs.md`.
+
+Current migration status:
+- uv sub-project solvers: `react`, `paper_finder`
+- legacy (extras-based) solvers: everything else under `solvers/` (for now)
 
 If you have trouble setting up an environment on your local system, a Docker image is provided.  For a given `<solver_name>` (e.g. `react`):
 
@@ -28,6 +52,11 @@ export ASTA_TOOL_KEY=<your-asta-tool-key>
 export HF_TOKEN=<your-huggingface-key>
 
 ./solvers/<solver_name>/demo.sh
+```
+
+Smoke check (all uv sub-project solvers):
+```commandline
+make smoke-solvers
 ```
 
 See documentation in [asta-bench](https://github.com/allenai/asta-bench) for more details on how to run the suite.
