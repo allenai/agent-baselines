@@ -17,9 +17,9 @@ most likely to break on `inspect_ai>=0.4`.
 
 | Solver | File | Touchpoint | Risk |
 |---|---|---|---|
-| react | `agent_baselines/solvers/react/basic_agent.py` | `inspect_ai.log._transcript.transcript` | Internal logging API |
-| magenticone | `agent_baselines/solvers/magenticone/magentic_autogen_bridge.py` | `inspect_ai.model._call_tools.execute_tools` | Internal tool execution API |
-| sqa (perplexity) | `agent_baselines/solvers/sqa/perplexity_base.py` | `inspect_ai.model._providers.perplexity.PerplexityAPI` | Internal provider API |
+| react | `agent_baselines/inspect_compat.py` | fallback to `inspect_ai.log._transcript.transcript` | Internal logging API |
+| magenticone | `agent_baselines/inspect_compat.py` | fallback to `inspect_ai.model._call_tools.execute_tools` | Internal tool execution API |
+| sqa (perplexity) | `agent_baselines/inspect_compat.py` | `inspect_ai.model._providers.perplexity.PerplexityAPI` | Internal provider API |
 
 ## Known deprecations / forward-compat risks
 - Running with newer `inspect_ai` (e.g. `>=0.3.137`) may emit a deprecation warning
@@ -46,7 +46,7 @@ tests.
   - `inspect_ai.solver`: `Solver`, `TaskState`, `Generate`, `chain`, `solver`, `system_message`
   - `inspect_ai.tool`: `Tool`, `ToolCall`, `ToolDef`, `ToolError`, `ToolInfo`, `tool_with`
   - `inspect_ai.util`: `LimitExceededError`
-  - Internal: `inspect_ai.log._transcript.transcript`
+  - Via compat: `agent_baselines.inspect_compat.transcript` (may fall back to internal `inspect_ai.log._transcript.transcript`)
 - Proposed version range: `>=0.3.114,<0.4`
 - Notes: the internal transcript import is only used on `stop_reason == "model_length"`.
 
@@ -72,7 +72,7 @@ tests.
   - `inspect_ai.model`: `ChatMessageAssistant`, `ModelUsage`, `ResponseSchema`, `get_model`
   - `inspect_ai.solver`: `Solver`, `TaskState`, `Generate`, `chain`, `generate`, `solver`, `prompt_template`, `system_message`
   - `inspect_ai.util`: `json_schema`, `subprocess`
-  - Internal: `inspect_ai.model._providers.perplexity.PerplexityAPI`
+  - Via compat: `agent_baselines.inspect_compat.perplexity_api_class` (internal Perplexity provider import)
 - Proposed version range: `>=0.3.114,<0.4`
 - Notes: Perplexity integration depends on internal provider APIs; treat upgrades carefully.
 

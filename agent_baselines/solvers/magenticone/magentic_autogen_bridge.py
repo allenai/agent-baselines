@@ -101,7 +101,7 @@ async def tool_wrapper({params_str}) -> str:
     '''Execute the Inspect tool via execute_tools() for proper event logging.'''
     from inspect_ai.tool import ToolCall
     from inspect_ai.model import ChatMessageAssistant
-    from inspect_ai.model._call_tools import execute_tools
+    from agent_baselines.inspect_compat import execute_tools
     import uuid
 
     # Build the arguments dict
