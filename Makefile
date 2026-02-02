@@ -1,4 +1,4 @@
-.PHONY: shell format mypy flake test build-image test-expensive
+.PHONY: shell format mypy flake test build-image test-expensive smoke-solvers
 
 # allow passing extra pytest args, e.g. make test-expensive PYTEST_ARGS="-k EVAL_NAME"
 PYTEST_ARGS ?=
@@ -51,8 +51,10 @@ else
     -v $(DOCKER_SOCKET_PATH):/var/run/docker.sock \
     -v $$(pwd)/pyproject.toml:/agent-baselines/pyproject.toml:ro \
     -v $$(pwd)/agent_baselines:/agent-baselines/agent_baselines \
+    -v $$(pwd)/scripts:/agent-baselines/scripts:ro \
     -v $$(pwd)/tests:/agent-baselines/tests \
     -v $$(pwd)/logs:/agent-baselines/logs \
+    -v $$(pwd)/solvers:/agent-baselines/solvers \
     -v agent-baselines-cache:/root/.cache
   TEST_RUN := docker run --rm $(ENV_ARGS) $(LOCAL_MOUNTS) $(AGENT_BASELINES_TAG)
   BUILD_QUIET ?=
@@ -130,3 +132,9 @@ endif
 test-expensive:
 	@$(TEST_RUN) uv run --no-sync --extra dev --extra inspect_evals --extra smolagents \
 		-m pytest $(PYTEST_ARGS) -vv -o addopts= -m expensive /agent-baselines/tests
+
+# -----------------------------------------------------------------------------
+# Solver uv sub-project smoke checks
+# -----------------------------------------------------------------------------
+smoke-solvers: build-image
+	@$(TEST_RUN) ./scripts/smoke_solvers.sh

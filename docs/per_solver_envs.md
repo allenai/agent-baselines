@@ -48,3 +48,11 @@ uv run --project solvers/react astabench eval ...
 3. Update `solvers/<solver>/setup.sh` to call `uv sync --project solvers/<solver>`.
 4. Update `solvers/<solver>/demo.sh` to call `uv run --project solvers/<solver> …`.
 5. Document required env vars in `solvers/<solver>/env`.
+
+## Smoke test (all solver sub‑projects)
+Run:
+```
+make smoke-solvers
+```
+This iterates `solvers/*/pyproject.toml`, syncs each solver environment, and verifies
+imports for `astabench`, `inspect_ai`, and `agent_baselines`.
