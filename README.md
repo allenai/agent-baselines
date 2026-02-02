@@ -50,7 +50,7 @@ export HF_TOKEN=<your-huggingface-key>
 ./solvers/<solver_name>/demo.sh
 ```
 
-Smoke check (all uv sub-project solvers):
+Smoke check (integration; runs `uv sync` per solver):
 ```commandline
 make smoke-solvers
 ```

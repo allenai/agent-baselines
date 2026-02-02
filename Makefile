@@ -1,4 +1,4 @@
-.PHONY: shell format mypy flake test build-image test-expensive smoke-solvers
+.PHONY: shell format mypy flake test build-image test-expensive smoke-solvers smoke-solvers-ci
 
 # allow passing extra pytest args, e.g. make test-expensive PYTEST_ARGS="-k EVAL_NAME"
 PYTEST_ARGS ?=
@@ -13,6 +13,7 @@ ENV_ARGS :=
 SOLVER :=
 # Docker image tag for the solver
 TARGET := --target agent-baselines
+SMOKE_SOLVERS ?=
 
 ifdef SOLVER
 	  TARGET := --target $(SOLVER)
@@ -136,5 +137,13 @@ test-expensive:
 # -----------------------------------------------------------------------------
 # Solver uv sub-project smoke checks
 # -----------------------------------------------------------------------------
+ifneq ($(IS_CI),true)
 smoke-solvers: build-image
-	@$(TEST_RUN) ./scripts/smoke_solvers.sh
+smoke-solvers-ci: build-image
+endif
+
+smoke-solvers:
+	@$(TEST_RUN) ./scripts/smoke_solvers.sh $(SMOKE_SOLVERS)
+
+smoke-solvers-ci:
+	@$(TEST_RUN) ./scripts/smoke_solvers.sh react paper_finder
