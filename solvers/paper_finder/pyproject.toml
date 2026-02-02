@@ -8,5 +8,10 @@ version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
     "astabench==0.3.1",
-    "inspect_ai==0.3.114",
+    "inspect_ai==0.3.169",
+]
+
+[tool.uv]
+override-dependencies = [
+    "inspect_ai==0.3.169",
 ]

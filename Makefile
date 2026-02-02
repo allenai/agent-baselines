@@ -12,7 +12,7 @@ ENV_ARGS :=
 # Name of solver to build Docker container for
 SOLVER :=
 # Docker image tag for the solver
-TARGET := --target agent-baselines-base
+TARGET := --target agent-baselines
 
 ifdef SOLVER
 	  TARGET := --target $(SOLVER)
