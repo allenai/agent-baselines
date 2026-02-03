@@ -1,4 +1,4 @@
-.PHONY: shell format mypy flake test build-image test-expensive smoke-solvers smoke-solvers-ci
+.PHONY: shell format mypy flake test build-image test-expensive smoke-solvers smoke-solvers-ci solve-score-ci
 
 # allow passing extra pytest args, e.g. make test-expensive PYTEST_ARGS="-k EVAL_NAME"
 PYTEST_ARGS ?=
@@ -140,6 +140,7 @@ test-expensive:
 ifneq ($(IS_CI),true)
 smoke-solvers: build-image
 smoke-solvers-ci: build-image
+solve-score-ci: build-image
 endif
 
 smoke-solvers:
@@ -147,3 +148,6 @@ smoke-solvers:
 
 smoke-solvers-ci:
 	@$(TEST_RUN) ./scripts/smoke_solvers.sh react paper_finder
+
+solve-score-ci:
+	@$(TEST_RUN) ./scripts/smoke_solve_score.sh paper_finder
