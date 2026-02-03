@@ -168,7 +168,7 @@ Materialize scores into each log file:
 LOG_DIR="<log_dir>" python -c 'import json, os; from pathlib import Path; p = Path(os.environ["LOG_DIR"]) / "logs.json"; m = json.loads(p.read_text(encoding="utf-8")); print("\n".join(m.keys()))' \
   | while IFS= read -r log_file; do
       [ -z "${log_file}" ] && continue
-      ./scripts/solver_uv.sh run scorer -- inspect score --action overwrite --overwrite "<log_dir>/${log_file}"
+      ./scripts/solver_uv.sh run scorer -- inspect score --overwrite "<log_dir>/${log_file}"
     done
 ```
 
@@ -180,6 +180,7 @@ Then (optionally) aggregate scores/metrics for the log dir:
 Notes:
 - `astabench score` expects logs to already contain `results.scores`. If you ran
   `astabench eval` with `--no-score`, you must run `inspect score` first.
+- If you re-score logs that already contain scores, you may want `inspect score --action overwrite`.
 - The canonical scorer env is `solvers/scorer/` (see `solvers/scorer/README.md`).
 
 ### When `inspect log convert` is needed
@@ -188,6 +189,10 @@ different Inspect log format (e.g. an older `eval` format), convert them to JSON
 *in an environment that can read them*:
 ```
 ./scripts/solver_uv.sh run <solver> -- inspect log convert --to json --output-dir <out_dir> <path_to_logs_or_log_dir>
+```
+Alternatively, use the wrapper:
+```
+./scripts/inspect_log_convert.sh <solver> --to json --output-dir <out_dir> <path_to_logs_or_log_dir>
 ```
 
 ## Smoke test (all solver sub‑projects)
