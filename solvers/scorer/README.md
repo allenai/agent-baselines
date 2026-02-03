@@ -20,14 +20,33 @@ Install deps with:
 
 For best cross-version compatibility, generate logs with `--log-format json`.
 
-Score a directory of logs:
+### Materialize scores (recommended)
+If you ran `astabench eval` with `--no-score`, the log files will not contain
+scores yet. Use `inspect score` in this frozen scorer env to materialize scores
+into the logs.
+
+Score a single log file (overwrite in place):
 ```bash
-./scripts/solver_uv.sh run scorer -- astabench score <log_dir>
+./scripts/solver_uv.sh run scorer -- inspect score --action overwrite --overwrite <log_file>
+```
+If Inspect can't infer the scorer from the log, pass it explicitly:
+```bash
+./scripts/solver_uv.sh run scorer -- inspect score --scorer path/to/task.py@scorer_fn --action overwrite --overwrite <log_file>
 ```
 
-Or score a single log file:
+Score all logs in a log dir (uses Inspect's `logs.json` manifest):
 ```bash
-./scripts/solver_uv.sh run scorer -- inspect score <log_file>
+LOG_DIR="<log_dir>" python -c 'import json, os; from pathlib import Path; p = Path(os.environ["LOG_DIR"]) / "logs.json"; m = json.loads(p.read_text(encoding="utf-8")); print("\n".join(m.keys()))' \
+  | while IFS= read -r log_file; do
+      [ -z "${log_file}" ] && continue
+      ./scripts/solver_uv.sh run scorer -- inspect score --action overwrite --overwrite "<log_dir>/${log_file}"
+    done
+```
+
+### Aggregate (optional)
+After log files contain scores, you can aggregate them with:
+```bash
+./scripts/solver_uv.sh run scorer -- astabench score <log_dir>
 ```
 
 ## Example: cross-version solve → score
@@ -37,7 +56,12 @@ Solve in a solver env (example uses `paper_finder`, which pins a newer Inspect):
 ./scripts/solver_uv.sh run paper_finder -- astabench eval --no-score --log-format json --log-dir ./logs/paper_finder ...
 ```
 
-Score logs in the frozen scorer env:
+Materialize scores in the frozen scorer env:
+```bash
+./scripts/solver_uv.sh run scorer -- inspect score --action overwrite --overwrite ./logs/paper_finder/<log_file>
+```
+
+Optionally aggregate the scored logs:
 ```bash
 ./scripts/solver_uv.sh run scorer -- astabench score ./logs/paper_finder
 ```

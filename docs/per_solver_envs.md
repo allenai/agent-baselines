@@ -134,6 +134,62 @@ Expected output (today):
 
 (Expected versions should match what’s pinned in `solvers/<solver>/pyproject.toml`.)
 
+## Decoupled scoring (two-phase: solve → score)
+Sometimes we want **scoring** to remain pinned to a known-good Inspect version
+even if solvers need newer/different versions. The approach is:
+
+1. **Solve** in the solver env, producing **JSON logs** and skipping scoring:
+   - `--no-score --log-format json`
+2. **Score** the resulting logs in the frozen scorer env (`solvers/scorer/`):
+   - Materialize scores into each log file with `inspect score`
+   - (Optional) Aggregate metrics / leaderboard artifacts with `astabench score`
+
+### Setup
+One-time setup for the scorer env:
+```
+./scripts/solver_uv.sh sync scorer
+```
+
+### Step 1: Solve (per solver env)
+```
+./scripts/solver_uv.sh run <solver> -- astabench eval \
+  --log-dir <log_dir> \
+  --no-score \
+  --log-format json \
+  ...
+```
+
+### Step 2: Score (frozen scorer env)
+`inspect score` operates on a single log file at a time. Inspect writes a
+`logs.json` manifest in the log dir listing the per-run log files.
+
+Materialize scores into each log file:
+```
+LOG_DIR="<log_dir>" python -c 'import json, os; from pathlib import Path; p = Path(os.environ["LOG_DIR"]) / "logs.json"; m = json.loads(p.read_text(encoding="utf-8")); print("\n".join(m.keys()))' \
+  | while IFS= read -r log_file; do
+      [ -z "${log_file}" ] && continue
+      ./scripts/solver_uv.sh run scorer -- inspect score --action overwrite --overwrite "<log_dir>/${log_file}"
+    done
+```
+
+Then (optionally) aggregate scores/metrics for the log dir:
+```
+./scripts/solver_uv.sh run scorer -- astabench score <log_dir>
+```
+
+Notes:
+- `astabench score` expects logs to already contain `results.scores`. If you ran
+  `astabench eval` with `--no-score`, you must run `inspect score` first.
+- The canonical scorer env is `solvers/scorer/` (see `solvers/scorer/README.md`).
+
+### When `inspect log convert` is needed
+The most compatible artifact boundary is **JSON logs**. If you have logs in a
+different Inspect log format (e.g. an older `eval` format), convert them to JSON
+*in an environment that can read them*:
+```
+./scripts/solver_uv.sh run <solver> -- inspect log convert --to json --output-dir <out_dir> <path_to_logs_or_log_dir>
+```
+
 ## Smoke test (all solver sub‑projects)
 Run:
 ```
