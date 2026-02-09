@@ -18,7 +18,7 @@ def _make_repo_root(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "pyproject.toml").write_text(
-        "[project]\nname = \"tmp\"\nversion = \"0.0.0\"\n",
+        '[project]\nname = "tmp"\nversion = "0.0.0"\n',
         encoding="utf-8",
     )
 
@@ -67,9 +67,7 @@ def test_scaffold_creates_expected_files(tmp_path: Path) -> None:
     demo_sh = (solver_dir / "demo.sh").read_text(encoding="utf-8")
     assert "./scripts/solver_uv.sh run foo_bar --" in demo_sh
     assert "--model mockllm/model" in demo_sh
-    assert (
-        "--solver agent_baselines/solvers/foo_bar/solver.py@demo_solver" in demo_sh
-    )
+    assert "--solver agent_baselines/solvers/foo_bar/solver.py@demo_solver" in demo_sh
 
     assert (solver_dir / "env").read_text(encoding="utf-8") == "ASTA_TOOL_KEY\n"
 

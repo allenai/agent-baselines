@@ -11,7 +11,7 @@ Inspect version (and related deps) without impacting other solvers.
 
 ## Constraints / Notes
 - Most solvers import `astabench`; `astabench` pins `inspect_ai` in its own
-  dependencies (currently an **exact** pin). On PyPI today, all released
+  dependencies (currently an **exact** pin). As of 2026-02-02, all released
   `astabench` versions pin `inspect_ai==0.3.114`, so changing
   Inspect versions requires an override or an `astabench` fork.
 - Solver code lives under `agent_baselines/solvers/…` in the repo root; we rely on
@@ -100,6 +100,10 @@ override-dependencies = [
 ]
 ```
 
+You may also need to pin transitive dependencies that `inspect_ai` pulls in
+(e.g. `openai`), since their compatible versions can change across Inspect
+releases. Add these to `override-dependencies` as needed.
+
 Then regenerate the solver lockfile and re-sync:
 ```
 ./scripts/solver_uv.sh lock <solver>
@@ -128,7 +132,7 @@ From repo root:
 ./scripts/solver_uv.sh run paper_finder -- python -c 'import inspect_ai; print(inspect_ai.__version__)'
 ```
 
-Expected output (today):
+Expected output (as of 2026-02-02):
 - `react` prints `0.3.114`
 - `paper_finder` prints `0.3.169`
 

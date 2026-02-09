@@ -90,24 +90,46 @@ def _read_uv_calls(log_file: Path) -> list[list[str]]:
     ]
 
 
-def test_sync_calls_lock_when_lockfile_missing(tmp_path: Path) -> None:
-    root = tmp_path / "repo"
-    _make_repo_root(root)
-    _make_solver(root, "foo", with_lock=False)
+class _UvHarness:
+    """Shared test harness: fake repo root, fake uv binary, env dict."""
 
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    log_file = tmp_path / "uv.log"
-    _make_fake_uv(bin_dir, log_file)
+    def __init__(self, tmp_path: Path) -> None:
+        self.root = tmp_path / "repo"
+        _make_repo_root(self.root)
 
-    env = os.environ.copy()
-    env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
-    env["UV_LOG_FILE"] = str(log_file)
+        bin_dir = tmp_path / "bin"
+        bin_dir.mkdir()
+        self.log_file = tmp_path / "uv.log"
+        _make_fake_uv(bin_dir, self.log_file)
 
-    result = _run_solver_uv(cwd=root, env=env, args=["sync", "foo"])
+        self.env = os.environ.copy()
+        self.env["PATH"] = f"{bin_dir}{os.pathsep}{self.env['PATH']}"
+        self.env["UV_LOG_FILE"] = str(self.log_file)
+
+    def add_solver(self, name: str, *, with_lock: bool) -> None:
+        _make_solver(self.root, name, with_lock=with_lock)
+
+    def run(
+        self, args: list[str], *, cwd: Path | None = None
+    ) -> subprocess.CompletedProcess[str]:
+        return _run_solver_uv(cwd=cwd or self.root, env=self.env, args=args)
+
+    def uv_calls(self) -> list[list[str]]:
+        return _read_uv_calls(self.log_file)
+
+
+@pytest.fixture
+def harness(tmp_path: Path) -> _UvHarness:
+    return _UvHarness(tmp_path)
+
+
+def test_sync_calls_lock_when_lockfile_missing(harness: _UvHarness) -> None:
+    harness.add_solver("foo", with_lock=False)
+
+    result = harness.run(["sync", "foo"])
     assert result.returncode == 0, result.stderr
 
-    calls = _read_uv_calls(log_file)
+    calls = harness.uv_calls()
     assert len(calls) == 2
     assert calls[0][0:2] == ["uv", "lock"]
     assert calls[0][2:6] == ["--project", "solvers/foo", "--python", "3.11"]
@@ -115,69 +137,36 @@ def test_sync_calls_lock_when_lockfile_missing(tmp_path: Path) -> None:
     assert calls[1][2:6] == ["--project", "solvers/foo", "--python", "3.11"]
 
 
-def test_sync_skips_lock_when_lockfile_present(tmp_path: Path) -> None:
-    root = tmp_path / "repo"
-    _make_repo_root(root)
-    _make_solver(root, "foo", with_lock=True)
+def test_sync_skips_lock_when_lockfile_present(harness: _UvHarness) -> None:
+    harness.add_solver("foo", with_lock=True)
 
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    log_file = tmp_path / "uv.log"
-    _make_fake_uv(bin_dir, log_file)
-
-    env = os.environ.copy()
-    env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
-    env["UV_LOG_FILE"] = str(log_file)
-
-    result = _run_solver_uv(cwd=root, env=env, args=["sync", "foo"])
+    result = harness.run(["sync", "foo"])
     assert result.returncode == 0, result.stderr
 
-    calls = _read_uv_calls(log_file)
+    calls = harness.uv_calls()
     assert len(calls) == 1
     assert calls[0][0:2] == ["uv", "sync"]
 
 
-def test_lock_action_calls_uv_lock(tmp_path: Path) -> None:
-    root = tmp_path / "repo"
-    _make_repo_root(root)
-    _make_solver(root, "foo", with_lock=False)
+def test_lock_action_calls_uv_lock(harness: _UvHarness) -> None:
+    harness.add_solver("foo", with_lock=False)
 
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    log_file = tmp_path / "uv.log"
-    _make_fake_uv(bin_dir, log_file)
-
-    env = os.environ.copy()
-    env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
-    env["UV_LOG_FILE"] = str(log_file)
-
-    result = _run_solver_uv(cwd=root, env=env, args=["lock", "foo"])
+    result = harness.run(["lock", "foo"])
     assert result.returncode == 0, result.stderr
 
-    calls = _read_uv_calls(log_file)
+    calls = harness.uv_calls()
     assert len(calls) == 1
     assert calls[0][0:2] == ["uv", "lock"]
     assert calls[0][2:6] == ["--project", "solvers/foo", "--python", "3.11"]
 
 
-def test_run_action_calls_uv_run_with_frozen(tmp_path: Path) -> None:
-    root = tmp_path / "repo"
-    _make_repo_root(root)
-    _make_solver(root, "foo", with_lock=True)
+def test_run_action_calls_uv_run_with_frozen(harness: _UvHarness) -> None:
+    harness.add_solver("foo", with_lock=True)
 
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    log_file = tmp_path / "uv.log"
-    _make_fake_uv(bin_dir, log_file)
-
-    env = os.environ.copy()
-    env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
-    env["UV_LOG_FILE"] = str(log_file)
-
-    result = _run_solver_uv(cwd=root, env=env, args=["run", "foo", "--", "echo", "hi"])
+    result = harness.run(["run", "foo", "--", "echo", "hi"])
     assert result.returncode == 0, result.stderr
 
-    calls = _read_uv_calls(log_file)
+    calls = harness.uv_calls()
     assert len(calls) == 1
     assert calls[0][0:2] == ["uv", "run"]
     assert calls[0][2:6] == ["--project", "solvers/foo", "--python", "3.11"]
@@ -185,24 +174,13 @@ def test_run_action_calls_uv_run_with_frozen(tmp_path: Path) -> None:
     assert calls[0][-2:] == ["echo", "hi"]
 
 
-def test_run_action_calls_uv_run_without_separator(tmp_path: Path) -> None:
-    root = tmp_path / "repo"
-    _make_repo_root(root)
-    _make_solver(root, "foo", with_lock=True)
+def test_run_action_calls_uv_run_without_separator(harness: _UvHarness) -> None:
+    harness.add_solver("foo", with_lock=True)
 
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    log_file = tmp_path / "uv.log"
-    _make_fake_uv(bin_dir, log_file)
-
-    env = os.environ.copy()
-    env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
-    env["UV_LOG_FILE"] = str(log_file)
-
-    result = _run_solver_uv(cwd=root, env=env, args=["run", "foo", "echo", "hi"])
+    result = harness.run(["run", "foo", "echo", "hi"])
     assert result.returncode == 0, result.stderr
 
-    calls = _read_uv_calls(log_file)
+    calls = harness.uv_calls()
     assert len(calls) == 1
     assert calls[0][0:2] == ["uv", "run"]
     assert calls[0][2:6] == ["--project", "solvers/foo", "--python", "3.11"]
@@ -210,39 +188,16 @@ def test_run_action_calls_uv_run_without_separator(tmp_path: Path) -> None:
     assert calls[0][-2:] == ["echo", "hi"]
 
 
-def test_run_requires_command(tmp_path: Path) -> None:
-    root = tmp_path / "repo"
-    _make_repo_root(root)
-    _make_solver(root, "foo", with_lock=True)
+def test_run_requires_command(harness: _UvHarness) -> None:
+    harness.add_solver("foo", with_lock=True)
 
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    log_file = tmp_path / "uv.log"
-    _make_fake_uv(bin_dir, log_file)
-
-    env = os.environ.copy()
-    env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
-    env["UV_LOG_FILE"] = str(log_file)
-
-    result = _run_solver_uv(cwd=root, env=env, args=["run", "foo"])
+    result = harness.run(["run", "foo"])
     assert result.returncode == 2
     assert "Usage:" in result.stderr
 
 
-def test_missing_solver_pyproject_errors(tmp_path: Path) -> None:
-    root = tmp_path / "repo"
-    _make_repo_root(root)
-
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    log_file = tmp_path / "uv.log"
-    _make_fake_uv(bin_dir, log_file)
-
-    env = os.environ.copy()
-    env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
-    env["UV_LOG_FILE"] = str(log_file)
-
-    result = _run_solver_uv(cwd=root, env=env, args=["sync", "missing"])
+def test_missing_solver_pyproject_errors(harness: _UvHarness) -> None:
+    result = harness.run(["sync", "missing"])
     assert result.returncode == 2
     assert "missing solvers/missing/pyproject.toml" in result.stderr
 
@@ -265,25 +220,14 @@ def test_not_repo_root_errors(tmp_path: Path) -> None:
     assert "must run from within the repo" in result.stderr
 
 
-def test_works_from_solver_subdir(tmp_path: Path) -> None:
-    root = tmp_path / "repo"
-    _make_repo_root(root)
-    _make_solver(root, "foo", with_lock=True)
+def test_works_from_solver_subdir(harness: _UvHarness) -> None:
+    harness.add_solver("foo", with_lock=True)
 
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    log_file = tmp_path / "uv.log"
-    _make_fake_uv(bin_dir, log_file)
-
-    env = os.environ.copy()
-    env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
-    env["UV_LOG_FILE"] = str(log_file)
-
-    solver_subdir = root / "solvers" / "foo"
-    result = _run_solver_uv(cwd=solver_subdir, env=env, args=["sync", "foo"])
+    solver_subdir = harness.root / "solvers" / "foo"
+    result = harness.run(["sync", "foo"], cwd=solver_subdir)
     assert result.returncode == 0, result.stderr
 
-    calls = _read_uv_calls(log_file)
+    calls = harness.uv_calls()
     assert len(calls) == 1
     assert calls[0][0:2] == ["uv", "sync"]
     assert calls[0][2:6] == ["--project", "solvers/foo", "--python", "3.11"]
@@ -303,80 +247,34 @@ def test_missing_uv_errors(tmp_path: Path) -> None:
     assert "uv not found on PATH" in result.stderr
 
 
-def test_solver_uv_python_override(tmp_path: Path) -> None:
-    root = tmp_path / "repo"
-    _make_repo_root(root)
-    _make_solver(root, "foo", with_lock=True)
+def test_solver_uv_python_override(harness: _UvHarness) -> None:
+    harness.add_solver("foo", with_lock=True)
+    harness.env["SOLVER_UV_PYTHON"] = "3.12"
 
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    log_file = tmp_path / "uv.log"
-    _make_fake_uv(bin_dir, log_file)
-
-    env = os.environ.copy()
-    env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
-    env["UV_LOG_FILE"] = str(log_file)
-    env["SOLVER_UV_PYTHON"] = "3.12"
-
-    result = _run_solver_uv(cwd=root, env=env, args=["sync", "foo"])
+    result = harness.run(["sync", "foo"])
     assert result.returncode == 0, result.stderr
 
-    calls = _read_uv_calls(log_file)
+    calls = harness.uv_calls()
     assert len(calls) == 1
     assert calls[0][0:2] == ["uv", "sync"]
     assert calls[0][2:6] == ["--project", "solvers/foo", "--python", "3.12"]
 
 
-def test_invalid_action_shows_usage(tmp_path: Path) -> None:
-    root = tmp_path / "repo"
-    _make_repo_root(root)
-    _make_solver(root, "foo", with_lock=True)
+def test_invalid_action_shows_usage(harness: _UvHarness) -> None:
+    harness.add_solver("foo", with_lock=True)
 
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    log_file = tmp_path / "uv.log"
-    _make_fake_uv(bin_dir, log_file)
-
-    env = os.environ.copy()
-    env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
-    env["UV_LOG_FILE"] = str(log_file)
-
-    result = _run_solver_uv(cwd=root, env=env, args=["nope", "foo"])
+    result = harness.run(["nope", "foo"])
     assert result.returncode == 2
     assert "Usage:" in result.stderr
 
 
-def test_no_args_shows_usage(tmp_path: Path) -> None:
-    root = tmp_path / "repo"
-    _make_repo_root(root)
-
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    log_file = tmp_path / "uv.log"
-    _make_fake_uv(bin_dir, log_file)
-
-    env = os.environ.copy()
-    env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
-    env["UV_LOG_FILE"] = str(log_file)
-
-    result = _run_solver_uv(cwd=root, env=env, args=[])
+def test_no_args_shows_usage(harness: _UvHarness) -> None:
+    result = harness.run([])
     assert result.returncode == 2
     assert "Usage:" in result.stderr
 
 
-def test_sync_requires_solver_name(tmp_path: Path) -> None:
-    root = tmp_path / "repo"
-    _make_repo_root(root)
-
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    log_file = tmp_path / "uv.log"
-    _make_fake_uv(bin_dir, log_file)
-
-    env = os.environ.copy()
-    env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
-    env["UV_LOG_FILE"] = str(log_file)
-
-    result = _run_solver_uv(cwd=root, env=env, args=["sync"])
+def test_sync_requires_solver_name(harness: _UvHarness) -> None:
+    result = harness.run(["sync"])
     assert result.returncode == 2
     assert "Usage:" in result.stderr

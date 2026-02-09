@@ -40,10 +40,7 @@
 - Gate: ensure `make format flake mypy test` pass locally before request for review.
 
 ## Security & Configuration Tips
-- Configure secrets via env or `.env`: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`, `AZUREAI_OPENAI_API_KEY`, `HF_TOKEN`, `ASTA_TOOL_KEY`.
-- Solver-specific keys (e.g. `MODAL_TOKEN`, `YDC_API_KEY`, `PAPER_FINDER_URL`, `FUTUREHOUSE_API_KEY` / `FH_API_KEY`) are documented per solver and listed in `solvers/<solver>/env`.
+- Required env vars are listed in `solvers/<solver>/env`. Do not commit secrets.
 - Never commit secrets, large caches, or derived data; respect `.gitignore`/DVC.
 - New solvers go under `agent_baselines/solvers/<name>/` with matching tests in `tests/solvers/`.
-
-## Task tracking
-Use `bd` for task tracking. Read https://github.com/steveyegge/beads/blob/main/AGENT_INSTRUCTIONS.md
+- Do **not** `git push` automatically — leave that to the user.
