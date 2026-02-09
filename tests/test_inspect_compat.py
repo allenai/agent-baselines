@@ -36,6 +36,8 @@ def test_no_private_inspect_imports_outside_compat() -> None:
         if re.search(r"inspect_ai\.[a-zA-Z0-9_\.]*\._", text):
             offenders.append(str(path.relative_to(root)))
 
-    assert not offenders, "Private inspect_ai imports found outside inspect_compat:\n" + "\n".join(
+    assert (
+        not offenders
+    ), "Private inspect_ai imports found outside inspect_compat:\n" + "\n".join(
         offenders
     )

@@ -48,12 +48,9 @@ async def run_task(task_id, prompt, model, results_dir=None):
                 os.remove(readable_results_file)
 
     try:
-        prompt = (
-            prompt
-            + """
+        prompt = prompt + """
 As you don't have the ability to actually do this research, please make up the report, code, trace/log, and artifacts as best you can, to simulate a successful piece of research.
 """
-        )
         print(
             "Running task", task_id, "with model", model, "...", end=""
         )  # for progress viewing on TTY

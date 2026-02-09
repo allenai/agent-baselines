@@ -40,7 +40,6 @@
 - Gate: ensure `make format flake mypy test` pass locally before request for review.
 
 ## Security & Configuration Tips
-- Required env vars are listed in `solvers/<solver>/env`. Do not commit secrets.
 - Never commit secrets, large caches, or derived data; respect `.gitignore`/DVC.
 - New solvers go under `agent_baselines/solvers/<name>/` with matching tests in `tests/solvers/`.
 - Do **not** `git push` automatically — leave that to the user.
