@@ -20,6 +20,9 @@ Inspect version (and related deps) without impacting other solvers.
   and solver `demo.sh`) `cd` to repo root to make this reliable.
 - You cannot mix multiple `inspect_ai` versions **in the same Python process**.
   Per-solver isolation works because we run each solver as its own process/env.
+- For Inspect upgrade risk review, check `agent_baselines/inspect_compat.py`
+  (centralized private/internal Inspect imports) and
+  `tests/test_inspect_compat.py` (guards against private imports outside compat).
 
 ## Helper: `scripts/solver_uv.sh`
 This repo standardizes per-solver environment operations through `scripts/solver_uv.sh`:
