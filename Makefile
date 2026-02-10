@@ -97,7 +97,7 @@ format:
 	docker run --rm \
 		-v $$(pwd):/agent-baselines \
 		$(AGENT_BASELINES_TAG) \
-		sh -c "pip install --no-cache-dir black && black ."
+		uv run --extra dev black .
 
 ifneq ($(IS_CI),true)
 mypy: build-image
