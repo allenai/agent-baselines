@@ -1,4 +1,4 @@
-.PHONY: shell format mypy flake test build-image test-expensive
+.PHONY: shell format mypy flake test build-image test-expensive smoke-solvers smoke-solvers-ci
 
 # allow passing extra pytest args, e.g. make test-expensive PYTEST_ARGS="-k EVAL_NAME"
 PYTEST_ARGS ?=
@@ -12,12 +12,15 @@ ENV_ARGS :=
 # Name of solver to build Docker container for
 SOLVER :=
 # Docker image tag for the solver
-TARGET := --target agent-baselines-base
+TARGET := --target agent-baselines
+BUILD_ARGS :=
+SMOKE_SOLVERS ?=
 
 ifdef SOLVER
-	  TARGET := --target $(SOLVER)
-	  AGENT_BASELINES_TAG := $(AGENT_BASELINES_TAG)-$(SOLVER)
-	  ENV_ARGS += --env-file solvers/$(SOLVER)/env
+  TARGET := --target solver
+  BUILD_ARGS += --build-arg SOLVER_NAME=$(SOLVER)
+  AGENT_BASELINES_TAG := $(AGENT_BASELINES_TAG)-$(SOLVER)
+  ENV_ARGS += --env-file solvers/$(SOLVER)/env
 endif
 
 # Add each env var only if it's defined
@@ -51,8 +54,10 @@ else
     -v $(DOCKER_SOCKET_PATH):/var/run/docker.sock \
     -v $$(pwd)/pyproject.toml:/agent-baselines/pyproject.toml:ro \
     -v $$(pwd)/agent_baselines:/agent-baselines/agent_baselines \
+    -v $$(pwd)/scripts:/agent-baselines/scripts:ro \
     -v $$(pwd)/tests:/agent-baselines/tests \
     -v $$(pwd)/logs:/agent-baselines/logs \
+    -v $$(pwd)/solvers:/agent-baselines/solvers \
     -v agent-baselines-cache:/root/.cache
   TEST_RUN := docker run --rm $(ENV_ARGS) $(LOCAL_MOUNTS) $(AGENT_BASELINES_TAG)
   BUILD_QUIET ?=
@@ -63,7 +68,7 @@ endif
 # -----------------------------------------------------------------------------
 
 build-image:
-	docker build $(BUILD_QUIET) $(TARGET) . --tag $(AGENT_BASELINES_TAG) -f ./docker/Dockerfile
+	docker build $(BUILD_QUIET) $(TARGET) $(BUILD_ARGS) . --tag $(AGENT_BASELINES_TAG) -f ./docker/Dockerfile
 
 # -----------------------------------------------------------------------------
 # Interactive shell in container
@@ -94,7 +99,7 @@ format:
 	docker run --rm \
 		-v $$(pwd):/agent-baselines \
 		$(AGENT_BASELINES_TAG) \
-		sh -c "pip install --no-cache-dir black && black ."
+		uv run --extra dev black .
 
 ifneq ($(IS_CI),true)
 mypy: build-image
@@ -130,3 +135,17 @@ endif
 test-expensive:
 	@$(TEST_RUN) uv run --no-sync --extra dev --extra inspect_evals --extra smolagents \
 		-m pytest $(PYTEST_ARGS) -vv -o addopts= -m expensive /agent-baselines/tests
+
+# -----------------------------------------------------------------------------
+# Solver uv sub-project smoke checks
+# -----------------------------------------------------------------------------
+ifneq ($(IS_CI),true)
+smoke-solvers: build-image
+smoke-solvers-ci: build-image
+endif
+
+smoke-solvers:
+	@$(TEST_RUN) ./scripts/smoke_solvers.sh $(SMOKE_SOLVERS)
+
+smoke-solvers-ci:
+	@$(TEST_RUN) ./scripts/smoke_solvers.sh react paper_finder

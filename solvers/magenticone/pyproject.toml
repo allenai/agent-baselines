@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-baselines-magenticone"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "astabench==0.3.1",
+    "inspect_ai==0.3.114",
+    "autogen-agentchat==0.6.4",
+    "autogen-ext[openai, diskcache, azure, anthropic]==0.6.4",
+]

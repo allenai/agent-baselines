@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-baselines-storm"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "astabench==0.3.1",
+    "inspect_ai==0.3.114",
+    "knowledge-storm @ git+https://github.com/gituser768/storm.git@dh-fix-youcom",
+]
+
+[tool.uv]
+override-dependencies = [
+    # STORM pretends to require a lower version, but doesn't actually need it:
+    # https://github.com/allenai/asta-bench/issues/31#issuecomment-3045978008
+    "datasets~=3.2.0",
+]

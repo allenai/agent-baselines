@@ -1,4 +1,5 @@
 .venv/
+solvers/**/.venv/
 tmp/
 logs/
 uv.lock

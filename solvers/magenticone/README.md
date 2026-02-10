@@ -10,7 +10,8 @@ This directory contains Magentic-One style agents that use an outer loop (orches
 
 ## Setup
 
-Install the magenticone dependencies:
+This solver is configured as a per‑solver uv sub‑project in `solvers/magenticone/pyproject.toml`.
+Install deps with:
 
 ```bash
 ./solvers/magenticone/setup.sh

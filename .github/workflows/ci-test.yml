@@ -25,13 +25,16 @@ jobs:
           context: .
           file: ./docker/Dockerfile
           tags: agent-baselines:latest
-          target: agent-baselines-base
+          target: agent-baselines
           cache-from: type=gha,scope=agent-baselines  # Use GitHub Actions cache
           cache-to: type=gha,mode=max,scope=agent-baselines
           load: true  # Make the image available for later steps
 
       - name: Run tests
         run: |
-          # Generate '-e VAR' for all env vars except '_*'
-          ENV_ARGS=$(env | grep -vE '^_' | awk '{print "-e " $1}')
           make test
+
+      - name: Smoke solvers (per-solver envs)
+        run: |
+          # Keep this small but meaningful: exercise two solvers with different inspect_ai versions.
+          make smoke-solvers-ci

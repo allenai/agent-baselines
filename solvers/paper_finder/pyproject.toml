@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-baselines-paper-finder"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "astabench==0.3.1",
+    "inspect_ai==0.3.169",
+]
+
+[tool.uv]
+override-dependencies = [
+    "inspect_ai==0.3.169",
+]

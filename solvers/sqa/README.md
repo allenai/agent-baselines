@@ -6,6 +6,14 @@ It has a retrieval and reranking component and a multi-step LLM to create the fi
 SQA is intended to be run only against the `sqa_dev` or `sqa_test` tasks.
 The backbone LLM model with which to call the SQA pipeline can be specified with the -S completion_model parameter to the demo.sh script as in the below examples.
 
+## Dependencies
+
+This solver is configured as a per‑solver uv sub‑project in `solvers/sqa/pyproject.toml`.
+Install deps with:
+```
+./solvers/sqa/setup.sh
+```
+
 
 This also requires a reranker model, specifically [mxbai-rerank-large-v1](https://huggingface.co/mixedbread-ai/mxbai-rerank-large-v1), to select the top 50 search results.
 The reranker can be deployed on a service like Modal, in which case the [`MODAL_TOKEN`](https://modal.com/) to be set as an environment variable, 

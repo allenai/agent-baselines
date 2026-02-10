@@ -30,36 +30,30 @@ ENV PATH="/root/.cargo/bin:$PATH"
 # Install common dependencies
 WORKDIR /agent-baselines
 COPY pyproject.toml /agent-baselines/
-
-RUN mkdir -p /agent-baselines/agent_baselines
-
-RUN uv sync --extra dev
-
 COPY docker/bashrc /root/.bashrc
+
+RUN mkdir -p /agent-baselines/agent_baselines /agent-baselines/solvers /agent-baselines/scripts
+
+RUN uv sync --extra dev --no-install-project
+
+FROM agent-baselines-base AS agent-baselines
 COPY . /agent-baselines
 
-
 # Images for running specific solvers
-FROM agent-baselines-base AS react
-RUN solvers/react/setup.sh
-
-FROM agent-baselines-base AS smolagents
-RUN solvers/smolagents/setup.sh
-
-FROM agent-baselines-base AS storm
-RUN solvers/storm/setup.sh
-
-FROM agent-baselines-base AS sqa
-RUN solvers/sqa/setup.sh
-
-FROM agent-baselines-base AS super
-RUN solvers/super/setup.sh
-
-FROM agent-baselines-base AS datavoyager
-RUN solvers/datavoyager/setup.sh
-
-FROM agent-baselines-base AS futurehouse
-RUN solvers/futurehouse/setup.sh
-
-FROM agent-baselines-base AS magenticone
-RUN solvers/magenticone/setup.sh
+#
+# NOTE: Solver stages should install dependencies before copying the full repo
+# contents from the agent-baselines stage. This keeps dependency installation
+# cached unless solver-specific files change.
+# Parameterized solver stage:
+# docker build --target solver --build-arg SOLVER_NAME=<solver> ...
+# Sentinel default makes missing --build-arg failures obvious in COPY paths.
+FROM agent-baselines-base AS solver
+ARG SOLVER_NAME=__solver_name_required__
+COPY solvers/${SOLVER_NAME}/pyproject.toml solvers/${SOLVER_NAME}/uv.lock solvers/${SOLVER_NAME}/setup.sh /agent-baselines/solvers/${SOLVER_NAME}/
+RUN UV_FROZEN=1 solvers/${SOLVER_NAME}/setup.sh
+# Copy runtime repo contents without `/agent-baselines/.venv`.
+COPY --from=agent-baselines /agent-baselines/agent_baselines /agent-baselines/agent_baselines
+COPY --from=agent-baselines /agent-baselines/docs /agent-baselines/docs
+COPY --from=agent-baselines /agent-baselines/scripts /agent-baselines/scripts
+COPY --from=agent-baselines /agent-baselines/solvers /agent-baselines/solvers
+COPY --from=agent-baselines /agent-baselines/README.md /agent-baselines/README.md

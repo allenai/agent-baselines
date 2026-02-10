@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-baselines-arxivdigestables"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "astabench==0.3.1",
+    "inspect_ai==0.3.114",
+    "ai2-scholar-qa==0.7.0",
+]
+
+[tool.uv]
+override-dependencies = [
+    # ai2-scholar-qa pins openai to a lower version than inspect requires
+    "openai==1.78.0",
+]

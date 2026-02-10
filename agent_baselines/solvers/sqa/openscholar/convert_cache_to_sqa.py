@@ -3,6 +3,7 @@
 Script to convert openscholar_cache.json format to SQAResponse format.
 Each case_id key should correspond to a SQAResponse value.
 """
+
 import json
 import sys
 from pathlib import Path

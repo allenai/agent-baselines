@@ -1,3 +1,8 @@
 #!/bin/bash
 
-uv sync --extra sqa --extra datavoyager --extra super
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "${repo_root}"
+
+uv sync --project "solvers/asta-v0" --python 3.11

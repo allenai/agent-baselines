@@ -185,9 +185,12 @@ logs/
 .DS_Store
 .mise.toml
 .vscode/
+.ccb_config/
+.cq_config/
 /astabench/evals/sqa/storm/
 /storm/
 uv.lock
+!solvers/**/uv.lock
 
 # tmp files written by solvers/evals
 /generation_cache.db
@@ -198,3 +201,6 @@ uv.lock
 
 # AI docs
 CLAUDE.md
+
+# Beads task tracker (local state)
+.beads/

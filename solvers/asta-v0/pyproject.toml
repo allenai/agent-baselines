@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-baselines-asta-v0"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "astabench==0.3.1",
+    "inspect_ai==0.3.114",
+    "ai2-scholar-qa==0.7.0",
+    "autogen-agentchat==0.6.4",
+    "autogen-ext[openai, diskcache, azure, anthropic]==0.6.4",
+    "ipython~=8.18",
+    "matplotlib==3.10.0",
+    "nest_asyncio==1.6.0",
+    "nbconvert~=7.16.1",
+    "pyyaml==6.0.2",
+    "termcolor==2.5.0",
+    "websocket-client~=1.7.0",
+]
+
+[tool.uv]
+override-dependencies = [
+    # ai2-scholar-qa pins openai to a lower version than inspect requires
+    "openai==1.78.0",
+]

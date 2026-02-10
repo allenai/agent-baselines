@@ -7,3 +7,11 @@ It has a retrieval and reranking component and a multi-step LLM to create the fi
 SQA is intended to be run only against the `sqa_dev` or `sqa_test` tasks.
 
 This solver requires [`MODAL_TOKEN`](https://modal.com/) to be set as an environment variable.
+
+## Dependencies
+
+This solver is configured as a per‑solver uv sub‑project in `solvers/arxivdigestables/pyproject.toml`.
+Install deps with:
+```
+./solvers/arxivdigestables/setup.sh
+```

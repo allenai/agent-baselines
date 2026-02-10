@@ -2,8 +2,8 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from astabench.types.sqa import Citation, SQAResponse, SQASection
+from agent_baselines.inspect_compat import perplexity_api_class
 from inspect_ai.model import ResponseSchema, get_model
-from inspect_ai.model._providers.perplexity import PerplexityAPI
 from inspect_ai.solver import Solver, chain, generate
 from inspect_ai.solver import prompt_template as prompt_template_solver
 from inspect_ai.solver import solver
@@ -58,6 +58,7 @@ def perplexity_solver(
 ) -> Solver:
     # Verify that we have a PerplexityAPI model
     model = get_model()
+    PerplexityAPI = perplexity_api_class()
     assert isinstance(model.api, PerplexityAPI)
 
     # Prepare config for generate() - handle each parameter separately
