@@ -12,11 +12,6 @@ def _make_repo_root(root: Path) -> None:
     root.mkdir(parents=True, exist_ok=True)
     (root / "solvers").mkdir()
     (root / "agent_baselines" / "solvers").mkdir(parents=True)
-    (root / "scripts").mkdir()
-    (root / "scripts" / "solver_uv.sh").write_text(
-        "#!/usr/bin/env bash\n\n# placeholder for scaffold tests\n",
-        encoding="utf-8",
-    )
     (root / "pyproject.toml").write_text(
         '[project]\nname = "tmp"\nversion = "0.0.0"\n',
         encoding="utf-8",
@@ -62,10 +57,13 @@ def test_scaffold_creates_expected_files(tmp_path: Path) -> None:
     assert '"inspect_ai==0.3.114"' in pyproject
 
     setup_sh = (solver_dir / "setup.sh").read_text(encoding="utf-8")
-    assert "./scripts/solver_uv.sh sync foo_bar" in setup_sh
+    assert 'uv sync --project "solvers/foo_bar" --python 3.11' in setup_sh
 
     demo_sh = (solver_dir / "demo.sh").read_text(encoding="utf-8")
-    assert "./scripts/solver_uv.sh run foo_bar --" in demo_sh
+    assert (
+        'uv run --project "solvers/foo_bar" --python 3.11 --frozen -- inspect eval'
+        in demo_sh
+    )
     assert "--model mockllm/model" in demo_sh
     assert "--solver agent_baselines/solvers/foo_bar/solver.py@demo_solver" in demo_sh
 
@@ -77,6 +75,55 @@ def test_scaffold_creates_expected_files(tmp_path: Path) -> None:
 
     assert os.access(solver_dir / "setup.sh", os.X_OK)
     assert os.access(solver_dir / "demo.sh", os.X_OK)
+
+
+def test_scaffold_hyphenated_name(tmp_path: Path) -> None:
+    root = tmp_path / "repo"
+    _make_repo_root(root)
+
+    result = _run_new_solver(cwd=root, name="asta-v0")
+    assert result.returncode == 0, result.stderr
+
+    solver_dir = root / "solvers" / "asta-v0"
+    code_dir = root / "agent_baselines" / "solvers" / "asta-v0"
+
+    assert (solver_dir / "pyproject.toml").exists()
+    assert (code_dir / "solver.py").exists()
+    assert 'name = "agent-baselines-asta-v0"' in (
+        solver_dir / "pyproject.toml"
+    ).read_text(encoding="utf-8")
+
+    setup_sh = (solver_dir / "setup.sh").read_text(encoding="utf-8")
+    assert 'uv sync --project "solvers/asta-v0" --python 3.11' in setup_sh
+
+    demo_sh = (solver_dir / "demo.sh").read_text(encoding="utf-8")
+    assert (
+        'uv run --project "solvers/asta-v0" --python 3.11 --frozen -- inspect eval'
+        in demo_sh
+    )
+    assert "agent_baselines/solvers/asta-v0/solver.py@demo_solver" in demo_sh
+
+
+def test_scaffold_requires_repo_root(tmp_path: Path) -> None:
+    root = tmp_path / "repo"
+    _make_repo_root(root)
+
+    subdir = root / "solvers" / "nested"
+    subdir.mkdir(parents=True)
+
+    result = _run_new_solver(cwd=subdir, name="bar")
+    assert result.returncode == 2
+    assert "must run from repo root" in result.stderr
+    assert not (root / "solvers" / "bar").exists()
+
+
+def test_scaffold_outside_repo_errors(tmp_path: Path) -> None:
+    nowhere = tmp_path / "nowhere"
+    nowhere.mkdir()
+
+    result = _run_new_solver(cwd=nowhere, name="foo")
+    assert result.returncode == 2
+    assert "must run from repo root" in result.stderr
 
 
 def test_invalid_solver_name_errors(tmp_path: Path) -> None:

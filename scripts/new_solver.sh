@@ -46,10 +46,6 @@ if [ ! -f "pyproject.toml" ] || [ ! -d "solvers" ] || [ ! -d "agent_baselines/so
   die "must run from repo root (expected ./pyproject.toml, ./solvers/, ./agent_baselines/solvers/)"
 fi
 
-if [ ! -f "scripts/solver_uv.sh" ]; then
-  die "missing scripts/solver_uv.sh"
-fi
-
 solver_dir="solvers/${solver}"
 code_dir="agent_baselines/solvers/${solver}"
 
@@ -96,7 +92,7 @@ set -euo pipefail
 
 cd "\$(dirname "\${BASH_SOURCE[0]}")/../.."
 
-./scripts/solver_uv.sh sync ${solver}
+uv sync --project "solvers/${solver}" --python 3.11
 EOF
 
 cat > "${solver_dir}/demo.sh" <<EOF
@@ -107,7 +103,7 @@ set -euo pipefail
 cd "\$(dirname "\${BASH_SOURCE[0]}")/../.."
 
 # Runs a tiny eval using inspect's built-in mock model so it works without API keys.
-./scripts/solver_uv.sh run ${solver} -- inspect eval \\
+uv run --project "solvers/${solver}" --python 3.11 --frozen -- inspect eval \\
   astabench/evals/demo/arithmetic/task.py \\
   --model mockllm/model \\
   --solver agent_baselines/solvers/${solver}/solver.py@demo_solver \\
@@ -132,7 +128,7 @@ From repo root:
 
 ## Dependencies
 - \`solvers/${solver}/pyproject.toml\` pins per-solver deps (including \`astabench\` and \`inspect_ai\`).
-- Generate/update the lockfile with: \`./scripts/solver_uv.sh lock ${solver}\`
+- Generate/update the lockfile with: \`uv lock --project "solvers/${solver}" --python 3.11\`
 
 See \`docs/per_solver_envs.md\` for per-solver dependency workflow and Inspect override strategy.
 EOF
@@ -156,4 +152,4 @@ EOF
 chmod +x "${solver_dir}/setup.sh" "${solver_dir}/demo.sh"
 
 echo "created ${solver_dir}/ and ${code_dir}/"
-echo "next: ./scripts/solver_uv.sh lock ${solver}"
+echo "next: uv lock --project \"solvers/${solver}\" --python 3.11"

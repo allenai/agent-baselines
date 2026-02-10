@@ -11,7 +11,7 @@ if [ -z "${PAPER_FINDER_URL:-}" ]; then
     exit 1
 fi
 
-./scripts/solver_uv.sh run paper_finder -- inspect eval \
+uv run --project "solvers/paper_finder" --python 3.11 --frozen -- inspect eval \
 --solver astabench/solvers/search/paper_finder.py@ai2i_paper_finder \
 --S base_url="${PAPER_FINDER_URL}" \
 --model openai/gpt-4.o-mini \

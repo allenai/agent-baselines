@@ -11,7 +11,7 @@ if [ -z "${ASTA_TOOL_KEY:-}" ]; then
     exit 1
 fi
 
-./scripts/solver_uv.sh run smolagents -- astabench eval \
+uv run --project "solvers/smolagents" --python 3.11 --frozen -- astabench eval \
 --split validation \
 --solver agent_baselines/solvers/smolagents/agent.py@smolagents_coder \
 --model openai/gpt-4.1-nano \

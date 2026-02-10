@@ -5,4 +5,4 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "${repo_root}"
 
-./scripts/solver_uv.sh sync asta-v0
+uv sync --project "solvers/asta-v0" --python 3.11

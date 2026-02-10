@@ -23,7 +23,7 @@ fi
 # Note the use of 'mockllm/model' because models are directly configured for
 # each sub-agent, top-level `--model` settings will not be applied.
 
-./scripts/solver_uv.sh run asta-v0 -- astabench eval \
+uv run --project "solvers/asta-v0" --python 3.11 --frozen -- astabench eval \
 --solver agent_baselines/solvers/asta/v0/asta.py@fewshot_textsim_router \
 --model mockllm/model \
 --split validation \

@@ -36,9 +36,6 @@ RUN mkdir -p /agent-baselines/agent_baselines /agent-baselines/solvers /agent-ba
 
 RUN uv sync --extra dev --no-install-project
 
-# Copied here (after uv sync) so edits to this script don't bust the dep cache.
-COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
-
 FROM agent-baselines-base AS agent-baselines
 COPY . /agent-baselines
 
@@ -60,7 +57,6 @@ COPY --from=agent-baselines /agent-baselines/README.md /agent-baselines/README.m
 # contents from the agent-baselines stage. This keeps dependency installation
 # cached unless solver-specific files change.
 # Each solver stage: COPY solver-specific files, run setup, then overlay repo contents.
-# solver_uv.sh is already in the base image; only solver-specific files need copying.
 FROM agent-baselines-base AS react
 COPY solvers/react/pyproject.toml solvers/react/uv.lock solvers/react/setup.sh /agent-baselines/solvers/react/
 RUN UV_FROZEN=1 solvers/react/setup.sh

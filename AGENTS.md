@@ -13,9 +13,9 @@
 - Dev shell in container: `make shell` (mounts repo; respects `.env` and `solvers/<solver>/env`).
 - Typical local flow for a solver: `./solvers/<solver>/setup.sh` then `./solvers/<solver>/demo.sh` (both are intended to be run from repo root).
 - uv sub-project helpers:
-  - Lock/update deps: `./scripts/solver_uv.sh lock <solver>`
-  - Sync env: `./scripts/solver_uv.sh sync <solver>`
-  - Run in env: `./scripts/solver_uv.sh run <solver> -- <cmd ...>`
+  - Lock/update deps: `uv lock --project "solvers/<solver>" --python 3.11`
+  - Sync env: `uv sync --project "solvers/<solver>" --python 3.11`
+  - Run in env: `uv run --project "solvers/<solver>" --python 3.11 --frozen -- <cmd ...>`
   - New solver scaffold: `./scripts/new_solver.sh <solver>`
   - Smoke test all uv sub-projects: `make smoke-solvers`
 - Run tests: `make test` (skips `expensive` by default) or `make test-expensive`.

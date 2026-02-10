@@ -5,4 +5,4 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "${repo_root}"
 
-./scripts/solver_uv.sh sync futurehouse
+uv sync --project "solvers/futurehouse" --python 3.11
