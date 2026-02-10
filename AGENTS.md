@@ -9,7 +9,7 @@
 - DVC is present (`dvc.yaml`, `dvc.lock`); don’t commit large data or generated artifacts.
 
 ## Build, Test, and Development Commands
-- Build container: `make build-image` (optionally `SOLVER=code_agent`).
+- Build container: `make build-image` (optionally `SOLVER=<solver-name>`).
 - Dev shell in container: `make shell` (mounts repo; respects `.env` and `solvers/<solver>/env`).
 - Typical local flow for a solver: `./solvers/<solver>/setup.sh` then `./solvers/<solver>/demo.sh` (both are intended to be run from repo root).
 - uv sub-project helpers:
