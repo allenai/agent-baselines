@@ -13,6 +13,7 @@ import operator
 import re
 from typing import Any, Callable
 
+from inspect_ai.model import ModelOutput
 from inspect_ai.solver import Generate, Solver, TaskState, solver
 
 
@@ -93,7 +94,13 @@ def arithmetic_solver() -> Solver:
         value = _safe_eval(expr)
         answer: Any = int(value) if float(value).is_integer() else value
 
-        state.output.completion = json.dumps({"answer": answer})
+        completion = json.dumps({"answer": answer})
+        # Use ModelOutput.from_content so the serialized log carries the answer
+        # in output.choices (compatible with older scorer Inspect versions).
+        state.output = ModelOutput.from_content(
+            model=state.output.model or state.model,
+            content=completion,
+        )
         return state
 
     return solve

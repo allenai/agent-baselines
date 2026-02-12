@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import asyncio
 import importlib.util
 from pathlib import Path
 
 import pytest
+from inspect_ai.model import ChatMessageUser, ModelOutput
+from inspect_ai.scorer import Target
+from inspect_ai.solver import TaskState
 
 
 def _load_arithmetic_solver_module():
@@ -49,3 +53,26 @@ def test_extract_expression_handles_parenthesized_compute_line() -> None:
 def test_extract_expression_raises_when_missing() -> None:
     with pytest.raises(ValueError, match="No arithmetic expression found"):
         arithmetic_solver._extract_expression("No arithmetic here.")
+
+
+def test_solver_populates_choices_for_cross_version_scoring() -> None:
+    solve = arithmetic_solver.arithmetic_solver()
+    state = TaskState(
+        model="mockllm/model",
+        sample_id="1",
+        epoch=1,
+        input="Compute 4.6 + 2.1*2",
+        messages=[ChatMessageUser(content="Compute 4.6 + 2.1*2")],
+        target=Target(target="8.8"),
+        choices=None,
+        output=ModelOutput(model="mockllm/model"),
+        metadata={},
+    )
+
+    async def _generate(task_state: TaskState) -> TaskState:
+        return task_state
+
+    solved = asyncio.run(solve(state, _generate))
+    assert solved.output.completion == '{"answer": 8.8}'
+    assert len(solved.output.choices) == 1
+    assert solved.output.model_dump()["choices"]
