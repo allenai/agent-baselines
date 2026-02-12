@@ -16,13 +16,42 @@ from typing import Any, Callable
 from inspect_ai.solver import Generate, Solver, TaskState, solver
 
 
+def _is_expression_candidate(expr: str) -> bool:
+    candidate = expr.strip()
+    if not candidate:
+        return False
+    if re.fullmatch(r"[0-9+\-*/().\s]+", candidate) is None:
+        return False
+    if re.search(r"\d", candidate) is None:
+        return False
+    if re.search(r"[+\-*/]", candidate) is None:
+        return False
+    return True
+
+
 def _extract_expression(text: str) -> str:
-    # Find an arithmetic expression inside the prompt. The astabench demo task
-    # prompts contain a single expression (e.g. "2+2" or "4.6 + 2.1*2").
-    match = re.search(r"(-?\d[\d\.\s+\-*/()]*\d)", text)
-    if not match:
+    # Prefer explicit "Compute ..." lines to avoid picking up numeric examples
+    # from prompt instructions (e.g. {"answer": 1234}).
+    compute_match = re.search(
+        r"(?im)^\s*(?:compute|calculate)\s+(?P<expr>.+?)\s*$",
+        text,
+    )
+    if compute_match:
+        expr = compute_match.group("expr").strip()
+        if _is_expression_candidate(expr):
+            return expr
+
+    # Fallback: choose the last arithmetic-like token span in the prompt.
+    matches: list[str] = []
+    for line in text.splitlines():
+        for match in re.finditer(r"[0-9+\-*/().\s]+", line):
+            candidate = match.group(0).strip()
+            if _is_expression_candidate(candidate):
+                matches.append(candidate)
+
+    if not matches:
         raise ValueError("No arithmetic expression found in prompt.")
-    return match.group(1).strip()
+    return matches[-1].strip()
 
 
 _BINOPS: dict[type[ast.operator], Callable[[float, float], float]] = {
@@ -68,4 +97,3 @@ def arithmetic_solver() -> Solver:
         return state
 
     return solve
-
