@@ -9,13 +9,13 @@
 - DVC is present (`dvc.yaml`, `dvc.lock`); don’t commit large data or generated artifacts.
 
 ## Build, Test, and Development Commands
-- Build container: `make build-image` (optionally `SOLVER=code_agent`).
+- Build container: `make build-image` (optionally `SOLVER=<solver-name>`).
 - Dev shell in container: `make shell` (mounts repo; respects `.env` and `solvers/<solver>/env`).
 - Typical local flow for a solver: `./solvers/<solver>/setup.sh` then `./solvers/<solver>/demo.sh` (both are intended to be run from repo root).
 - uv sub-project helpers:
-  - Lock/update deps: `./scripts/solver_uv.sh lock <solver>`
-  - Sync env: `./scripts/solver_uv.sh sync <solver>`
-  - Run in env: `./scripts/solver_uv.sh run <solver> -- <cmd ...>`
+  - Lock/update deps: `uv lock --project "solvers/<solver>" --python 3.11`
+  - Sync env: `uv sync --project "solvers/<solver>" --python 3.11`
+  - Run in env: `uv run --project "solvers/<solver>" --python 3.11 --frozen -- <cmd ...>`
   - New solver scaffold: `./scripts/new_solver.sh <solver>`
   - Smoke test all uv sub-projects: `make smoke-solvers`
 - Run tests: `make test` (skips `expensive` by default) or `make test-expensive`.
@@ -40,36 +40,6 @@
 - Gate: ensure `make format flake mypy test` pass locally before request for review.
 
 ## Security & Configuration Tips
-- Configure secrets via env or `.env`: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`, `AZUREAI_OPENAI_API_KEY`, `HF_TOKEN`, `ASTA_TOOL_KEY`.
-- Solver-specific keys (e.g. `MODAL_TOKEN`, `YDC_API_KEY`, `PAPER_FINDER_URL`, `FUTUREHOUSE_API_KEY` / `FH_API_KEY`) are documented per solver and listed in `solvers/<solver>/env`.
 - Never commit secrets, large caches, or derived data; respect `.gitignore`/DVC.
 - New solvers go under `agent_baselines/solvers/<name>/` with matching tests in `tests/solvers/`.
-
-## Task tracking
-Use `bd` for task tracking. Read https://github.com/steveyegge/beads/blob/main/AGENT_INSTRUCTIONS.md
-
-## Landing the Plane (Session Completion)
-
-**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
-
-**MANDATORY WORKFLOW:**
-
-1. **File issues for remaining work** - Create issues for anything that needs follow-up
-2. **Run quality gates** (if code changed) - Tests, linters, builds
-3. **Update issue status** - Close finished work, update in-progress items
-4. **PUSH TO REMOTE** - This is MANDATORY:
-   ```bash
-   git pull --rebase
-   bd sync
-   git push
-   git status  # MUST show "up to date with origin"
-   ```
-5. **Clean up** - Clear stashes, prune remote branches
-6. **Verify** - All changes committed AND pushed
-7. **Hand off** - Provide context for next session
-
-**CRITICAL RULES:**
-- Work is NOT complete until `git push` succeeds
-- NEVER stop before pushing - that leaves work stranded locally
-- NEVER say "ready to push when you are" - YOU must push
-- If push fails, resolve and retry until it succeeds
+- Do **not** `git push` automatically — leave that to the user.

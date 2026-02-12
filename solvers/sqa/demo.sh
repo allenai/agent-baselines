@@ -17,7 +17,7 @@ if [ -z "${ASTA_TOOL_KEY:-}" ]; then
 fi
 
 
-./scripts/solver_uv.sh run sqa -- inspect eval \
+uv run --project "solvers/sqa" --python 3.11 --frozen -- inspect eval \
 --solver agent_baselines/solvers/sqa/sqa.py@sqa_solver \
 --limit 1 \
 "$@" \

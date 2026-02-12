@@ -8,14 +8,11 @@ Usage:
   scripts/smoke_solvers.sh [solver ...]
 
 Runs a basic smoke check for each solver uv sub-project (solvers/<solver>/pyproject.toml):
-  1) uv sync (via scripts/solver_uv.sh)
+  1) uv sync --project solvers/<solver> --python 3.11
   2) Import + version print for astabench, inspect_ai, agent_baselines
 
 If no solver args are provided, solvers are auto-discovered from:
   solvers/*/pyproject.toml
-
-Environment:
-  SOLVER_UV_PYTHON   Python version for uv (default: 3.11)
 
 Notes:
   - Run from repo root.
@@ -55,9 +52,9 @@ for solver in "${solvers[@]}"; do
   current_solver="${solver}"
   echo "== smoke: ${solver}"
 
-  ./scripts/solver_uv.sh sync "${solver}"
+  uv sync --project "solvers/${solver}" --python 3.11
 
-  ./scripts/solver_uv.sh run "${solver}" -- python - <<PY
+  uv run --project "solvers/${solver}" --python 3.11 --frozen -- python - <<PY
 import sys
 
 import agent_baselines

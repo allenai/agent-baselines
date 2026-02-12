@@ -11,7 +11,7 @@ if [ -z "${ASTA_TOOL_KEY:-}" ]; then
   exit 1
 fi
 
-./scripts/solver_uv.sh run react -- astabench eval \
+uv run --project "solvers/react" --python 3.11 --frozen -- astabench eval \
 --split validation \
 --solver agent_baselines/solvers/react/basic_agent.py@instantiated_basic_agent \
 --model openai/gpt-4.1-nano \

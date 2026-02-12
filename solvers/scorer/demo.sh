@@ -18,4 +18,4 @@ fi
 log_dir="$1"
 shift
 
-./scripts/solver_uv.sh run scorer -- astabench score "${log_dir}" "$@"
+uv run --project "solvers/scorer" --python 3.11 --frozen -- astabench score "${log_dir}" "$@"

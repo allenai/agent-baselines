@@ -18,7 +18,7 @@ if [ -z "${ASTA_TOOL_KEY:-}" ]; then
 fi
 
 
-./scripts/solver_uv.sh run arxivdigestables -- inspect eval \
+uv run --project "solvers/arxivdigestables" --python 3.11 --frozen -- inspect eval \
 --solver agent_baselines/solvers/arxivdigestables/asta_table_agent.py@tables_solver \
 --model openai/gpt-4.1 \
 --limit 1 \

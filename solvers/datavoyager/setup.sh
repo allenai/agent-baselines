@@ -5,4 +5,4 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "${repo_root}"
 
-./scripts/solver_uv.sh sync datavoyager
+uv sync --project "solvers/datavoyager" --python 3.11

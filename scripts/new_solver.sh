@@ -13,7 +13,7 @@ Creates a standard solver scaffold:
 
 Notes:
   - Run from repo root.
-  - Name must match: ^[a-z][a-z0-9_]*$
+  - Name must match: ^[a-z][a-z0-9_-]*$ (lowercase, digits, underscores, hyphens)
   - The generated solver defaults to astabench's pinned Inspect version. See
     docs/per_solver_envs.md for how to override inspect_ai with uv.
 EOF
@@ -36,16 +36,14 @@ fi
 
 solver="$1"
 
-if [[ ! "${solver}" =~ ^[a-z][a-z0-9_]*$ ]]; then
-  die "invalid solver name '${solver}' (expected ^[a-z][a-z0-9_]*$)"
+# Allow lowercase, digits, underscores, hyphens (e.g. asta-v0).
+# Must start with a letter.
+if [[ ! "${solver}" =~ ^[a-z][a-z0-9_-]*$ ]]; then
+  die "invalid solver name '${solver}' (expected ^[a-z][a-z0-9_-]*$)"
 fi
 
 if [ ! -f "pyproject.toml" ] || [ ! -d "solvers" ] || [ ! -d "agent_baselines/solvers" ]; then
   die "must run from repo root (expected ./pyproject.toml, ./solvers/, ./agent_baselines/solvers/)"
-fi
-
-if [ ! -f "scripts/solver_uv.sh" ]; then
-  die "missing scripts/solver_uv.sh"
 fi
 
 solver_dir="solvers/${solver}"
@@ -62,8 +60,8 @@ fi
 project_name_suffix="${solver//_/-}"
 project_name="agent-baselines-${project_name_suffix}"
 
-mkdir -p "${solver_dir}"
-mkdir -p "${code_dir}"
+mkdir "${solver_dir}"
+mkdir "${code_dir}"
 
 cat > "${solver_dir}/pyproject.toml" <<EOF
 [build-system]
@@ -92,10 +90,9 @@ cat > "${solver_dir}/setup.sh" <<EOF
 
 set -euo pipefail
 
-repo_root="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")/../.." && pwd)"
-cd "\${repo_root}"
+cd "\$(dirname "\${BASH_SOURCE[0]}")/../.."
 
-./scripts/solver_uv.sh sync ${solver}
+uv sync --project "solvers/${solver}" --python 3.11
 EOF
 
 cat > "${solver_dir}/demo.sh" <<EOF
@@ -103,12 +100,10 @@ cat > "${solver_dir}/demo.sh" <<EOF
 
 set -euo pipefail
 
-# Ensure this script works when invoked from any directory.
-repo_root="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")/../.." && pwd)"
-cd "\${repo_root}"
+cd "\$(dirname "\${BASH_SOURCE[0]}")/../.."
 
 # Runs a tiny eval using inspect's built-in mock model so it works without API keys.
-./scripts/solver_uv.sh run ${solver} -- inspect eval \\
+uv run --project "solvers/${solver}" --python 3.11 --frozen -- inspect eval \\
   astabench/evals/demo/arithmetic/task.py \\
   --model mockllm/model \\
   --solver agent_baselines/solvers/${solver}/solver.py@demo_solver \\
@@ -133,7 +128,7 @@ From repo root:
 
 ## Dependencies
 - \`solvers/${solver}/pyproject.toml\` pins per-solver deps (including \`astabench\` and \`inspect_ai\`).
-- Generate/update the lockfile with: \`./scripts/solver_uv.sh lock ${solver}\`
+- Generate/update the lockfile with: \`uv lock --project "solvers/${solver}" --python 3.11\`
 
 See \`docs/per_solver_envs.md\` for per-solver dependency workflow and Inspect override strategy.
 EOF
@@ -157,4 +152,4 @@ EOF
 chmod +x "${solver_dir}/setup.sh" "${solver_dir}/demo.sh"
 
 echo "created ${solver_dir}/ and ${code_dir}/"
-echo "next: ./scripts/solver_uv.sh lock ${solver}"
+echo "next: uv lock --project \"solvers/${solver}\" --python 3.11"

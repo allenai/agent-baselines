@@ -15,4 +15,4 @@ if [ -z "${ASTA_TOOL_KEY:-}" ]; then
 fi
 
 
-./scripts/solver_uv.sh sync paper_finder
+uv sync --project "solvers/paper_finder" --python 3.11

@@ -39,91 +39,21 @@ RUN uv sync --extra dev --no-install-project
 FROM agent-baselines-base AS agent-baselines
 COPY . /agent-baselines
 
-# Runtime repo contents (without the base stage venv).
-#
-# We copy these selectively rather than `COPY --from=agent-baselines /agent-baselines /agent-baselines`
-# to avoid copying `/agent-baselines/.venv` into solver images.
-FROM scratch AS agent-baselines-runtime
-COPY --from=agent-baselines /agent-baselines/agent_baselines /agent-baselines/agent_baselines
-COPY --from=agent-baselines /agent-baselines/docs /agent-baselines/docs
-COPY --from=agent-baselines /agent-baselines/scripts /agent-baselines/scripts
-COPY --from=agent-baselines /agent-baselines/solvers /agent-baselines/solvers
-COPY --from=agent-baselines /agent-baselines/README.md /agent-baselines/README.md
-
-
 # Images for running specific solvers
 #
 # NOTE: Solver stages should install dependencies before copying the full repo
 # contents from the agent-baselines stage. This keeps dependency installation
 # cached unless solver-specific files change.
-FROM agent-baselines-base AS react
-COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
-COPY solvers/react/pyproject.toml solvers/react/uv.lock solvers/react/setup.sh /agent-baselines/solvers/react/
-RUN UV_FROZEN=1 solvers/react/setup.sh
-COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
-
-FROM agent-baselines-base AS paper_finder
-COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
-COPY solvers/paper_finder/pyproject.toml solvers/paper_finder/uv.lock solvers/paper_finder/setup.sh /agent-baselines/solvers/paper_finder/
-RUN UV_FROZEN=1 solvers/paper_finder/setup.sh
-COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
-
-FROM agent-baselines-base AS smolagents
-COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
-COPY solvers/smolagents/pyproject.toml solvers/smolagents/uv.lock solvers/smolagents/setup.sh /agent-baselines/solvers/smolagents/
-RUN UV_FROZEN=1 solvers/smolagents/setup.sh
-COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
-
-FROM agent-baselines-base AS storm
-COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
-COPY solvers/storm/pyproject.toml solvers/storm/uv.lock solvers/storm/setup.sh /agent-baselines/solvers/storm/
-RUN UV_FROZEN=1 solvers/storm/setup.sh
-COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
-
-FROM agent-baselines-base AS sqa
-COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
-COPY solvers/sqa/pyproject.toml solvers/sqa/uv.lock solvers/sqa/setup.sh /agent-baselines/solvers/sqa/
-RUN UV_FROZEN=1 solvers/sqa/setup.sh
-COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
-
-FROM agent-baselines-base AS super
-COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
-COPY solvers/super/pyproject.toml solvers/super/uv.lock solvers/super/setup.sh /agent-baselines/solvers/super/
-RUN UV_FROZEN=1 solvers/super/setup.sh
-COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
-
-FROM agent-baselines-base AS datavoyager
-COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
-COPY solvers/datavoyager/pyproject.toml solvers/datavoyager/uv.lock solvers/datavoyager/setup.sh /agent-baselines/solvers/datavoyager/
-RUN UV_FROZEN=1 solvers/datavoyager/setup.sh
-COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
-
-FROM agent-baselines-base AS futurehouse
-COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
-COPY solvers/futurehouse/pyproject.toml solvers/futurehouse/uv.lock solvers/futurehouse/setup.sh /agent-baselines/solvers/futurehouse/
-RUN UV_FROZEN=1 solvers/futurehouse/setup.sh
-COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
-
-FROM agent-baselines-base AS magenticone
-COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
-COPY solvers/magenticone/pyproject.toml solvers/magenticone/uv.lock solvers/magenticone/setup.sh /agent-baselines/solvers/magenticone/
-RUN UV_FROZEN=1 solvers/magenticone/setup.sh
-COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
-
-FROM agent-baselines-base AS arxivdigestables
-COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
-COPY solvers/arxivdigestables/pyproject.toml solvers/arxivdigestables/uv.lock solvers/arxivdigestables/setup.sh /agent-baselines/solvers/arxivdigestables/
-RUN UV_FROZEN=1 solvers/arxivdigestables/setup.sh
-COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
-
-FROM agent-baselines-base AS asta-v0
-COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
-COPY solvers/asta-v0/pyproject.toml solvers/asta-v0/uv.lock solvers/asta-v0/setup.sh /agent-baselines/solvers/asta-v0/
-RUN UV_FROZEN=1 solvers/asta-v0/setup.sh
-COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
-
-FROM agent-baselines-base AS e2e_discovery
-COPY scripts/solver_uv.sh /agent-baselines/scripts/solver_uv.sh
-COPY solvers/e2e_discovery/pyproject.toml solvers/e2e_discovery/uv.lock solvers/e2e_discovery/setup.sh /agent-baselines/solvers/e2e_discovery/
-RUN UV_FROZEN=1 solvers/e2e_discovery/setup.sh
-COPY --from=agent-baselines-runtime /agent-baselines/ /agent-baselines/
+# Parameterized solver stage:
+# docker build --target solver --build-arg SOLVER_NAME=<solver> ...
+# Sentinel default makes missing --build-arg failures obvious in COPY paths.
+FROM agent-baselines-base AS solver
+ARG SOLVER_NAME=__solver_name_required__
+COPY solvers/${SOLVER_NAME}/pyproject.toml solvers/${SOLVER_NAME}/uv.lock solvers/${SOLVER_NAME}/setup.sh /agent-baselines/solvers/${SOLVER_NAME}/
+RUN UV_FROZEN=1 solvers/${SOLVER_NAME}/setup.sh
+# Copy runtime repo contents without `/agent-baselines/.venv`.
+COPY --from=agent-baselines /agent-baselines/agent_baselines /agent-baselines/agent_baselines
+COPY --from=agent-baselines /agent-baselines/docs /agent-baselines/docs
+COPY --from=agent-baselines /agent-baselines/scripts /agent-baselines/scripts
+COPY --from=agent-baselines /agent-baselines/solvers /agent-baselines/solvers
+COPY --from=agent-baselines /agent-baselines/README.md /agent-baselines/README.md

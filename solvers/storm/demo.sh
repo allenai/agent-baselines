@@ -16,7 +16,7 @@ if [ -z "${YDC_API_KEY:-}" ]; then
 fi
 
 
-./scripts/solver_uv.sh run storm -- inspect eval \
+uv run --project "solvers/storm" --python 3.11 --frozen -- inspect eval \
 --solver  agent_baselines/solvers/sqa/storm_solver.py@storm_solver \
 --model openai/gpt-4.1-nano \
 --limit 1 \

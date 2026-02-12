@@ -13,12 +13,14 @@ ENV_ARGS :=
 SOLVER :=
 # Docker image tag for the solver
 TARGET := --target agent-baselines
+BUILD_ARGS :=
 SMOKE_SOLVERS ?=
 
 ifdef SOLVER
-	  TARGET := --target $(SOLVER)
-	  AGENT_BASELINES_TAG := $(AGENT_BASELINES_TAG)-$(SOLVER)
-	  ENV_ARGS += --env-file solvers/$(SOLVER)/env
+  TARGET := --target solver
+  BUILD_ARGS += --build-arg SOLVER_NAME=$(SOLVER)
+  AGENT_BASELINES_TAG := $(AGENT_BASELINES_TAG)-$(SOLVER)
+  ENV_ARGS += --env-file solvers/$(SOLVER)/env
 endif
 
 # Add each env var only if it's defined
@@ -66,7 +68,7 @@ endif
 # -----------------------------------------------------------------------------
 
 build-image:
-	docker build $(BUILD_QUIET) $(TARGET) . --tag $(AGENT_BASELINES_TAG) -f ./docker/Dockerfile
+	docker build $(BUILD_QUIET) $(TARGET) $(BUILD_ARGS) . --tag $(AGENT_BASELINES_TAG) -f ./docker/Dockerfile
 
 # -----------------------------------------------------------------------------
 # Interactive shell in container
@@ -97,7 +99,7 @@ format:
 	docker run --rm \
 		-v $$(pwd):/agent-baselines \
 		$(AGENT_BASELINES_TAG) \
-		sh -c "pip install --no-cache-dir black && black ."
+		uv run --extra dev black .
 
 ifneq ($(IS_CI),true)
 mypy: build-image

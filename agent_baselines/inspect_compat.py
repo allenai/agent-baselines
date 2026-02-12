@@ -41,4 +41,3 @@ def perplexity_api_class() -> Type[object]:
         ) from exc
 
     return PerplexityAPI
-

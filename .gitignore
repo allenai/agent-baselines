@@ -201,3 +201,6 @@ uv.lock
 
 # AI docs
 CLAUDE.md
+
+# Beads task tracker (local state)
+.beads/

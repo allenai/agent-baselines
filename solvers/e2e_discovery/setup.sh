@@ -5,4 +5,4 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "${repo_root}"
 
-./scripts/solver_uv.sh sync e2e_discovery
+uv sync --project "solvers/e2e_discovery" --python 3.11
