@@ -99,7 +99,7 @@ format:
 	docker run --rm \
 		-v $$(pwd):/agent-baselines \
 		$(AGENT_BASELINES_TAG) \
-		uv run --extra dev black .
+		uv run --extra dev -m black .
 
 ifneq ($(IS_CI),true)
 mypy: build-image
@@ -109,7 +109,7 @@ mypy:
 	docker run --rm \
 		-v $$(pwd):/agent-baselines \
 		$(AGENT_BASELINES_TAG) \
-		uv run mypy agent-baselines/ tests/
+		uv run --extra dev -m mypy agent_baselines/ tests/
 
 ifneq ($(IS_CI),true)
 flake: build-image
@@ -117,8 +117,9 @@ endif
 
 flake:
 	docker run --rm \
+		-v $$(pwd):/agent-baselines \
 		$(AGENT_BASELINES_TAG) \
-		uv run flake8 agent_baselines/ tests/
+		uv run --extra dev -m flake8 agent_baselines/ tests/
 
 ifneq ($(IS_CI),true)
 test: build-image

@@ -36,10 +36,7 @@ def test_extract_expression_fallback_uses_last_match() -> None:
 
 
 def test_safe_eval_on_extracted_expression() -> None:
-    prompt = (
-        'Format as {"answer": 1234}.\n'
-        "Compute 4.6 + 2.1*2"
-    )
+    prompt = 'Format as {"answer": 1234}.\n' "Compute 4.6 + 2.1*2"
     expr = arithmetic_solver._extract_expression(prompt)
     assert arithmetic_solver._safe_eval(expr) == pytest.approx(8.8)
 

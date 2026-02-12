@@ -11,7 +11,16 @@ import re
 
 from inspect_ai import Task, task
 from inspect_ai.dataset import Sample
-from inspect_ai.scorer import CORRECT, INCORRECT, Score, Scorer, Target, accuracy, scorer, stderr
+from inspect_ai.scorer import (
+    CORRECT,
+    INCORRECT,
+    Score,
+    Scorer,
+    Target,
+    accuracy,
+    scorer,
+    stderr,
+)
 from inspect_ai.solver import Generate, Solver, TaskState, solver
 
 
@@ -60,4 +69,3 @@ def arithmetic_smoke() -> Task:
         solver=not_implemented_solver(),
         scorer=check_arithmetic(),
     )
-
