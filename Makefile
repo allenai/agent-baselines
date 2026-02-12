@@ -109,7 +109,7 @@ mypy:
 	docker run --rm \
 		-v $$(pwd):/agent-baselines \
 		$(AGENT_BASELINES_TAG) \
-		uv run --extra dev -m mypy agent_baselines/ tests/
+		uv run --extra dev -m mypy agent-baselines/ tests/
 
 ifneq ($(IS_CI),true)
 flake: build-image
