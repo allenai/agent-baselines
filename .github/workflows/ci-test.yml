@@ -38,3 +38,8 @@ jobs:
         run: |
           # Keep this small but meaningful: exercise two solvers with different inspect_ai versions.
           make smoke-solvers-ci
+
+      - name: Cross-version solve→score smoke (two-phase)
+        timeout-minutes: 10
+        run: |
+          make solve-score-ci

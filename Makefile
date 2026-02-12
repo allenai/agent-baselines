@@ -1,4 +1,4 @@
-.PHONY: shell format mypy flake test build-image test-expensive smoke-solvers smoke-solvers-ci
+.PHONY: shell format mypy flake test build-image test-expensive smoke-solvers smoke-solvers-ci solve-score-ci
 
 # allow passing extra pytest args, e.g. make test-expensive PYTEST_ARGS="-k EVAL_NAME"
 PYTEST_ARGS ?=
@@ -99,7 +99,7 @@ format:
 	docker run --rm \
 		-v $$(pwd):/agent-baselines \
 		$(AGENT_BASELINES_TAG) \
-		uv run --extra dev black .
+		uv run --extra dev -m black .
 
 ifneq ($(IS_CI),true)
 mypy: build-image
@@ -109,7 +109,7 @@ mypy:
 	docker run --rm \
 		-v $$(pwd):/agent-baselines \
 		$(AGENT_BASELINES_TAG) \
-		uv run mypy agent-baselines/ tests/
+		uv run --extra dev -m mypy agent-baselines/ tests/
 
 ifneq ($(IS_CI),true)
 flake: build-image
@@ -117,8 +117,9 @@ endif
 
 flake:
 	docker run --rm \
+		-v $$(pwd):/agent-baselines \
 		$(AGENT_BASELINES_TAG) \
-		uv run flake8 agent_baselines/ tests/
+		uv run --extra dev -m flake8 agent_baselines/ tests/
 
 ifneq ($(IS_CI),true)
 test: build-image
@@ -142,6 +143,7 @@ test-expensive:
 ifneq ($(IS_CI),true)
 smoke-solvers: build-image
 smoke-solvers-ci: build-image
+solve-score-ci: build-image
 endif
 
 smoke-solvers:
@@ -149,3 +151,6 @@ smoke-solvers:
 
 smoke-solvers-ci:
 	@$(TEST_RUN) ./scripts/smoke_solvers.sh react paper_finder
+
+solve-score-ci:
+	@$(TEST_RUN) ./scripts/smoke_solve_score.sh paper_finder

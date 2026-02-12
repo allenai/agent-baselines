@@ -1,0 +1,13 @@
+name: two-phase-smoke
+version: "0.0.1"
+
+splits:
+  - name: validation
+    tasks:
+      - name: arithmetic_smoke
+        # This intentionally uses a task file path to avoid relying on astabench's
+        # Inspect entrypoint registry in solver envs that may override Inspect.
+        path: scripts/ci/arithmetic_task.py@arithmetic_smoke
+        primary_metric: check_arithmetic/accuracy
+        tags:
+          - ci
