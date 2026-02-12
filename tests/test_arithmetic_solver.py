@@ -5,7 +5,7 @@ import importlib.util
 from pathlib import Path
 
 import pytest
-from inspect_ai.model import ChatMessageUser, ModelOutput
+from inspect_ai.model import ChatMessageUser, ModelName, ModelOutput
 from inspect_ai.scorer import Target
 from inspect_ai.solver import TaskState
 
@@ -57,8 +57,9 @@ def test_extract_expression_raises_when_missing() -> None:
 
 def test_solver_populates_choices_for_cross_version_scoring() -> None:
     solve = arithmetic_solver.arithmetic_solver()
+    model_name = ModelName("mockllm/model")
     state = TaskState(
-        model="mockllm/model",
+        model=model_name,
         sample_id="1",
         epoch=1,
         input="Compute 4.6 + 2.1*2",
@@ -75,4 +76,4 @@ def test_solver_populates_choices_for_cross_version_scoring() -> None:
     solved = asyncio.run(solve(state, _generate))
     assert solved.output.completion == '{"answer": 8.8}'
     assert len(solved.output.choices) == 1
-    assert solved.output.model_dump()["choices"]
+    assert solved.output.choices[0].message.content == '{"answer": 8.8}'

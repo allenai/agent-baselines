@@ -98,7 +98,7 @@ def arithmetic_solver() -> Solver:
         # Use ModelOutput.from_content so the serialized log carries the answer
         # in output.choices (compatible with older scorer Inspect versions).
         state.output = ModelOutput.from_content(
-            model=state.output.model or state.model,
+            model=str(state.model),
             content=completion,
         )
         return state
