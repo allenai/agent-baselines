@@ -25,7 +25,7 @@ Examples:
 
 Notes:
   - The eval phase enforces `--no-score --log-format json` for later scoring.
-  - The score phase runs in the frozen scorer env: `./scripts/solver_uv.sh run scorer -- astabench score <log_dir>`.
+  - The score phase runs in the frozen scorer env: `uv run --project "solvers/scorer" --python 3.11 --frozen -- astabench score <log_dir>`.
 EOF
 }
 
@@ -34,6 +34,7 @@ if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
   exit 0
 fi
 
+# Keep in sync with scripts/inspect_log_convert.sh:find_repo_root.
 find_repo_root() {
   local dir="$PWD"
   while true; do
@@ -62,6 +63,15 @@ fi
 
 solver="$1"
 shift
+
+if [ ! -f "solvers/${solver}/pyproject.toml" ]; then
+  echo "error: unknown solver env '${solver}' (missing solvers/${solver}/pyproject.toml)" >&2
+  exit 2
+fi
+if [ ! -f "solvers/scorer/pyproject.toml" ]; then
+  echo "error: missing scorer env (solvers/scorer/pyproject.toml)" >&2
+  exit 2
+fi
 
 log_dir=""
 while [ $# -gt 0 ]; do
@@ -98,13 +108,13 @@ mkdir -p "${log_dir}"
 eval_args=("$@")
 
 echo "== solve: ${solver} -> ${log_dir}" >&2
-./scripts/solver_uv.sh run "${solver}" -- astabench eval \
+uv run --project "solvers/${solver}" --python 3.11 --frozen -- astabench eval \
   --log-dir "${log_dir}" \
   --no-score \
   --log-format json \
   "${eval_args[@]}"
 
 echo "== score: ${log_dir} (scorer env)" >&2
-./scripts/solver_uv.sh run scorer -- astabench score "${log_dir}"
+uv run --project "solvers/scorer" --python 3.11 --frozen -- astabench score "${log_dir}"
 
 echo "== done: scored logs in ${log_dir}" >&2

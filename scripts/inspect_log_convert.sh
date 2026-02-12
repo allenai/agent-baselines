@@ -34,6 +34,7 @@ if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
   exit 0
 fi
 
+# Keep in sync with scripts/eval_then_score.sh:find_repo_root.
 find_repo_root() {
   local dir="$PWD"
   while true; do
@@ -63,5 +64,9 @@ fi
 env_name="$1"
 shift
 
-./scripts/solver_uv.sh run "${env_name}" -- inspect log convert "$@"
+if [ ! -f "solvers/${env_name}/pyproject.toml" ]; then
+  echo "error: unknown env '${env_name}' (missing solvers/${env_name}/pyproject.toml)" >&2
+  exit 2
+fi
 
+uv run --project "solvers/${env_name}" --python 3.11 --frozen -- inspect log convert "$@"

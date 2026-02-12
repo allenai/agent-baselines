@@ -187,7 +187,7 @@ Notes:
 - `astabench score` expects logs to already contain `results.scores`. If you ran
   `astabench eval` with `--no-score`, you must run `inspect score` first.
 - If you re-score logs that already contain scores, you may want
-  `inspect score --action overwrite`.
+  `inspect score --overwrite`.
 - The canonical scorer env is `solvers/scorer/` (see `solvers/scorer/README.md`).
 
 ### When `inspect log convert` is needed

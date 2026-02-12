@@ -16,13 +16,24 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${repo_root}"
 
 solver="${1:-paper_finder}"
+solver_project="solvers/${solver}"
+scorer_project="solvers/scorer"
 
 config_path="scripts/ci/two_phase_smoke.yml"
 solver_spec="scripts/arithmetic_solver.py@arithmetic_solver"
 model="mockllm/model"
 
-solver_inspect_version="$(./scripts/solver_uv.sh run "${solver}" -- python -c 'import inspect_ai; print(inspect_ai.__version__)')"
-scorer_inspect_version="$(./scripts/solver_uv.sh run scorer -- python -c 'import inspect_ai; print(inspect_ai.__version__)')"
+if [ ! -f "${solver_project}/pyproject.toml" ]; then
+  echo "error: unknown solver env '${solver}' (missing ${solver_project}/pyproject.toml)" >&2
+  exit 2
+fi
+if [ ! -f "${scorer_project}/pyproject.toml" ]; then
+  echo "error: missing scorer env (${scorer_project}/pyproject.toml)" >&2
+  exit 2
+fi
+
+solver_inspect_version="$(uv run --project "${solver_project}" --python 3.11 --frozen -- python -c 'import inspect_ai; print(inspect_ai.__version__)')"
+scorer_inspect_version="$(uv run --project "${scorer_project}" --python 3.11 --frozen -- python -c 'import inspect_ai; print(inspect_ai.__version__)')"
 
 echo "== inspect versions: solver=${solver}(${solver_inspect_version}) scorer(${scorer_inspect_version})" >&2
 if [ "${solver_inspect_version}" = "${scorer_inspect_version}" ]; then
@@ -47,7 +58,7 @@ cleanup() {
 trap cleanup EXIT
 
 echo "== solve: ${solver} -> ${log_dir}" >&2
-./scripts/solver_uv.sh run "${solver}" -- astabench eval \
+uv run --project "${solver_project}" --python 3.11 --frozen -- astabench eval \
   --log-dir "${log_dir}" \
   --config-path "${config_path}" \
   --split validation \
@@ -72,7 +83,7 @@ fi
 
 while IFS= read -r log_file; do
   [ -z "${log_file}" ] && continue
-  ./scripts/solver_uv.sh run scorer -- inspect score \
+  uv run --project "${scorer_project}" --python 3.11 --frozen -- inspect score \
     --scorer "${scorer_spec}" \
     --overwrite \
     "${log_dir}/${log_file}"
@@ -80,6 +91,6 @@ done <<<"${log_files}"
 
 echo "== score: aggregate (astabench score)" >&2
 # Disable LiteLLM cost lookups for scoring (keyless CI smoke; mockllm has no costs).
-LITELLM_LOCAL_MODEL_COST_MAP=True ./scripts/solver_uv.sh run scorer -- astabench score "${log_dir}"
+LITELLM_LOCAL_MODEL_COST_MAP=True uv run --project "${scorer_project}" --python 3.11 --frozen -- astabench score "${log_dir}"
 
 echo "== smoke: ok" >&2
