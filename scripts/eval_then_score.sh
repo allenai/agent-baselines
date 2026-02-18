@@ -15,7 +15,7 @@ set -euo pipefail
 usage() {
   cat <<'EOF' >&2
 Usage:
-  scripts/eval_then_score.sh <solver> [--log-dir <dir>] [--] <astabench eval args...>
+  scripts/eval_then_score.sh <solver> [--log-dir <dir>] [--scorer <scorer_spec>] [--] <astabench eval args...>
 
 Examples:
   # Solve+score a small validation run, writing logs to a known directory
@@ -25,7 +25,10 @@ Examples:
 
 Notes:
   - The eval phase enforces `--no-score --log-format json` for later scoring.
-  - The score phase runs in the frozen scorer env: `uv run --project "solvers/scorer" --python 3.11 --frozen -- astabench score <log_dir>`.
+  - For custom/non-registered scorers, pass `--scorer <path.py@scorer_name>`.
+  - The score phase runs in the frozen scorer env via:
+      1) `inspect score --overwrite` per log file
+      2) `astabench score <log_dir>` aggregation
 EOF
 }
 
@@ -74,6 +77,7 @@ if [ ! -f "solvers/scorer/pyproject.toml" ]; then
 fi
 
 log_dir=""
+score_scorer=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --log-dir)
@@ -86,6 +90,18 @@ while [ $# -gt 0 ]; do
       ;;
     --log-dir=*)
       log_dir="${1#--log-dir=}"
+      shift
+      ;;
+    --scorer)
+      if [ $# -lt 2 ]; then
+        echo "error: --scorer requires a value" >&2
+        exit 2
+      fi
+      score_scorer="$2"
+      shift 2
+      ;;
+    --scorer=*)
+      score_scorer="${1#--scorer=}"
       shift
       ;;
     --)
@@ -114,7 +130,33 @@ uv run --project "solvers/${solver}" --python 3.11 --frozen -- astabench eval \
   --log-format json \
   "${eval_args[@]}"
 
-echo "== score: ${log_dir} (scorer env)" >&2
-uv run --project "solvers/scorer" --python 3.11 --frozen -- astabench score "${log_dir}"
+echo "== score: inspect score (scorer env)" >&2
+if [ ! -f "${log_dir}/logs.json" ]; then
+  echo "error: ${log_dir}/logs.json not found" >&2
+  exit 1
+fi
+log_files="$(LOG_DIR="${log_dir}" python -c 'import json, os; from pathlib import Path; p = Path(os.environ["LOG_DIR"]) / "logs.json"; manifest = json.loads(p.read_text(encoding="utf-8")); print("\n".join(manifest.keys()))')"
+if [ -z "${log_files}" ]; then
+  echo "error: no log files listed in ${log_dir}/logs.json" >&2
+  exit 1
+fi
+
+while IFS= read -r log_file; do
+  [ -z "${log_file}" ] && continue
+  score_cmd=(
+    uv run --project "solvers/scorer" --python 3.11 --frozen -- inspect score
+  )
+  if [ -n "${score_scorer}" ]; then
+    score_cmd+=(--scorer "${score_scorer}")
+  fi
+  score_cmd+=(--overwrite)
+  score_cmd+=("${log_dir}/${log_file}")
+  "${score_cmd[@]}"
+done <<<"${log_files}"
+
+echo "== score: aggregate ${log_dir} (scorer env)" >&2
+# Note: --scorer applies to inspect score above; astabench score only aggregates.
+# Required by astabench score: prep_litellm_cost_map() raises without this.
+LITELLM_LOCAL_MODEL_COST_MAP=True uv run --project "solvers/scorer" --python 3.11 --frozen -- astabench score "${log_dir}"
 
 echo "== done: scored logs in ${log_dir}" >&2

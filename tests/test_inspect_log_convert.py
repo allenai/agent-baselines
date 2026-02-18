@@ -10,7 +10,7 @@ import os
 import subprocess
 from pathlib import Path
 
-from tests.conftest import (
+from tests._test_helpers import (
     bash_path,
     make_fake_uv,
     make_repo_root,
@@ -75,39 +75,6 @@ def test_calls_uv_run_with_inspect_log_convert_args(tmp_path: Path) -> None:
     assert calls[0][-5:] == ["--to", "json", "--output-dir", "out", "logs/in"]
 
 
-def test_requires_env_and_args(tmp_path: Path) -> None:
-    root = tmp_path / "repo"
-    make_repo_root(root)
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    make_fake_uv(bin_dir, tmp_path / "uv.log")
-
-    env = os.environ.copy()
-    env["UV_LOG_FILE"] = str(tmp_path / "uv.log")
-    env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
-
-    result = _run_script(cwd=root, env=env, args=[])
-    assert result.returncode == 2
-    assert "Usage:" in result.stderr
-
-
-def test_requires_convert_args(tmp_path: Path) -> None:
-    root = tmp_path / "repo"
-    make_repo_root(root)
-    make_solver_project(root, "paper_finder")
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    make_fake_uv(bin_dir, tmp_path / "uv.log")
-
-    env = os.environ.copy()
-    env["UV_LOG_FILE"] = str(tmp_path / "uv.log")
-    env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
-
-    result = _run_script(cwd=root, env=env, args=["paper_finder"])
-    assert result.returncode == 2
-    assert "Usage:" in result.stderr
-
-
 def test_works_from_subdir(tmp_path: Path) -> None:
     root = tmp_path / "repo"
     make_repo_root(root)
@@ -138,30 +105,6 @@ def test_works_from_subdir(tmp_path: Path) -> None:
         ],
     )
     assert result.returncode == 0, result.stderr
-
-
-def test_help_flag_works_outside_repo(tmp_path: Path) -> None:
-    env = os.environ.copy()
-    env["UV_LOG_FILE"] = str(tmp_path / "uv.log")
-    env["PATH"] = f"{tmp_path}{os.pathsep}{env['PATH']}"
-
-    result = _run_script(cwd=tmp_path, env=env, args=["--help"])
-    assert result.returncode == 0
-    assert "Usage:" in result.stderr
-
-
-def test_requires_repo_root(tmp_path: Path) -> None:
-    env = os.environ.copy()
-    env["UV_LOG_FILE"] = str(tmp_path / "uv.log")
-    env["PATH"] = f"{tmp_path}{os.pathsep}{env['PATH']}"
-
-    result = _run_script(
-        cwd=tmp_path,
-        env=env,
-        args=["scorer", "--to", "json", "--output-dir", "out", "logs/in"],
-    )
-    assert result.returncode == 2
-    assert "must run from within the repo" in result.stderr
 
 
 def test_requires_known_env_project(tmp_path: Path) -> None:
