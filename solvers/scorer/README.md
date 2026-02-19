@@ -8,8 +8,14 @@ This is a dedicated uv sub-project for **scoring** Inspect logs with a frozen
 This environment is configured as a per‑solver uv sub‑project in
 `solvers/scorer/pyproject.toml`.
 
-It is pinned to `inspect_ai==0.3.114` (matches the `astabench==0.3.1` released
-pin), so scoring remains stable even if solvers use other Inspect versions.
+It is pinned to `inspect_ai==0.3.179` and uses a uv override so scoring can run
+on this frozen Inspect version even though `astabench==0.3.1` pins
+`inspect_ai==0.3.114`.
+
+Version policy: the scorer env tracks a single pinned Inspect version (currently
+the latest stable we have validated in this repo). This version may be older or
+newer than solver env versions; compatibility is verified by solve→score smoke
+tests.
 
 Install deps with:
 ```bash
