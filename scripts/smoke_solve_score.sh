@@ -98,27 +98,30 @@ echo "== score: aggregate (astabench score)" >&2
 # Disable LiteLLM cost lookups for scoring (keyless CI smoke; mockllm has no costs).
 LITELLM_LOCAL_MODEL_COST_MAP=True uv run --project "${scorer_project}" --python 3.11 --frozen -- astabench score "${log_dir}"
 
-LOG_DIR="${log_dir}" python - <<'PY'
-import json
-import os
-import sys
-from pathlib import Path
+scores_file="${log_dir}/scores.json"
+if [ ! -f "${scores_file}" ]; then
+  echo "error: missing ${scores_file}" >&2
+  exit 1
+fi
 
-scores_path = Path(os.environ["LOG_DIR"]) / "scores.json"
-if not scores_path.exists():
-    raise SystemExit(f"error: missing {scores_path}")
+accuracy="$(
+  jq -r '
+    [
+      .results[]?
+      | .metrics[]?
+      | select(.name == "check_arithmetic/accuracy")
+      | .value
+    ] | if length == 0 then empty else .[0] end
+  ' "${scores_file}"
+)"
+if [ -z "${accuracy}" ]; then
+  echo "error: missing check_arithmetic/accuracy metric in scores.json" >&2
+  exit 1
+fi
 
-scores = json.loads(scores_path.read_text(encoding="utf-8"))
-for result in scores.get("results", []):
-    for metric in result.get("metrics", []):
-        if metric.get("name") == "check_arithmetic/accuracy":
-            value = float(metric.get("value"))
-            if abs(value - 1.0) > 1e-9:
-                raise SystemExit(
-                    f"error: expected check_arithmetic/accuracy=1.0, got {value}"
-                )
-            print(f"== smoke: ok (check_arithmetic/accuracy={value})", file=sys.stderr)
-            raise SystemExit(0)
+if ! awk -v value="${accuracy}" 'BEGIN { exit !(value > 0.999999999 && value < 1.000000001) }'; then
+  echo "error: expected check_arithmetic/accuracy=1.0, got ${accuracy}" >&2
+  exit 1
+fi
 
-raise SystemExit("error: missing check_arithmetic/accuracy metric in scores.json")
-PY
+echo "== smoke: ok (check_arithmetic/accuracy=${accuracy})" >&2
