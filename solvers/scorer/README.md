@@ -26,10 +26,22 @@ Install deps with:
 
 For best cross-version compatibility, generate logs with `--log-format json`.
 
-### Materialize scores (recommended)
-If you ran `astabench eval` with `--no-score`, the log files will not contain
-scores yet. Use `inspect score` in this frozen scorer env to materialize scores
-into the logs.
+### Recommended workflow
+Use the wrapper script from the repo root:
+
+```bash
+./scripts/eval_then_score.sh paper_finder --log-dir ./logs/paper_finder_two_phase -- \
+  --split validation --solver <solver_spec> --model <model> --limit 1
+```
+
+This handles the full workflow:
+1. Solve in `solvers/<solver>` with `astabench eval --no-score --log-format json`
+2. Materialize scores in `solvers/scorer` with `inspect score --overwrite`
+3. Aggregate in `solvers/scorer` with `astabench score`
+
+### Manual scoring commands (reference)
+If you already have unscored logs from `astabench eval --no-score`, use
+`inspect score` in this frozen scorer env to materialize scores into the logs.
 
 Score a single log file (overwrite in place):
 ```bash
@@ -42,7 +54,7 @@ uv run --project "solvers/scorer" --python 3.11 --frozen -- inspect score --scor
 
 Score all logs in a log dir (uses Inspect's `logs.json` manifest):
 ```bash
-LOG_DIR="<log_dir>" python -c 'import json, os; from pathlib import Path; p = Path(os.environ["LOG_DIR"]) / "logs.json"; m = json.loads(p.read_text(encoding="utf-8")); print("\n".join(m.keys()))' \
+jq -r 'keys[]' "<log_dir>/logs.json" \
   | while IFS= read -r log_file; do
       [ -z "${log_file}" ] && continue
       uv run --project "solvers/scorer" --python 3.11 --frozen -- inspect score --overwrite "<log_dir>/${log_file}"
@@ -53,21 +65,4 @@ LOG_DIR="<log_dir>" python -c 'import json, os; from pathlib import Path; p = Pa
 After log files contain scores, you can aggregate them with:
 ```bash
 uv run --project "solvers/scorer" --python 3.11 --frozen -- astabench score <log_dir>
-```
-
-## Example: cross-version solve → score
-
-Solve in a solver env (example uses `paper_finder`, which pins a newer Inspect):
-```bash
-uv run --project "solvers/paper_finder" --python 3.11 --frozen -- astabench eval --no-score --log-format json --log-dir ./logs/paper_finder ...
-```
-
-Materialize scores in the frozen scorer env:
-```bash
-uv run --project "solvers/scorer" --python 3.11 --frozen -- inspect score --overwrite ./logs/paper_finder/<log_file>
-```
-
-Optionally aggregate the scored logs:
-```bash
-uv run --project "solvers/scorer" --python 3.11 --frozen -- astabench score ./logs/paper_finder
 ```
