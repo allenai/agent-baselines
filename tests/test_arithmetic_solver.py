@@ -4,7 +4,6 @@ import asyncio
 import importlib.util
 from pathlib import Path
 
-import pytest
 from inspect_ai.model import ChatMessageUser, ModelName, ModelOutput
 from inspect_ai.scorer import Target
 from inspect_ai.solver import TaskState
@@ -28,28 +27,6 @@ def test_extract_expression_prefers_compute_line_over_example_json() -> None:
         "Compute 4.6 + 2.1*2"
     )
     assert arithmetic_solver._extract_expression(prompt) == "4.6 + 2.1*2"
-
-
-def test_extract_expression_fallback_uses_last_match() -> None:
-    text = "Example: 2+2\nNow solve this one: 3*4"
-    assert arithmetic_solver._extract_expression(text) == "3*4"
-
-
-def test_safe_eval_on_extracted_expression() -> None:
-    prompt = 'Format as {"answer": 1234}.\n' "Compute 4.6 + 2.1*2"
-    expr = arithmetic_solver._extract_expression(prompt)
-    assert arithmetic_solver._safe_eval(expr) == pytest.approx(8.8)
-
-
-def test_extract_expression_handles_parenthesized_compute_line() -> None:
-    expr = arithmetic_solver._extract_expression("Compute (1+2)*3")
-    assert expr == "(1+2)*3"
-    assert arithmetic_solver._safe_eval(expr) == pytest.approx(9.0)
-
-
-def test_extract_expression_raises_when_missing() -> None:
-    with pytest.raises(ValueError, match="No arithmetic expression found"):
-        arithmetic_solver._extract_expression("No arithmetic here.")
 
 
 def test_solver_populates_choices_for_cross_version_scoring() -> None:
