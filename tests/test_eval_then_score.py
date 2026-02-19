@@ -83,6 +83,34 @@ def make_fake_uv(bin_dir: Path, log_file: Path) -> None:
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
 
+def make_fake_jq(bin_dir: Path) -> None:
+    jq = bin_dir / "jq"
+    write_file(
+        jq,
+        "\n".join(
+            [
+                "#!/usr/bin/env bash",
+                "set -euo pipefail",
+                'if [ "$#" -ne 3 ] || [ "$1" != "-r" ] || [ "$2" != "keys[]" ]; then',
+                '  echo "unexpected jq args: $*" >&2',
+                "  exit 2",
+                "fi",
+                "python - \"$3\" <<'PY'",
+                "import json",
+                "import sys",
+                "from pathlib import Path",
+                "",
+                "manifest = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))",
+                "for key in manifest.keys():",
+                "    print(key)",
+                "PY",
+            ]
+        )
+        + "\n",
+    )
+    jq.chmod(0o755)
+
+
 def read_shell_calls(log_file: Path) -> list[list[str]]:
     if not log_file.exists():
         return []
@@ -143,6 +171,7 @@ def _make_eval_env(
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
     make_fake_uv(bin_dir, uv_log)
+    make_fake_jq(bin_dir)
 
     env = os.environ.copy()
     env["UV_LOG_FILE"] = str(uv_log)

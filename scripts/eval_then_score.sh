@@ -25,6 +25,7 @@ Examples:
 
 Notes:
   - The eval phase enforces `--no-score --log-format json` for later scoring.
+  - Requires `jq` to read `logs.json` (uses: `jq -r 'keys[]'`).
   - For custom/non-registered scorers, pass `--scorer <path.py@scorer_name>`.
   - The score phase runs in the frozen scorer env via:
       1) `inspect score --overwrite` per log file
@@ -47,6 +48,11 @@ cd "${repo_root}"
 
 if [ $# -lt 1 ]; then
   usage
+  exit 2
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+  echo "error: jq is required (expected: jq -r 'keys[]' <log_dir>/logs.json)" >&2
   exit 2
 fi
 
@@ -121,7 +127,7 @@ if [ ! -f "${log_dir}/logs.json" ]; then
   echo "error: ${log_dir}/logs.json not found" >&2
   exit 1
 fi
-log_files="$(LOG_DIR="${log_dir}" python -c 'import json, os; from pathlib import Path; p = Path(os.environ["LOG_DIR"]) / "logs.json"; manifest = json.loads(p.read_text(encoding="utf-8")); print("\n".join(manifest.keys()))')"
+log_files="$(jq -r 'keys[]' "${log_dir}/logs.json")"
 if [ -z "${log_files}" ]; then
   echo "error: no log files listed in ${log_dir}/logs.json" >&2
   exit 1

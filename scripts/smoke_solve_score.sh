@@ -23,6 +23,11 @@ config_path="scripts/ci/two_phase_smoke.yml"
 solver_spec="scripts/arithmetic_solver.py@arithmetic_solver"
 model="mockllm/model"
 
+if ! command -v jq >/dev/null 2>&1; then
+  echo "error: jq is required (expected: jq -r 'keys[]' <log_dir>/logs.json)" >&2
+  exit 2
+fi
+
 if [ ! -f "${solver_project}/pyproject.toml" ]; then
   echo "error: unknown solver env '${solver}' (missing ${solver_project}/pyproject.toml)" >&2
   exit 2
@@ -75,7 +80,7 @@ if [ ! -f "${log_dir}/logs.json" ]; then
   echo "error: ${log_dir}/logs.json not found" >&2
   exit 1
 fi
-log_files="$(LOG_DIR="${log_dir}" python -c 'import json, os; from pathlib import Path; p = Path(os.environ["LOG_DIR"]) / "logs.json"; manifest = json.loads(p.read_text(encoding="utf-8")); print("\n".join(manifest.keys()))')"
+log_files="$(jq -r 'keys[]' "${log_dir}/logs.json")"
 if [ -z "${log_files}" ]; then
   echo "error: no log files listed in ${log_dir}/logs.json" >&2
   exit 1
