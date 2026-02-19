@@ -23,18 +23,19 @@ from tests._test_helpers import (
 )
 
 
-def _script_path() -> Path:
+def _source_script_path() -> Path:
     return Path(__file__).resolve().parents[1] / "scripts" / "eval_then_score.sh"
 
 
 def _run_eval_then_score(
     *,
+    script_path: Path,
     cwd: Path,
     env: dict[str, str],
     args: list[str],
 ) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [bash_path(), str(_script_path()), *args],
+        [bash_path(), str(script_path), *args],
         cwd=cwd,
         env=env,
         text=True,
@@ -48,6 +49,7 @@ class EvalThenScoreEnv:
     root: Path
     env: dict[str, str]
     uv_log: Path
+    script_path: Path
 
 
 def _make_eval_env(
@@ -58,6 +60,12 @@ def _make_eval_env(
 ) -> EvalThenScoreEnv:
     root = tmp_path / "repo"
     make_repo_root(root)
+    source_script = _source_script_path()
+    script_path = root / "scripts" / "eval_then_score.sh"
+    script_path.parent.mkdir(parents=True, exist_ok=True)
+    script_path.write_text(source_script.read_text(encoding="utf-8"), encoding="utf-8")
+    script_path.chmod(0o755)
+
     if include_solver:
         make_solver_project(root, "react")
     if include_scorer:
@@ -71,7 +79,7 @@ def _make_eval_env(
     env = os.environ.copy()
     env["UV_LOG_FILE"] = str(uv_log)
     env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
-    return EvalThenScoreEnv(root=root, env=env, uv_log=uv_log)
+    return EvalThenScoreEnv(root=root, env=env, uv_log=uv_log, script_path=script_path)
 
 
 @pytest.fixture
@@ -82,6 +90,7 @@ def eval_env(tmp_path: Path) -> EvalThenScoreEnv:
 def test_calls_solve_then_score_with_log_dir(eval_env: EvalThenScoreEnv) -> None:
 
     result = _run_eval_then_score(
+        script_path=eval_env.script_path,
         cwd=eval_env.root,
         env=eval_env.env,
         args=[
@@ -133,6 +142,7 @@ def test_works_from_subdir(eval_env: EvalThenScoreEnv) -> None:
     subdir.mkdir(parents=True)
 
     result = _run_eval_then_score(
+        script_path=eval_env.script_path,
         cwd=subdir,
         env=eval_env.env,
         args=[
@@ -150,6 +160,7 @@ def test_requires_solver_project(tmp_path: Path) -> None:
     test_env = _make_eval_env(tmp_path, include_solver=False, include_scorer=True)
 
     result = _run_eval_then_score(
+        script_path=test_env.script_path,
         cwd=test_env.root,
         env=test_env.env,
         args=["react", "--", "--config-only"],
@@ -162,6 +173,7 @@ def test_requires_scorer_project(tmp_path: Path) -> None:
     test_env = _make_eval_env(tmp_path, include_solver=True, include_scorer=False)
 
     result = _run_eval_then_score(
+        script_path=test_env.script_path,
         cwd=test_env.root,
         env=test_env.env,
         args=["react", "--", "--config-only"],

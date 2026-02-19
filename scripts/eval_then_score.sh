@@ -37,25 +37,11 @@ if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
   exit 0
 fi
 
-# Keep in sync with scripts/inspect_log_convert.sh:find_repo_root.
-find_repo_root() {
-  local dir="$PWD"
-  while true; do
-    if [ -f "${dir}/pyproject.toml" ] && [ -d "${dir}/solvers" ]; then
-      printf '%s\n' "${dir}"
-      return 0
-    fi
-    if [ "${dir}" = "/" ]; then
-      return 1
-    fi
-    dir="$(dirname "${dir}")"
-  done
-}
-
-repo_root="$(find_repo_root)" || {
-  echo "error: must run from within the repo (expected an ancestor dir with pyproject.toml + solvers/)" >&2
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [ ! -f "${repo_root}/pyproject.toml" ] || [ ! -d "${repo_root}/solvers" ]; then
+  echo "error: could not determine repo root from script path (${repo_root})" >&2
   exit 2
-}
+fi
 
 cd "${repo_root}"
 

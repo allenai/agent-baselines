@@ -197,10 +197,6 @@ different Inspect log format (e.g. an older `eval` format), convert them to JSON
 ```
 uv run --project "solvers/<solver>" --python 3.11 --frozen -- inspect log convert --to json --output-dir <out_dir> <path_to_logs_or_log_dir>
 ```
-Alternatively, use the wrapper:
-```
-./scripts/inspect_log_convert.sh <solver> --to json --output-dir <out_dir> <path_to_logs_or_log_dir>
-```
 
 ## Smoke test (all solver sub‑projects)
 Run:
