@@ -7,6 +7,16 @@ name = "agent-baselines-react"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
-    "astabench==0.3.1",
-    "inspect_ai==0.3.114",
+    "astabench==0.4.1",
+    "inspect_ai==0.3.183",
+]
+
+[tool.uv]
+override-dependencies = [
+    # Override astabench's inspect pin for Opus 4.6 support.
+    "inspect_ai==0.3.183",
+    # inspect_ai==0.3.183 imports Anthropic beta types added in 0.78+.
+    "anthropic==0.84.0",
+    # inspect 0.3.183 entrypoint loading requires OpenAI >= 2.17.0.
+    "openai==2.17.0",
 ]

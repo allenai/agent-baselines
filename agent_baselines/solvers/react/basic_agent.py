@@ -12,6 +12,7 @@ from typing import Literal
 from astabench.tools import ToolsetConfig
 from astabench.tools.submission import get_submission_manager, submit_tool
 from astabench.util.state import merge_tools_with_state
+from agent_baselines.inspect_compat import execute_tools
 from inspect_ai.model import (
     CachePolicy,
     ChatMessage,
@@ -19,7 +20,6 @@ from inspect_ai.model import (
     ChatMessageTool,
     ChatMessageUser,
     Model,
-    execute_tools,
     get_model,
 )
 from inspect_ai.solver import Generate, Solver, TaskState, chain, solver, system_message
