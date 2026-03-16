@@ -12,7 +12,7 @@ resolution-markers = [
 
 [manifest]
 overrides = [
-    { name = "astabench", specifier = "==0.4.2" },
+    { name = "astabench", specifier = "==0.5.0" },
     { name = "inspect-ai", specifier = "==0.3.169" },
 ]
 
@@ -27,7 +27,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "astabench", specifier = "==0.4.2" },
+    { name = "astabench", specifier = "==0.5.0" },
     { name = "inspect-ai", specifier = "==0.3.169" },
 ]
 
