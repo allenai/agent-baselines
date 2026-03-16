@@ -21,6 +21,7 @@ max_tokens_lookup = {
     "openai/gpt-4.1": 32_000,
     "anthropic/claude-sonnet-3.7-20250219": 16_000,
     "google/gemini-2.5-flash": 64_000,
+    "google/gemini-3-flash-preview": 64_000,
     "default": 32_000,
 }
 

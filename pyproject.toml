@@ -8,7 +8,7 @@ version = "0.1.1"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "astabench==0.3.1",
+    "astabench>=0.3.1",
 ]
 
 [project.optional-dependencies]
@@ -76,7 +76,8 @@ conflicts = [
 ]
 override-dependencies = [
     # sqa pins openai to a lower version than inspect requires
-    "openai==1.78.0",
+    "openai==2.28.0",
+    "inspect_ai==0.3.143",
 
     # STORM pretends to require a lower version, but doesn't actually need it:
     # https://github.com/allenai/asta-bench/issues/31#issuecomment-3045978008
@@ -102,6 +103,7 @@ ignore = [
 "agent_baselines" = ["solvers/datavoyager/dv_core/config/*.yaml", "solvers/code_agent/*.yaml"]
 
 [tool.uv.sources]
+astabench = { path = "..", editable = true }
 knowledge-storm = { git = "https://github.com/gituser768/storm", branch = "dh-fix-youcom" }
 
 [tool.pytest.ini_options]

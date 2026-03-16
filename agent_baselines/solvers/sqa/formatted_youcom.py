@@ -44,6 +44,6 @@ def formatted_solver(
 ) -> Solver:
     chainlist = [
         youcom_solver(api_type=api_type, instructions=system_prompt),
-        format_solver("google/gemini-2.5-flash-preview-05-20"),
+        format_solver("google/gemini-3-flash-preview"),
     ]
     return chain(chainlist)

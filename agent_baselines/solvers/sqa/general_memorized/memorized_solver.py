@@ -60,7 +60,7 @@ def formatted_solver(
     chainlist = [
         memorized_solver(),
         format_solver(
-            "google/gemini-2.5-flash-preview-05-20", require_snippets=require_snippets
+            "google/gemini-3-flash-preview", require_snippets=require_snippets
         ),
     ]
     return chain(chainlist)
