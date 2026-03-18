@@ -28,7 +28,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "astabench", specifier = "==0.4.1" },
+    { name = "astabench", specifier = "==0.5.1" },
     { name = "inspect-ai", specifier = "==0.3.183" },
 ]
 
@@ -271,7 +271,7 @@ wheels = [
 
 [[package]]
 name = "astabench"
-version = "0.4.1"
+version = "0.5.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agent-eval" },
@@ -296,9 +296,9 @@ dependencies = [
     { name = "scipy" },
     { name = "tabulate" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/43/d3/c88896574f54276ecb42f2ea4f6ccc46f3326abe3e4fbcda6502a3a02874/astabench-0.4.1.tar.gz", hash = "sha256:001c94424983483edcbf675e15effb44218f1313202e28a115f85b6b6a417f09", size = 193833 }
+sdist = { url = "https://files.pythonhosted.org/packages/d9/73/fffe745b25fcf605b15771ee9b675ad745bf27eeae7438363bfd9dbbdf88/astabench-0.5.1.tar.gz", hash = "sha256:3bf1e33b15102ec0d7913cb92cfb835203799866e5648e60b43e1a76ca769657", size = 195257 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cc/ec/df091c3d5ad4fddc30b651d4fc56925c0fd6949ec936a85026406aa2cd11/astabench-0.4.1-py3-none-any.whl", hash = "sha256:b2c7b9da12d73e68e4a60e24a222f0884a9d2eef18c6817edfdca7116d739175", size = 212996 },
+    { url = "https://files.pythonhosted.org/packages/12/42/bbb94da8d67ca66debe7affccb383141be234e535c118d66e01d29d3970f/astabench-0.5.1-py3-none-any.whl", hash = "sha256:95b6c3594e9f468b75f43b6884fed8f867ac9bb6c3966a2acabf6df283f38a7b", size = 213756 },
 ]
 
 [[package]]
