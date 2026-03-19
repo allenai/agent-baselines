@@ -103,7 +103,6 @@ ignore = [
 "agent_baselines" = ["solvers/datavoyager/dv_core/config/*.yaml", "solvers/code_agent/*.yaml"]
 
 [tool.uv.sources]
-astabench = { path = "..", editable = true }
 knowledge-storm = { git = "https://github.com/gituser768/storm", branch = "dh-fix-youcom" }
 
 [tool.pytest.ini_options]
