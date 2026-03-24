@@ -18,6 +18,9 @@ from scholarqa.rag.reranker.modal_engine import RERANKER_MAPPING
 
 logger = logging.getLogger(__name__)
 
+REQUIRED_SQA_ENV_VARS = ("MODAL_TOKEN", "MODAL_TOKEN_SECRET", "ASTA_TOOL_KEY")
+REPO_ROOT = Path(__file__).resolve().parents[4]
+
 claude_4_0 = "anthropic/claude-sonnet-4-20250514"
 claude_3_7 = "anthropic/claude-3-7-sonnet-20250219"
 claude_3_5 = "anthropic/claude-3-5-sonnet-20240620"
@@ -35,6 +38,31 @@ completion_model_map = {
 }
 
 RERANKER_TYPES = list(RERANKER_MAPPING.keys())
+
+
+def load_repo_env_if_needed(env_path: Path | None = None) -> None:
+    if all(os.getenv(key) for key in REQUIRED_SQA_ENV_VARS):
+        return
+    env_path = env_path or REPO_ROOT / ".env"
+    if not env_path.exists():
+        return
+    for raw_line in env_path.read_text().splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        if key not in REQUIRED_SQA_ENV_VARS or os.getenv(key):
+            continue
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+            value = value[1:-1]
+        os.environ[key] = value
+
+
+def missing_required_env_vars(env_path: Path | None = None) -> list[str]:
+    load_repo_env_if_needed(env_path)
+    return [key for key in REQUIRED_SQA_ENV_VARS if not os.getenv(key)]
 
 
 def set_citation_titles(resp):
@@ -142,14 +170,9 @@ def query_sqa(
     reranker_type: str = "modal",
     **reranker_kwargs,
 ):
-    if not (
-        os.getenv("MODAL_TOKEN")
-        and os.getenv("MODAL_TOKEN_SECRET")
-        and os.getenv("ASTA_TOOL_KEY")
-    ):
-        raise RuntimeError(
-            "MODAL_TOKEN, MODAL_TOKEN_SECRET, or ASTA_TOOL_KEY is not set"
-        )
+    missing_env = missing_required_env_vars()
+    if missing_env:
+        raise RuntimeError(f"Missing required env vars for SQA solver: {missing_env}")
     retriever = FullTextRetriever(n_retrieval=256, n_keyword_srch=20)
     if "modal" == reranker_type:
         if not reranker_kwargs:
@@ -194,12 +217,11 @@ def sqa_solver(
     **reranker_kwargs,
 ) -> Solver:
     async def solve(state: TaskState, generate: Generate) -> TaskState:
-        # check for modal tokens:
-        assert (
-            os.getenv("MODAL_TOKEN")
-            and os.getenv("MODAL_TOKEN_SECRET")
-            and os.getenv("ASTA_TOOL_KEY")
-        ), "MODAL_TOKEN or MODAL_TOKEN_SECRET or ASTA_TOOL_KEY is not set"
+        missing_env = missing_required_env_vars()
+        if missing_env:
+            raise RuntimeError(
+                f"Missing required env vars for SQA solver: {missing_env}"
+            )
         question = state.metadata["initial_prompt"]
         proc_result = await subprocess(
             [
