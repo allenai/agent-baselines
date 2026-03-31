@@ -14,6 +14,8 @@ dependencies = [
 
 [tool.uv]
 override-dependencies = [
-    # ai2-scholar-qa pins openai to a lower version than inspect requires
+    # Keep the SQA solver on the OpenAI SDK version required by
+    # ai2-scholar-qa==0.7.0 in this older astabench==0.3.1 / inspect_ai==0.3.114
+    # environment.
     "openai==1.78.0",
 ]

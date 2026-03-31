@@ -75,12 +75,20 @@ conflicts = [
     [{extra = "storm"}, {extra = "smolagents"}],
 ]
 override-dependencies = [
-    # sqa pins openai to a lower version than inspect requires
-    "openai==2.28.0",
+    # Shared root-env stability pin. This keeps the repo-level dev/test env on
+    # the same Inspect release as current astabench (0.5.x). The per-solver
+    # sub-projects below still pin their own Inspect versions independently.
+    # Revisit if/when the root env moves to a newer astabench release.
     "inspect_ai==0.3.143",
 
-    # STORM pretends to require a lower version, but doesn't actually need it:
-    # https://github.com/allenai/asta-bench/issues/31#issuecomment-3045978008
+    # Hard conflict when the root env is installed with the `sqa` extra:
+    # ai2-scholar-qa==0.7.0 pins openai==1.78.0, but the shared root env is
+    # currently validated with the newer 2.28.0 SDK.
+    "openai==2.28.0",
+
+    # Keep the root env on the same datasets line as astabench/STORM runs we
+    # currently validate. This one is a compatibility pin, not a known hard
+    # resolver conflict.
     "datasets~=3.2.0",
 ]
 
