@@ -12,7 +12,7 @@ resolution-markers = [
 
 [manifest]
 overrides = [
-    { name = "astabench", specifier = "==0.4.2" },
+    { name = "astabench", specifier = "==0.5.0" },
     { name = "inspect-ai", specifier = "==0.3.169" },
 ]
 
@@ -27,7 +27,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "astabench", specifier = "==0.4.2" },
+    { name = "astabench", specifier = "==0.5.0" },
     { name = "inspect-ai", specifier = "==0.3.169" },
 ]
 
@@ -270,7 +270,7 @@ wheels = [
 
 [[package]]
 name = "astabench"
-version = "0.4.1"
+version = "0.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agent-eval" },
@@ -295,9 +295,9 @@ dependencies = [
     { name = "scipy" },
     { name = "tabulate" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/43/d3/c88896574f54276ecb42f2ea4f6ccc46f3326abe3e4fbcda6502a3a02874/astabench-0.4.1.tar.gz", hash = "sha256:001c94424983483edcbf675e15effb44218f1313202e28a115f85b6b6a417f09", size = 193833, upload-time = "2026-02-26T09:43:07.154Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9c/3d/af4ccc3bc393173d761edc4b097c315f8ac863b3dbf781c160d126404174/astabench-0.5.0.tar.gz", hash = "sha256:22706fd3e1f9871cc6e4fa1e027f3a4a22746f5b80f9d26d2a0c586c4a2d4eeb", size = 194938, upload-time = "2026-03-12T20:57:46.372Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cc/ec/df091c3d5ad4fddc30b651d4fc56925c0fd6949ec936a85026406aa2cd11/astabench-0.4.1-py3-none-any.whl", hash = "sha256:b2c7b9da12d73e68e4a60e24a222f0884a9d2eef18c6817edfdca7116d739175", size = 212996, upload-time = "2026-02-26T09:43:05.401Z" },
+    { url = "https://files.pythonhosted.org/packages/5a/d0/87e17786e79f99509e84d76ab8afb32b0c5238a9dd3fb52011a2225cc5f9/astabench-0.5.0-py3-none-any.whl", hash = "sha256:1e063ecf55c79ff87025d7bc7a07485bb827664ffe2ab0f83a3bd19e48aa8e59", size = 213466, upload-time = "2026-03-12T20:57:44.765Z" },
 ]
 
 [[package]]
