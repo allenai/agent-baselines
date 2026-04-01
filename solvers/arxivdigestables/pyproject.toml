@@ -7,13 +7,10 @@ name = "agent-baselines-arxivdigestables"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
-    "astabench==0.3.1",
+    "astabench==0.5.2",
     "inspect_ai==0.3.114",
-    "ai2-scholar-qa==0.7.0",
+    "ai2-scholar-qa",
 ]
 
-[tool.uv]
-override-dependencies = [
-    # ai2-scholar-qa pins openai to a lower version than inspect requires
-    "openai==1.78.0",
-]
+[tool.uv.sources]
+ai2-scholar-qa = { git = "https://github.com/gituser768/ai2-scholarqa-lib.git", rev = "4b0ca06", subdirectory = "api" }

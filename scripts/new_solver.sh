@@ -73,7 +73,7 @@ name = "${project_name}"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
-    "astabench==0.3.1",
+    "astabench==0.5.2",
     "inspect_ai==0.3.114",
 ]
 

@@ -251,7 +251,7 @@ def fewshot_textsim_router() -> Solver:
                 .as_posix()
             ),
         )
-        mkhandoff("sqa", sqa_solver(completion_model="claude-4.0"))
+        mkhandoff("sqa", sqa_solver(completion_model="claude-4.6"))
         mkhandoff(
             "super",
             code_agent(

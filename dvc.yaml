@@ -14,9 +14,8 @@ stages:
   solve_sqa:
     matrix:
       model:
-        - claude-3.7
-        - gemini-2.5-pro
-        - claude-4.0
+        - claude-4.6
+        - gemini-3.1-pro-preview
         - o3_high
       split:
         - dev
@@ -202,17 +201,13 @@ stages:
           llm_name: openai/o4-mini
           llm_args: "--reasoning-effort high --reasoning-tokens 8192 -M responses_store=false --reasoning-history none"
         - <<: *llm_defaults
-          llm_name: anthropic/claude-sonnet-4-20250514
+          llm_name: anthropic/claude-sonnet-4-6
           llm_args: "--reasoning-tokens 8192"
           suffix: "-thinking"
         - <<: *llm_defaults
-          llm_name: google/gemini-2.5-pro-preview-03-25
+          llm_name: google/gemini-3.1-pro-preview
         - <<: *llm_defaults
-          llm_name: anthropic/claude-sonnet-4-20250514
-        - <<: *llm_defaults
-          llm_name: anthropic/claude-3-7-sonnet-20250219
-        - <<: *llm_defaults
-          llm_name: anthropic/claude-3-5-sonnet-20240620
+          llm_name: anthropic/claude-sonnet-4-6
         - <<: *llm_defaults
           llm_name: openai/o3
           llm_args: "--reasoning-effort high --reasoning-tokens 8192 -M responses_store=false --reasoning-history none"
@@ -313,22 +308,16 @@ stages:
           is_retrieverless: true
         - name: openai/o3
           is_retrieverless: true
-        - name: anthropic/claude-sonnet-4-20250514-thinking
+        - name: anthropic/claude-sonnet-4-6-thinking
           is_retrieverless: true
-        - name: google/gemini-2.5-pro-preview-03-25
+        - name: google/gemini-3.1-pro-preview
           is_retrieverless: true
-        - name: anthropic/claude-sonnet-4-20250514
-          is_retrieverless: true
-        - name: anthropic/claude-3-7-sonnet-20250219
-          is_retrieverless: true
-        - name: anthropic/claude-3-5-sonnet-20240620
+        - name: anthropic/claude-sonnet-4-6
           is_retrieverless: true
         # sqa solvers:
-        - name: sqa_claude-3.7
+        - name: sqa_claude-4.6
           is_retrieverless: false
-        - name: sqa_claude-4.0
-          is_retrieverless: false
-        - name: sqa_gemini-2.5-pro
+        - name: sqa_gemini-3.1-pro-preview
           is_retrieverless: false
         - name: sqa_o3_high
           is_retrieverless: false
@@ -380,14 +369,11 @@ stages:
       model:
         - openai/o4-mini
         - openai/o3
-        - anthropic/claude-sonnet-4-20250514-thinking
-        - google/gemini-2.5-pro-preview-03-25
-        - anthropic/claude-sonnet-4-20250514
-        - anthropic/claude-3-7-sonnet-20250219
-        - anthropic/claude-3-5-sonnet-20240620
-        - sqa_claude-3.7
-        - sqa_claude-4.0
-        - sqa_gemini-2.5-pro
+        - anthropic/claude-sonnet-4-6-thinking
+        - google/gemini-3.1-pro-preview
+        - anthropic/claude-sonnet-4-6
+        - sqa_claude-4.6
+        - sqa_gemini-3.1-pro-preview
         - sqa_o3_high
         - elicit
         - storm
@@ -417,14 +403,11 @@ stages:
       model:
         - openai/o4-mini
         - openai/o3
-        - anthropic/claude-sonnet-4-20250514-thinking
-        - google/gemini-2.5-pro-preview-03-25
-        - anthropic/claude-sonnet-4-20250514
-        - anthropic/claude-3-7-sonnet-20250219
-        - anthropic/claude-3-5-sonnet-20240620
-        - sqa_claude-3.7
-        - sqa_claude-4.0
-        - sqa_gemini-2.5-pro
+        - anthropic/claude-sonnet-4-6-thinking
+        - google/gemini-3.1-pro-preview
+        - anthropic/claude-sonnet-4-6
+        - sqa_claude-4.6
+        - sqa_gemini-3.1-pro-preview
         - sqa_o3_high
         - elicit
         - storm
@@ -452,14 +435,11 @@ stages:
       model:
         - openai/o4-mini
         - openai/o3
-        - anthropic/claude-sonnet-4-20250514-thinking
-        - google/gemini-2.5-pro-preview-03-25
-        - anthropic/claude-sonnet-4-20250514
-        - anthropic/claude-3-7-sonnet-20250219
-        - anthropic/claude-3-5-sonnet-20240620
-        - sqa_claude-3.7
-        - sqa_claude-4.0
-        - sqa_gemini-2.5-pro
+        - anthropic/claude-sonnet-4-6-thinking
+        - google/gemini-3.1-pro-preview
+        - anthropic/claude-sonnet-4-6
+        - sqa_claude-4.6
+        - sqa_gemini-3.1-pro-preview
         - sqa_o3_high
         - elicit
         - storm
