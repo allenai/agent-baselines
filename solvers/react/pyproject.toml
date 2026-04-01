@@ -18,5 +18,5 @@ dependencies = [
 [tool.uv]
 override-dependencies = [
     # TODO remove me once agent-eval and astabench is updated with this
-    "inspect_ai==0.3.202",
+    "inspect_ai==0.3.203",
 ]

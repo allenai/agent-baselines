@@ -11,7 +11,7 @@ resolution-markers = [
 ]
 
 [manifest]
-overrides = [{ name = "inspect-ai", specifier = "==0.3.202" }]
+overrides = [{ name = "inspect-ai", specifier = "==0.3.203" }]
 
 [[package]]
 name = "agent-baselines-react"
@@ -1268,7 +1268,7 @@ wheels = [
 
 [[package]]
 name = "inspect-ai"
-version = "0.3.202"
+version = "0.3.203"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aioboto3" },
@@ -1309,9 +1309,9 @@ dependencies = [
     { name = "zipp" },
     { name = "zstandard" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/86/2b/20b237f8bf21a8b209585655f1bccc780ac50f91a297b0645c0f7a061b34/inspect_ai-0.3.202.tar.gz", hash = "sha256:de8a575a041ea7e84913eddea4f6512accdf62924f496383eb8a77a58e5f96b3", size = 42475250, upload-time = "2026-03-31T15:56:33.578Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/89/78/54882838ccfb70dd9e35a4a4f30d811e4b29249961aaf44b88e3bf1cfef5/inspect_ai-0.3.203.tar.gz", hash = "sha256:576d8fbc15a2ad64b9080520f9088d57934c112b99a747505916e1c95a1d289c", size = 42476985, upload-time = "2026-04-01T20:17:44.464Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f5/97/5405c4e2acfc70e70a65aad10ca5b15c45d437df29a77db71d4157642c45/inspect_ai-0.3.202-py3-none-any.whl", hash = "sha256:91fa45b2e16c709cf269651e8fdb80f353ca933fa80647b32b66a5be5601a42b", size = 33270087, upload-time = "2026-03-31T15:56:24.627Z" },
+    { url = "https://files.pythonhosted.org/packages/eb/0a/79e771a4eb862cc874ac08c2e88332023b961594267651d0b54a6e982f52/inspect_ai-0.3.203-py3-none-any.whl", hash = "sha256:894cff8873f033a7dd8391bb5317fbfa6bb35478622a72504ef32822b4f2bf79", size = 33271783, upload-time = "2026-04-01T20:17:36.187Z" },
 ]
 
 [[package]]
