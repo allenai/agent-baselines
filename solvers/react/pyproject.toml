@@ -9,9 +9,12 @@ requires-python = ">=3.11"
 dependencies = [
     "astabench==0.5.2",
     "inspect_ai==0.3.202",
+    # inspect==0.3.202 requires this
+    "openai>=2.26.0",
 ]
 
 [tool.uv]
 override-dependencies = [
+    # TODO remove me once agent-eval and astabench is updated with this
     "inspect_ai==0.3.202",
 ]
