@@ -7,7 +7,7 @@ name = "agent-baselines-smolagents"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
-    "astabench==0.5.2",
+    "astabench==0.3.1",
     "inspect_ai==0.3.114",
     "smolagents==1.17.0",
 ]
