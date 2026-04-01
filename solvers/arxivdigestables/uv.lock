@@ -8,6 +8,12 @@ resolution-markers = [
     "python_full_version < '3.12'",
 ]
 
+[manifest]
+overrides = [
+    { name = "litellm", specifier = "==1.82.3" },
+    { name = "openai", specifier = "==2.30.0" },
+]
+
 [[package]]
 name = "agent-baselines-arxivdigestables"
 version = "0.1.0"
@@ -20,7 +26,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "ai2-scholar-qa", git = "https://github.com/gituser768/ai2-scholarqa-lib.git?subdirectory=api&rev=4b0ca06" },
+    { name = "ai2-scholar-qa", specifier = "==0.8.13" },
     { name = "astabench", specifier = "==0.5.2" },
     { name = "inspect-ai", specifier = "==0.3.114" },
 ]
@@ -52,8 +58,8 @@ leaderboard = [
 
 [[package]]
 name = "ai2-scholar-qa"
-version = "0.8.14"
-source = { git = "https://github.com/gituser768/ai2-scholarqa-lib.git?subdirectory=api&rev=4b0ca06#4b0ca06c663adff84535f87f6fc23812652b4686" }
+version = "0.8.13"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyascii" },
     { name = "backoff" },
@@ -80,6 +86,10 @@ dependencies = [
     { name = "tenacity" },
     { name = "tqdm" },
     { name = "uvicorn", extra = ["standard"] },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/53/93/d8f3ca35d95b4791316cdfcc8aa3c34a8e226b57284073b7d46a64ac5046/ai2_scholar_qa-0.8.13.tar.gz", hash = "sha256:b07b3de5c93979cf9cc3c252b8d8f09ba258e82ab4f80796cd66b7b6f8fdee3c", size = 107678 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bd/37/a477d6bfb82ac62373d042db557806d72469cebeb448ecd28da873ec78c0/ai2_scholar_qa-0.8.13-py3-none-any.whl", hash = "sha256:3f4a9457fccdcdc9f817b367bd2402943324660bf4a2c69a59351363101f8664", size = 118283 },
 ]
 
 [[package]]

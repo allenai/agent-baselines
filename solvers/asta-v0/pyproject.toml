@@ -9,7 +9,7 @@ requires-python = ">=3.11"
 dependencies = [
     "astabench==0.5.2",
     "inspect_ai==0.3.114",
-    "ai2-scholar-qa",
+    "ai2-scholar-qa==0.8.13",
     "autogen-agentchat==0.6.4",
     "autogen-ext[openai, diskcache, azure, anthropic]==0.6.4",
     "ipython~=8.18",
@@ -21,5 +21,8 @@ dependencies = [
     "websocket-client~=1.7.0",
 ]
 
-[tool.uv.sources]
-ai2-scholar-qa = { git = "https://github.com/gituser768/ai2-scholarqa-lib.git", rev = "4b0ca06", subdirectory = "api" }
+[tool.uv]
+override-dependencies = [
+    "litellm==1.82.3",
+    "openai==2.30.0",
+]

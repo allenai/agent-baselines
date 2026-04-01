@@ -28,7 +28,7 @@ azure = [
     "azure-ai-inference"
 ]
 sqa = [
-    "ai2-scholar-qa",
+    "ai2-scholar-qa==0.8.13",
 ]
 smolagents = [
     "smolagents==1.17.0",
@@ -75,9 +75,8 @@ conflicts = [
     [{extra = "storm"}, {extra = "smolagents"}],
 ]
 override-dependencies = [
-    # futurehouse-client and knowledge-storm still pin older provider
-    # libraries, but the current SQA model set is validated on the newer
-    # astabench stack.
+    # ai2-scholar-qa 0.8.13 still pins older provider libraries, but the
+    # current SQA model set is validated on the newer astabench stack.
     "litellm==1.82.3",
     "openai==2.30.0",
 
@@ -106,8 +105,6 @@ ignore = [
 
 [tool.uv.sources]
 knowledge-storm = { git = "https://github.com/gituser768/storm", branch = "dh-fix-youcom" }
-# Temporary until ai2-scholar-qa 0.8.14 is released.
-ai2-scholar-qa = { git = "https://github.com/gituser768/ai2-scholarqa-lib.git", rev = "4b0ca06", subdirectory = "api" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
