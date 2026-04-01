@@ -10,13 +10,10 @@ Inspect version (and related deps) without impacting other solvers.
 - **Minimal coupling:** solver envs should not depend on the root `pyproject.toml`.
 
 ## Constraints / Notes
-- Most solvers import `astabench`; the per-solver projects in this repo still
-  default to `astabench==0.3.1`, which pins `inspect_ai==0.3.114`. Changing
-  Inspect versions there still requires an override or an `astabench` fork.
-- Separately, the repo-root dev/test environment in [`pyproject.toml`](../pyproject.toml)
-  is pinned to `inspect_ai==0.3.143`. That override block now calls out which
-  entries are hard conflicts versus shared-env compatibility pins so we can
-  reevaluate them later.
+- Most solvers import `astabench`; `astabench` pins `inspect_ai` in its own
+  dependencies (currently an **exact** pin). As of 2026-02-02, all released
+  `astabench` versions pin `inspect_ai==0.3.114`, so changing
+  Inspect versions requires an override or an `astabench` fork.
 - Solver code lives under `agent_baselines/solvers/…` in the repo root; we rely on
   running from repo root so Python can import `agent_baselines` without installing
   it as a package. Solver `setup.sh` and `demo.sh` `cd` to repo root to make this

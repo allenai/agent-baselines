@@ -30,11 +30,7 @@ Adding a new solver:
 - Use `./scripts/new_solver.sh <solver>` (then run `uv lock --project "solvers/<solver>" --python 3.11`).
 
 Inspect/AstaBench coupling:
-- Most solver sub-projects in this repo still pin `astabench==0.3.1` and
-  `inspect_ai==0.3.114`.
-- The shared repo-root env is pinned separately in [`pyproject.toml`](pyproject.toml);
-  that override block now notes which entries are hard conflicts (`sqa`'s
-  `openai` pin) versus shared-env compatibility pins.
+- `astabench` pins `inspect_ai` exactly (currently released astabench versions pin `inspect_ai==0.3.114`).
 - To diverge per-solver, use uv `override-dependencies`. See `docs/per_solver_envs.md`.
 
 If you have trouble setting up an environment on your local system, a Docker image is provided.  For a given `<solver_name>` (e.g. `react`):
