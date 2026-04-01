@@ -177,7 +177,8 @@ def query_sqa(
         run_table_generation=True,
         llm_kwargs=(
             {"max_tokens": 40960 * 2}
-            if completion_model in {
+            if completion_model
+            in {
                 "gemini/gemini-2.5-pro-preview-03-25",
                 "gemini/gemini-3.1-pro-preview",
             }
