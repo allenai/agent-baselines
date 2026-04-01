@@ -28,7 +28,7 @@ azure = [
     "azure-ai-inference"
 ]
 sqa = [
-    "ai2-scholar-qa==0.8.13",
+    "ai2-scholar-qa==0.7.0",
 ]
 smolagents = [
     "smolagents==1.17.0",
@@ -75,7 +75,7 @@ conflicts = [
     [{extra = "storm"}, {extra = "smolagents"}],
 ]
 override-dependencies = [
-    # ai2-scholar-qa 0.8.13 still pins older provider libraries, but the
+    # ai2-scholar-qa 0.7.0 still pins older provider libraries, but the
     # current SQA model set is validated on the newer astabench stack.
     "litellm==1.82.3",
     "openai==2.30.0",

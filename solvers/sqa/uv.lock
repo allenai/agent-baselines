@@ -26,7 +26,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "ai2-scholar-qa", specifier = "==0.8.13" },
+    { name = "ai2-scholar-qa", specifier = "==0.7.0" },
     { name = "astabench", specifier = "==0.5.2" },
     { name = "inspect-ai", specifier = "==0.3.114" },
 ]
@@ -58,7 +58,7 @@ leaderboard = [
 
 [[package]]
 name = "ai2-scholar-qa"
-version = "0.8.13"
+version = "0.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyascii" },
@@ -87,9 +87,9 @@ dependencies = [
     { name = "tqdm" },
     { name = "uvicorn", extra = ["standard"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/53/93/d8f3ca35d95b4791316cdfcc8aa3c34a8e226b57284073b7d46a64ac5046/ai2_scholar_qa-0.8.13.tar.gz", hash = "sha256:b07b3de5c93979cf9cc3c252b8d8f09ba258e82ab4f80796cd66b7b6f8fdee3c", size = 107678 }
+sdist = { url = "https://files.pythonhosted.org/packages/d5/af/3d8b174516ae7675b736e9261d13a12a9f33273eb27c9edae354a893c888/ai2_scholar_qa-0.7.0.tar.gz", hash = "sha256:1fbcfb677a8f7d5441e7eb7ac72f86cb04280bbc8ea7b2eeeef03dd94d166f58", size = 60553 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bd/37/a477d6bfb82ac62373d042db557806d72469cebeb448ecd28da873ec78c0/ai2_scholar_qa-0.8.13-py3-none-any.whl", hash = "sha256:3f4a9457fccdcdc9f817b367bd2402943324660bf4a2c69a59351363101f8664", size = 118283 },
+    { url = "https://files.pythonhosted.org/packages/a3/e9/0e2762640afdde41ffeda9592e8d4b7bbfe21b9cda0e56306cd6355885d4/ai2_scholar_qa-0.7.0-py3-none-any.whl", hash = "sha256:99795c17a548786fd4cc7bdd905c34281eee57d194bd03c8a93cada9ad7f1d85", size = 70656 },
 ]
 
 [[package]]
