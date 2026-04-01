@@ -8,9 +8,11 @@ version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
     "astabench==0.5.2",
-    # inspect==0.3.202 requires these minimum versions
+    # TODO these should all go into astabench, or agent-eval wherever they appear 
+    # inspect==0.3.202 requires these minimum versions,
     "openai>=2.26.0",
     "anthropic>=0.85.0",
+    "google-genai>=1.69.0",
 ]
 
 [tool.uv]
