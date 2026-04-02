@@ -35,6 +35,6 @@ def memorized_solver() -> Solver:
 def formatted_solver() -> Solver:
     chainlist = [
         memorized_solver(),
-        format_solver("google/gemini-2.5-flash-preview-05-20"),
+        format_solver("google/gemini-3-flash-preview"),
     ]
     return chain(chainlist)

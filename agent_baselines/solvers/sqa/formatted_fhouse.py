@@ -21,6 +21,6 @@ def formatted_solver(
             polling_interval=polling_interval,
             extract_snippets=True,
         ),
-        format_solver("google/gemini-2.5-flash-preview-05-20"),
+        format_solver("google/gemini-3-flash-preview"),
     ]
     return chain(chainlist)

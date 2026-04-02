@@ -53,7 +53,7 @@ def test_scaffold_creates_expected_files(tmp_path: Path) -> None:
 
     pyproject = (solver_dir / "pyproject.toml").read_text(encoding="utf-8")
     assert 'name = "agent-baselines-foo-bar"' in pyproject
-    assert '"astabench==0.3.1"' in pyproject
+    assert '"astabench==0.5.2"' in pyproject
     assert '"inspect_ai==0.3.114"' in pyproject
 
     setup_sh = (solver_dir / "setup.sh").read_text(encoding="utf-8")

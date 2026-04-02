@@ -21,12 +21,17 @@ logger = logging.getLogger(__name__)
 claude_4_0 = "anthropic/claude-sonnet-4-20250514"
 claude_3_7 = "anthropic/claude-3-7-sonnet-20250219"
 claude_3_5 = "anthropic/claude-3-5-sonnet-20240620"
+claude_4_6 = "anthropic/claude-sonnet-4-6"
 gemini_2_5_pro = "gemini/gemini-2.5-pro-preview-03-25"
+gemini_3_1_pro = "gemini/gemini-3.1-pro-preview"
 completion_model_map = {
     "claude-3.7": claude_3_7,
     "claude-3.5": claude_3_5,
     "claude-4.0": claude_4_0,
+    "claude-4.6": claude_4_6,
     "gemini-2.5-pro": gemini_2_5_pro,
+    "gemini-3.1-pro-preview": gemini_3_1_pro,
+    "o3_high": "openai/o3",
 }
 
 RERANKER_TYPES = list(RERANKER_MAPPING.keys())
@@ -172,7 +177,11 @@ def query_sqa(
         run_table_generation=True,
         llm_kwargs=(
             {"max_tokens": 40960 * 2}
-            if completion_model == "gemini/gemini-2.5-pro-preview-03-25"
+            if completion_model
+            in {
+                "gemini/gemini-2.5-pro-preview-03-25",
+                "gemini/gemini-3.1-pro-preview",
+            }
             else {}
         ),
     )
@@ -184,7 +193,7 @@ def query_sqa(
 
 @solver
 def sqa_solver(
-    completion_model: str = "claude-3.7",
+    completion_model: str = "claude-4.6",
     reranker_type: Literal[*RERANKER_TYPES] = "modal",
     **reranker_kwargs,
 ) -> Solver:

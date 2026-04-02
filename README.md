@@ -30,7 +30,7 @@ Adding a new solver:
 - Use `./scripts/new_solver.sh <solver>` (then run `uv lock --project "solvers/<solver>" --python 3.11`).
 
 Inspect/AstaBench coupling:
-- `astabench` pins `inspect_ai` exactly (currently released astabench versions pin `inspect_ai==0.3.114`).
+- `astabench==0.5.2` pins `inspect_ai==0.3.114`.
 - To diverge per-solver, use uv `override-dependencies`. See `docs/per_solver_envs.md`.
 
 If you have trouble setting up an environment on your local system, a Docker image is provided.  For a given `<solver_name>` (e.g. `react`):
@@ -105,7 +105,7 @@ dvc repro --force
 If you just want to run a single stage (the "@" specifies the loop value to run):
 
 ``` bash
-dvc repro solve_sqa@claude-3.7
+dvc repro solve_sqa@claude-4.6
 ```
 
 ### When to force a stage to run
@@ -129,9 +129,9 @@ You can check if the `dependencies` of any stages have changed by running `dvc s
 ``` bash
 summarize_scores:
   changed deps:
-    modified:           dvc_logs/scored/task_sqa_solver_sqa_claude-3.7.eval
+    modified:           dvc_logs/scored/task_sqa_solver_sqa_claude-4.6.eval
 ```
-This tells me that the scores for the claude 3.7 solver have changed and I need to rerun the stage which aggregates the results into a table (`summarize_scores`). You can do this by running `dvc repro`.
+This tells me that the scores for the claude 4.6 solver have changed and I need to rerun the stage which aggregates the results into a table (`summarize_scores`). You can do this by running `dvc repro`.
 
 ### Collaborating with others on the same project
 When someone pushes changes to the lockfile `dvc.lock` then you can checkout those changing by pulling from the cache:

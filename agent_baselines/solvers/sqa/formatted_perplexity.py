@@ -37,7 +37,7 @@ def formatted_solver(
     reasoning_effort: str = "",
     search_mode: str = "",
     require_snippets: bool = True,
-    scorer_model: str = "google/gemini-2.5-flash-preview-05-20",
+    scorer_model: str = "google/gemini-3-flash-preview",
 ) -> Solver:
     chainlist = [
         perplexity_solver(

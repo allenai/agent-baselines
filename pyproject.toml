@@ -8,7 +8,7 @@ version = "0.1.1"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "astabench==0.3.1",
+    "astabench==0.5.2",
 ]
 
 [project.optional-dependencies]
@@ -75,8 +75,10 @@ conflicts = [
     [{extra = "storm"}, {extra = "smolagents"}],
 ]
 override-dependencies = [
-    # sqa pins openai to a lower version than inspect requires
-    "openai==1.78.0",
+    # ai2-scholar-qa 0.7.0 still pins older provider libraries, but the
+    # current SQA model set is validated on the newer astabench stack.
+    "litellm==1.82.3",
+    "openai==2.30.0",
 
     # STORM pretends to require a lower version, but doesn't actually need it:
     # https://github.com/allenai/asta-bench/issues/31#issuecomment-3045978008
