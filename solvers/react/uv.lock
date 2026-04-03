@@ -10,31 +10,20 @@ resolution-markers = [
     "python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 
-[manifest]
-overrides = [{ name = "inspect-ai", specifier = "==0.3.203" }]
-
 [[package]]
 name = "agent-baselines-react"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "anthropic" },
     { name = "astabench" },
-    { name = "google-genai" },
-    { name = "openai" },
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "anthropic", specifier = ">=0.85.0" },
-    { name = "astabench", specifier = "==0.5.2" },
-    { name = "google-genai", specifier = ">=1.69.0" },
-    { name = "openai", specifier = ">=2.26.0" },
-]
+requires-dist = [{ name = "astabench", git = "https://github.com/allenai/asta-bench?branch=jason%2Fupagenteval" }]
 
 [[package]]
 name = "agent-eval"
-version = "0.1.46"
+version = "0.1.47"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -45,9 +34,9 @@ dependencies = [
     { name = "pyarrow" },
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7a/1f/1f56d3659ed70b4d6596e7c6cc41dfe81206f2f0bfe912191fb02109021a/agent_eval-0.1.46.tar.gz", hash = "sha256:c677a1ea778a9b5af7e384232b873d417ca6cd68d97e7b6cd876434c2a53727d", size = 49485, upload-time = "2026-03-26T20:14:05.647Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/da/06/b7c44262ab6d3d018bb4803ff01bfaf8e02e3a2374a52bd76ae181bcc48b/agent_eval-0.1.47.tar.gz", hash = "sha256:48086ca688f82800489ce553ceed226bbe2bfbe758f6c90e1a6bbb276b0d4a74", size = 49475, upload-time = "2026-04-02T20:15:44.046Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7a/5c/06c53c32dd7f589a81614fccd10992ed7e2eaa57fff73ba2f956f8ac6f53/agent_eval-0.1.46-py3-none-any.whl", hash = "sha256:c32a3c29c3ff9328d227fda1cb2d270e84e3dc5243a549961a9c4bf136b4bae8", size = 44313, upload-time = "2026-03-26T20:14:03.603Z" },
+    { url = "https://files.pythonhosted.org/packages/93/17/2ff8ece05b83a336749c720a7a5b6fb8f3070f6a4a3b2ae7e521f02d20d0/agent_eval-0.1.47-py3-none-any.whl", hash = "sha256:aa8ae8842a03c994ae6844c5f82e19488f68eb665ed47834ee765e3c3b257a51", size = 44343, upload-time = "2026-04-02T20:15:42.572Z" },
 ]
 
 [package.optional-dependencies]
@@ -278,8 +267,8 @@ wheels = [
 
 [[package]]
 name = "astabench"
-version = "0.5.2"
-source = { registry = "https://pypi.org/simple" }
+version = "0.5.3"
+source = { git = "https://github.com/allenai/asta-bench?branch=jason%2Fupagenteval#e19644a52c1f3f993a0711e745939c51d2193647" }
 dependencies = [
     { name = "agent-eval", extra = ["leaderboard"] },
     { name = "anthropic" },
@@ -302,10 +291,6 @@ dependencies = [
     { name = "pydantic" },
     { name = "scipy" },
     { name = "tabulate" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/29/e4/a7f6c3d08800c1bb71db0200a7bc7bb24e2cc34dbc05e47740b855e60275/astabench-0.5.2.tar.gz", hash = "sha256:61f74ac0b94a85078188730bf5822fdb606c9c5c09eb85f7ff060ebfb2d61794", size = 195333, upload-time = "2026-03-26T23:47:01.85Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/44/fe/c5bc15fce156f2da9f5ce9aac62af84e1f04974aa1d347e9a3c251b6615a/astabench-0.5.2-py3-none-any.whl", hash = "sha256:4599ca84607e71bf3332966a9384dbe7bd432ac77adf7d46939bcfef157ce12f", size = 213767, upload-time = "2026-03-26T23:47:00.266Z" },
 ]
 
 [[package]]
