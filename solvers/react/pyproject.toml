@@ -7,16 +7,8 @@ name = "agent-baselines-react"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
-    "astabench==0.5.2",
-    # TODO these should all go into astabench, or agent-eval wherever they appear 
-    # inspect==0.3.202 requires these minimum versions,
-    "openai>=2.26.0",
-    "anthropic>=0.85.0",
-    "google-genai>=1.69.0",
+    "astabench==0.5.3",
 ]
 
-[tool.uv]
-override-dependencies = [
-    # TODO remove me once agent-eval and astabench is updated with this
-    "inspect_ai==0.3.203",
-]
+[tool.uv.sources]
+astabench = { git = "https://github.com/allenai/asta-bench", branch = "jason/upagenteval" }
