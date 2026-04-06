@@ -8,5 +8,6 @@ version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
     "astabench==0.5.3",
+    "inspect_ai==0.3.203",
 ]
 

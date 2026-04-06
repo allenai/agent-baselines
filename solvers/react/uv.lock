@@ -16,10 +16,14 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "astabench" },
+    { name = "inspect-ai" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "astabench", specifier = "==0.5.3" }]
+requires-dist = [
+    { name = "astabench", specifier = "==0.5.3" },
+    { name = "inspect-ai", specifier = "==0.3.203" },
+]
 
 [[package]]
 name = "agent-eval"
