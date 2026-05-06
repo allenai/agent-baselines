@@ -221,7 +221,7 @@ def basic_agent(
     init: Solver | list[Solver] | None = None,
     tools: list[Tool] | Solver | None = None,
     cache: bool | CachePolicy = False,
-    max_steps: int = 10,
+    max_steps: int = 100,
     max_tool_output: int | None = None,
     continue_message: str = DEFAULT_CONTINUE_MESSAGE,
     add_submit_tool: bool = True,
@@ -384,7 +384,7 @@ def basic_agent(
 
 @solver
 def instantiated_basic_agent(
-    max_steps: int = 10,
+    max_steps: int = 100,
     model_override: str | Model | None = None,
     **tool_options,
 ):
