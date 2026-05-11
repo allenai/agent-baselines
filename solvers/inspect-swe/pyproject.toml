@@ -7,16 +7,27 @@ name = "agent-baselines-inspect-swe"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
-    "astabench==0.5.3",
     # >=0.3.220 contains the bridge serialization fix (#3879) for tool
     # results that are Pydantic models (e.g. list[ContentText] from real
     # MCP servers). Older versions fail bridged MCP calls with
     # "Object of type ContentText is not JSON serializable".
     "inspect_ai>=0.3.220",
-    "inspect_swe>=0.1.0",
+    # >=0.2.54 contains the per-invocation bridge port allocation
+    # (claude_code ACP) that unblocks parallel evals — older versions
+    # share a fixed port 13131 between concurrent samples and serialize.
+    # 0.2.52 introduced the ``opencode`` agent which the wrapper now
+    # registers; older versions don't expose that constructor.
+    "inspect_swe>=0.2.54",
 ]
 
+# ``astabench`` ships the public eval tasks (``astabench/litqa2_validation``
+# etc.) + the ``astabench eval`` CLI. Default-active, opt-out-able with
+# ``uv sync --no-group astabench``.
+[dependency-groups]
+astabench = ["astabench==0.5.3"]
+
 [tool.uv]
+default-groups = ["astabench"]
 # astabench==0.5.3 pins inspect_ai==0.3.203, but we need >=0.3.220 for
 # the bridged-MCP serialization fix. Override astabench's pin so the
 # resolver picks a newer inspect_ai. Public APIs astabench uses are

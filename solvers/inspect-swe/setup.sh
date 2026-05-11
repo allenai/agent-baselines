@@ -17,7 +17,7 @@ cd "${repo_root}"
 
 uv sync --project "solvers/inspect-swe" --python 3.11
 
-ASTA_IMAGE="${ASTA_IMAGE:-ghcr.io/allenai/asta:v0.16.0}"
+ASTA_IMAGE="${ASTA_IMAGE:-ghcr.io/allenai/asta:latest}"
 vendor="${here}/.vendor/asta-plugins"
 stamp="${vendor}/.image-id"
 

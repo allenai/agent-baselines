@@ -1,15 +1,15 @@
-# Single-service compose: the agent runs in the asta-plugins image,
-# which already has the asta CLI + Quarto + node on PATH for skills
-# that shell out. Image tag is pinnable via the ASTA_IMAGE env var
-# (defaults to v0.16.0). inspect_swe downloads and installs the agent
-# binary (claude_code / codex / gemini) into this container at sample
-# setup via ensure_agent_binary_installed().
+# Single-service compose: the agent runs in the asta image, which has
+# the asta CLI + Quarto + node on PATH for skills that shell out.
+# inspect_swe downloads and installs the agent binary
+# (claude_code / codex / gemini) into this container at sample setup
+# via ensure_agent_binary_installed(). Default ASTA_IMAGE is `:latest`;
+# see the solver README's Reproducibility section.
 #
 # For tasks that need both a python sandbox and the agent runtime,
 # point --sandbox at a two-service compose and pass `-S sandbox_name=agent`.
 services:
   default:
-    image: ${ASTA_IMAGE:-ghcr.io/allenai/asta:v0.16.0}
+    image: ${ASTA_IMAGE:-ghcr.io/allenai/asta:latest}
     init: true
     command: tail -f /dev/null
     cpus: 2.0

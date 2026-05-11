@@ -18,17 +18,23 @@ name = "agent-baselines-inspect-swe"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "astabench" },
     { name = "inspect-ai" },
     { name = "inspect-swe" },
 ]
 
+[package.dev-dependencies]
+astabench = [
+    { name = "astabench" },
+]
+
 [package.metadata]
 requires-dist = [
-    { name = "astabench", specifier = "==0.5.3" },
     { name = "inspect-ai", specifier = ">=0.3.220" },
-    { name = "inspect-swe", specifier = ">=0.1.0" },
+    { name = "inspect-swe", specifier = ">=0.2.54" },
 ]
+
+[package.metadata.requires-dev]
+astabench = [{ name = "astabench", specifier = "==0.5.3" }]
 
 [[package]]
 name = "agent-client-protocol"
@@ -1353,7 +1359,7 @@ wheels = [
 
 [[package]]
 name = "inspect-swe"
-version = "0.2.48"
+version = "0.2.54"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agent-client-protocol" },
@@ -1367,9 +1373,9 @@ dependencies = [
     { name = "sniffio" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a7/90/2b34e476fbe7c245843b4f6d4dd003f81e978bfc32218fa36c3e73a8825a/inspect_swe-0.2.48.tar.gz", hash = "sha256:30671d1580dccefcc3c435663da92d2de7f36d013f54703196440b95fdf296d4", size = 68092, upload-time = "2026-04-26T19:32:47.962Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/30/a3/bdcac9cf83ec0b8a17091902d750508b2231ede588cb4626a9e0ae243bde/inspect_swe-0.2.54.tar.gz", hash = "sha256:3b1dbe27e7ede8a7b5278ae081461c7a65f6fa9311bbcbf330b1752befeb2991", size = 73844, upload-time = "2026-05-13T20:07:13.199Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/79/56/57ebd6dd97f6ad7c88e91468305f2107c9b6404c208d3a27ab46b79ababb/inspect_swe-0.2.48-py3-none-any.whl", hash = "sha256:b6324fa749134346554a91194d3ff262cab8e16ee96941bf638a14a78cc45fce", size = 95111, upload-time = "2026-04-26T19:32:46.612Z" },
+    { url = "https://files.pythonhosted.org/packages/e9/7a/23054d181dd4a433cd7d685c73160947f86177c6b3a5a8ed56193675bc51/inspect_swe-0.2.54-py3-none-any.whl", hash = "sha256:55c76fdb446f0ca1db736480f837f534c2258ff8d4295cd16862466a8d2e64c7", size = 103915, upload-time = "2026-05-13T20:07:11.85Z" },
 ]
 
 [[package]]
