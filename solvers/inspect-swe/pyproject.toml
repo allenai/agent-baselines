@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-baselines-inspect-swe"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "astabench==0.5.3",
+    # >=0.3.220 contains the bridge serialization fix (#3879) for tool
+    # results that are Pydantic models (e.g. list[ContentText] from real
+    # MCP servers). Older versions fail bridged MCP calls with
+    # "Object of type ContentText is not JSON serializable".
+    "inspect_ai>=0.3.220",
+    "inspect_swe>=0.1.0",
+]
+
+[tool.uv]
+# astabench==0.5.3 pins inspect_ai==0.3.203, but we need >=0.3.220 for
+# the bridged-MCP serialization fix. Override astabench's pin so the
+# resolver picks a newer inspect_ai. Public APIs astabench uses are
+# stable across 0.3.203..0.3.220.
+override-dependencies = ["inspect_ai>=0.3.220"]

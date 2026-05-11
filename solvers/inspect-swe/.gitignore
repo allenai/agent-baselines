@@ -1,0 +1,4 @@
+.vendor/
+.venv/
+.egress_logs/
+.mitmproxy/
