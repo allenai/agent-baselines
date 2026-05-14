@@ -12,6 +12,7 @@ top-venv inspect_ai.
 """
 
 import os
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -223,3 +224,110 @@ class TestInstallAstaSkills:
             state_tools=[self._named_tool("snippet_search")],
         )
         assert "bridged_tools" not in kwargs
+
+
+class TestVendoredImageMatch:
+    """``setup.sh`` extracts skills from the asta image and stamps the
+    image ID into ``.vendor/asta-plugins/.image-id``. If the operator
+    later overrides ``ASTA_IMAGE`` without re-running setup, the host-side
+    skill source silently disagrees with the asta CLI in the sandbox.
+    ``_check_vendored_image_matches_env`` raises in that case — a
+    generalization of the semver-tag-only ``_check_plugin_image_version_match``
+    that works for ``:latest`` and digest pins too."""
+
+    def _setup_vendor(self, tmp_path, stamp_id: str | None) -> Path:
+        """Build a fake .vendor/asta-plugins tree under tmp_path with the
+        given stamp (None = no stamp file)."""
+        vendor = tmp_path / "asta-plugins"
+        (vendor / "plugins" / "asta" / "skills" / "x").mkdir(parents=True)
+        (vendor / "plugins" / "asta" / "skills" / "x" / "SKILL.md").write_text(
+            "---\nname: x\ndescription: stub\n---\n"
+        )
+        if stamp_id is not None:
+            (vendor / ".image-id").write_text(stamp_id)
+        return vendor
+
+    def test_no_stamp_skips_check(self, tmp_path, monkeypatch):
+        """Old setup.sh / unrelated path: no stamp file → skip check."""
+        vendor = self._setup_vendor(tmp_path, stamp_id=None)
+        monkeypatch.setenv("ASTA_IMAGE", "ghcr.io/allenai/asta:v0.17.0")
+        monkeypatch.setattr(
+            "agent_baselines.solvers.inspect_swe.agent._VENDOR_ASTA_PLUGINS", vendor
+        )
+        from agent_baselines.solvers.inspect_swe.agent import _resolve_bundled_skills
+
+        # No raise.
+        _resolve_bundled_skills("asta")
+
+    def test_no_asta_image_env_skips_check(self, tmp_path, monkeypatch):
+        """ASTA_IMAGE unset → no comparison; running sandbox uses compose
+        default and operator hasn't asked for a specific ref."""
+        vendor = self._setup_vendor(tmp_path, stamp_id="sha256:abc")
+        monkeypatch.delenv("ASTA_IMAGE", raising=False)
+        monkeypatch.setattr(
+            "agent_baselines.solvers.inspect_swe.agent._VENDOR_ASTA_PLUGINS", vendor
+        )
+        from agent_baselines.solvers.inspect_swe.agent import _resolve_bundled_skills
+
+        _resolve_bundled_skills("asta")
+
+    def test_docker_unavailable_skips_check(self, tmp_path, monkeypatch):
+        """docker not on PATH → no way to resolve ASTA_IMAGE to an ID.
+        Skip the check (post-run ``asta_image`` stamp will still record
+        what actually ran)."""
+        vendor = self._setup_vendor(tmp_path, stamp_id="sha256:abc")
+        monkeypatch.setenv("ASTA_IMAGE", "ghcr.io/allenai/asta:v0.17.0")
+        monkeypatch.setattr(
+            "agent_baselines.solvers.inspect_swe.agent._VENDOR_ASTA_PLUGINS", vendor
+        )
+
+        def fake_run(*args, **kwargs):
+            raise FileNotFoundError("docker not installed")
+
+        monkeypatch.setattr(
+            "agent_baselines.solvers.inspect_swe.agent.subprocess.run", fake_run
+        )
+        from agent_baselines.solvers.inspect_swe.agent import _resolve_bundled_skills
+
+        _resolve_bundled_skills("asta")
+
+    def test_matching_ids_no_raise(self, tmp_path, monkeypatch):
+        """Stamp matches what docker resolves → happy path."""
+        stamp = "sha256:abc123"
+        vendor = self._setup_vendor(tmp_path, stamp_id=stamp)
+        monkeypatch.setenv("ASTA_IMAGE", "ghcr.io/allenai/asta:v0.17.0")
+        monkeypatch.setattr(
+            "agent_baselines.solvers.inspect_swe.agent._VENDOR_ASTA_PLUGINS", vendor
+        )
+
+        def fake_run(*args, **kwargs):
+            return MagicMock(stdout=f"{stamp}\n", returncode=0)
+
+        monkeypatch.setattr(
+            "agent_baselines.solvers.inspect_swe.agent.subprocess.run", fake_run
+        )
+        from agent_baselines.solvers.inspect_swe.agent import _resolve_bundled_skills
+
+        _resolve_bundled_skills("asta")
+
+    def test_mismatch_raises(self, tmp_path, monkeypatch):
+        """Stamp ≠ current ASTA_IMAGE's docker ID → raise. Catches the
+        ``changed ASTA_IMAGE without re-running setup.sh`` footgun for
+        all image forms, including :latest and digest pins where the
+        existing PLUGIN_VERSION preflight is silent."""
+        vendor = self._setup_vendor(tmp_path, stamp_id="sha256:abc123")
+        monkeypatch.setenv("ASTA_IMAGE", "ghcr.io/allenai/asta:latest")
+        monkeypatch.setattr(
+            "agent_baselines.solvers.inspect_swe.agent._VENDOR_ASTA_PLUGINS", vendor
+        )
+
+        def fake_run(*args, **kwargs):
+            return MagicMock(stdout="sha256:def456\n", returncode=0)
+
+        monkeypatch.setattr(
+            "agent_baselines.solvers.inspect_swe.agent.subprocess.run", fake_run
+        )
+        from agent_baselines.solvers.inspect_swe.agent import _resolve_bundled_skills
+
+        with pytest.raises(ValueError, match="Re-run solvers/inspect-swe/setup.sh"):
+            _resolve_bundled_skills("asta")

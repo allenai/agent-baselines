@@ -1,10 +1,13 @@
 #!/bin/bash
 # Sync the inspect_swe solver's dependencies and vendor asta-plugins.
 #
-# The asta-plugins clone provides the bundled skill trees the solver
-# can install into the agent's sandbox via inspect_swe's standard
-# ``skills=`` plumbing. Pin to a tag that matches your asta image so
-# the skills line up with what the image is built from.
+# Skill trees are extracted directly from the asta image's
+# ``/opt/asta-plugins`` (the canonical source repo per the asta-plugins
+# Dockerfile's ``COPY . /opt/asta-plugins``). One env var — ASTA_IMAGE —
+# controls both the asta CLI inside the sandbox and the host-side
+# skill trees the solver loads; skew between them is structurally
+# impossible, so any ASTA_IMAGE (including ``:latest``) yields a
+# self-consistent setup.
 
 set -euo pipefail
 
@@ -14,18 +17,23 @@ cd "${repo_root}"
 
 uv sync --project "solvers/inspect-swe" --python 3.11
 
-# Vendor asta-plugins for host-side skill resolution. ASTA_PLUGINS_REF
-# defaults to the asta image tag (kept in sync with ASTA_IMAGE) so
-# bundled skills match what's baked into the image.
 ASTA_IMAGE="${ASTA_IMAGE:-ghcr.io/allenai/asta:v0.16.0}"
-ASTA_PLUGINS_REF="${ASTA_PLUGINS_REF:-${ASTA_IMAGE##*:}}"
 vendor="${here}/.vendor/asta-plugins"
-if [ ! -d "${vendor}/.git" ]; then
+stamp="${vendor}/.image-id"
+
+# Refresh the local cache against the registry. No-op when the local
+# tag already matches; needed when ASTA_IMAGE is a mutable tag (e.g.
+# :latest) that the registry may have re-pushed.
+docker pull --quiet "${ASTA_IMAGE}" >/dev/null
+
+# Image ID is the immutable content hash — re-extract only when the
+# bytes change, regardless of whether the user pulled by tag or digest.
+image_id="$(docker image inspect --format '{{.Id}}' "${ASTA_IMAGE}")"
+existing_id="$(cat "${stamp}" 2>/dev/null || true)"
+if [ "${existing_id}" != "${image_id}" ]; then
     rm -rf "${vendor}"
-    mkdir -p "$(dirname "${vendor}")"
-    git clone --depth 1 --branch "${ASTA_PLUGINS_REF}" \
-        https://github.com/allenai/asta-plugins.git "${vendor}"
-else
-    git -C "${vendor}" fetch --depth 1 origin "${ASTA_PLUGINS_REF}"
-    git -C "${vendor}" checkout FETCH_HEAD
+    mkdir -p "${vendor}"
+    docker run --rm "${ASTA_IMAGE}" tar -cC /opt/asta-plugins . \
+        | tar -xC "${vendor}"
+    echo "${image_id}" > "${stamp}"
 fi

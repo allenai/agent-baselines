@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
+import subprocess
 from pathlib import Path
 from typing import Any, Literal
 
@@ -44,9 +45,69 @@ def _resolve_bundled_skills(plugin: AstaPlugin) -> list[Path]:
     if not plugin_dir.is_dir():
         raise FileNotFoundError(
             f"Bundled skills not found at {plugin_dir}. "
-            f"Run solvers/inspect-swe/setup.sh to clone asta-plugins."
+            f"Run solvers/inspect-swe/setup.sh to extract bundled skills "
+            f"from the asta image."
         )
+    _check_vendored_image_matches_env()
     return sorted(d for d in plugin_dir.iterdir() if (d / "SKILL.md").is_file())
+
+
+def _check_vendored_image_matches_env() -> None:
+    """Raise if ``.vendor/asta-plugins`` was extracted from a different
+    image than ``ASTA_IMAGE`` currently points at.
+
+    ``setup.sh`` stamps the resolved image ID into ``.vendor/.image-id``
+    on extraction. If the operator later overrides ``ASTA_IMAGE`` to a
+    different ref without re-running setup, the host-side skill source
+    silently disagrees with the asta CLI in the sandbox.
+
+    The check compares image IDs (immutable content hashes), so it
+    works for tags, ``:latest``, and ``@sha256:`` digests alike — a
+    generalization of ``_check_plugin_image_version_match``, which
+    only fires for ``:vX.Y.Z`` semver tags.
+
+    Skipped when:
+    - ``.image-id`` stamp doesn't exist (older setup.sh; unrelated path).
+    - ``ASTA_IMAGE`` env var is unset (nothing to compare against —
+      the running sandbox uses compose's default and the operator
+      hasn't asked for a specific ref).
+    - docker isn't on PATH or the image isn't locally pulled (can't
+      resolve the env ref to an ID without docker; ``_stamp_asta_image``
+      will record the runtime value post-run).
+    """
+    stamp_file = _VENDOR_ASTA_PLUGINS / ".image-id"
+    try:
+        stamped_id = stamp_file.read_text().strip()
+    except FileNotFoundError:
+        return
+    if not stamped_id:
+        return
+    env_image = os.environ.get("ASTA_IMAGE", "")
+    if not env_image:
+        return
+    try:
+        result = subprocess.run(
+            ["docker", "image", "inspect", "--format", "{{.Id}}", env_image],
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=5,
+        )
+    except (
+        subprocess.CalledProcessError,
+        FileNotFoundError,
+        subprocess.TimeoutExpired,
+    ):
+        return
+    current_id = result.stdout.strip()
+    if not current_id or current_id == stamped_id:
+        return
+    raise ValueError(
+        f"Vendored skills at {_VENDOR_ASTA_PLUGINS} were extracted from "
+        f"image {stamped_id[:19]} but ASTA_IMAGE={env_image!r} now resolves "
+        f"to {current_id[:19]}. Re-run solvers/inspect-swe/setup.sh so the "
+        f"host-side skill source matches the asta CLI baked into the image."
+    )
 
 
 @solver

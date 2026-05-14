@@ -15,9 +15,10 @@ standard Inspect infrastructure.
     `mcp__astabench_*` via the bridge.
   - Set to `"asta"` or `"asta-preview"`: the solver resolves bundled
     skill dirs from `.vendor/asta-plugins/plugins/<plugin>/skills/`
-    (cloned by `setup.sh` at a tag matching the asta image) and passes
-    them to inspect_swe's standard `skills=` plumbing — each agent's
-    wrapper handles its own discovery path. The skills give the agent
+    (extracted by `setup.sh` from the asta image, so the host-side
+    skill source always matches the CLI baked into the runtime) and
+    passes them to inspect_swe's standard `skills=` plumbing — each
+    agent's wrapper handles its own discovery path. The skills give the agent
     a native CLI surface (`asta papers`, `asta documents`,
     `asta analyze-data`, `asta artifacts`, `asta autodiscovery`,
     `asta experiment`, `asta literature find`, `asta generate-theories`,
