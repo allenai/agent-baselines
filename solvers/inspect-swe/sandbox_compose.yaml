@@ -1,0 +1,31 @@
+# Single-service compose: the agent runs in the asta-plugins image,
+# which already has the asta CLI + Quarto + node on PATH for skills
+# that shell out. Image tag is pinnable via the ASTA_IMAGE env var
+# (defaults to v0.16.0). inspect_swe downloads and installs the agent
+# binary (claude_code / codex / gemini) into this container at sample
+# setup via ensure_agent_binary_installed().
+#
+# For tasks that need both a python sandbox and the agent runtime,
+# point --sandbox at a two-service compose and pass `-S sandbox_name=agent`.
+services:
+  default:
+    image: ${ASTA_IMAGE:-ghcr.io/allenai/asta:v0.16.0}
+    init: true
+    command: tail -f /dev/null
+    cpus: 2.0
+    mem_limit: 8G
+    working_dir: /app
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+      - TZ=Etc/UTC
+      # Per-sample, the solver overrides these from the task's
+      # Sample.metadata["insertion_date"]; the host can also export
+      # them directly. Unset = no cutoff applied by the asta CLI.
+      - ASTA_PUBLICATION_DATE_RANGE=${ASTA_PUBLICATION_DATE_RANGE:-}
+      - ASTA_INSERTED_BEFORE=${ASTA_INSERTED_BEFORE:-}
+      - ASTA_TOKEN=${ASTA_TOKEN:-}
+    labels:
+      # Lets `docker rm -f $(docker ps -q --filter label=…)` target only this
+      # project's leaked sandbox containers without nuking other inspect_ai
+      # users on the same machine. See README "Stale containers".
+      - "agent_baselines.inspect_swe_baseline=true"
