@@ -88,16 +88,15 @@ swap `astabench eval --split validation` for `inspect eval <task-spec>`.
 ### Swapping in local skills
 
 For skill iteration (or just running against a non-tagged ref), clone
-and build asta-plugins, then point `-S skills=` at the built tree
-instead of `-S install_asta_skills=`:
+asta-plugins and point `-S skills=` at its canonical skill tree
+(`plugins/asta-preview/skills`) instead of `-S install_asta_skills=`:
 
 ```bash
-# Skip if already cloned. ``make build-plugins`` regenerates
-# ``plugins/<plugin>/skills/`` after editing ``skills/``; re-run
-# after each ref switch or edit.
+# Skip if already cloned. plugins/asta-preview/skills is the canonical
+# source — edit it directly, no build step. (`make build-plugins` only
+# regenerates the core `plugins/asta` subset, if you're testing that.)
 git clone https://github.com/allenai/asta-plugins.git ../asta-plugins
 git -C ../asta-plugins checkout <your-ref>
-(cd ../asta-plugins && make build-plugins)
 
 # Then in the astabench eval command above:
 #   -S skills=../asta-plugins/plugins/asta-preview/skills
