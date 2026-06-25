@@ -10,7 +10,8 @@ from agent_baselines.solvers.youcom import query_youcom
 
 logger = logging.getLogger(__name__)
 
-YOUCOM_API_KEY = os.environ["YOUCOM_API_KEY"]
+# YDC_API_KEY is You.com's canonical env var; YOUCOM_API_KEY kept as a fallback.
+YOUCOM_API_KEY = os.environ.get("YDC_API_KEY") or os.environ["YOUCOM_API_KEY"]
 
 
 @solver
