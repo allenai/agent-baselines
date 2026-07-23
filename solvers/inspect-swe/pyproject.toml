@@ -11,12 +11,14 @@ dependencies = [
     # results that are Pydantic models (e.g. list[ContentText] from real
     # MCP servers). Older versions fail bridged MCP calls with
     # "Object of type ContentText is not JSON serializable".
-    # >=0.3.249 additionally lets the Anthropic sandbox bridge accept a
+    # >=0.3.233 additionally lets the Anthropic sandbox bridge accept a
     # system-role message in `messages[]` (folds it into ChatMessageSystem
-    # in messages_from_anthropic_input). Current Claude Code emits such a
-    # message; 0.3.220 raised `RuntimeError: Unexpected message role: system`
-    # and interrupted the arm mid-sample.
-    "inspect_ai>=0.3.249",
+    # in messages_from_anthropic_input, commit 8829d740 / #4095). Current
+    # Claude Code emits such a message; 0.3.220 raised
+    # `RuntimeError: Unexpected message role: system` and interrupted the
+    # arm mid-sample. 0.3.233 is the tightest floor carrying both fixes;
+    # nothing above it (0.3.249 etc.) is required to run this arm.
+    "inspect_ai>=0.3.233",
     # >=0.2.54 contains the per-invocation bridge port allocation
     # (claude_code ACP) that unblocks parallel evals — older versions
     # share a fixed port 13131 between concurrent samples and serialize.
@@ -33,8 +35,11 @@ astabench = ["astabench==0.5.3"]
 
 [tool.uv]
 default-groups = ["astabench"]
-# astabench==0.5.3 pins inspect_ai==0.3.203, but we need >=0.3.249 for
-# the bridged-MCP serialization fix and the Anthropic bridge system-role
-# fix. Override astabench's pin so the resolver picks a newer inspect_ai.
-# Public APIs astabench uses are stable across 0.3.203..0.3.249.
-override-dependencies = ["inspect_ai>=0.3.249"]
+# astabench==0.5.3 pins inspect_ai (==0.3.203 historically), but this arm
+# needs >=0.3.233 for the bridged-MCP list[ContentText] serialization fix
+# (0.3.220) and the Anthropic bridge system-role fix (0.3.233). Override so
+# the resolver can pick an inspect_ai that satisfies both, while still
+# letting astabench's own pin (once bumped to ==0.3.233, allenai/asta-bench#156)
+# land the exact version. Public APIs astabench uses are stable across
+# 0.3.203..0.3.233.
+override-dependencies = ["inspect_ai>=0.3.233"]
