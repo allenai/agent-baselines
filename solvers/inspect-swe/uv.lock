@@ -11,7 +11,7 @@ resolution-markers = [
 ]
 
 [manifest]
-overrides = [{ name = "inspect-ai", specifier = ">=0.3.249" }]
+overrides = [{ name = "inspect-ai", specifier = ">=0.3.233" }]
 
 [[package]]
 name = "agent-baselines-inspect-swe"
@@ -29,7 +29,7 @@ astabench = [
 
 [package.metadata]
 requires-dist = [
-    { name = "inspect-ai", specifier = ">=0.3.249" },
+    { name = "inspect-ai", specifier = ">=0.3.233" },
     { name = "inspect-swe", specifier = ">=0.2.54" },
 ]
 
