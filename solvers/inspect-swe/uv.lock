@@ -11,7 +11,7 @@ resolution-markers = [
 ]
 
 [manifest]
-overrides = [{ name = "inspect-ai", specifier = ">=0.3.220" }]
+overrides = [{ name = "inspect-ai", specifier = ">=0.3.249" }]
 
 [[package]]
 name = "agent-baselines-inspect-swe"
@@ -29,7 +29,7 @@ astabench = [
 
 [package.metadata]
 requires-dist = [
-    { name = "inspect-ai", specifier = ">=0.3.220" },
+    { name = "inspect-ai", specifier = ">=0.3.249" },
     { name = "inspect-swe", specifier = ">=0.2.54" },
 ]
 
@@ -38,14 +38,14 @@ astabench = [{ name = "astabench", specifier = "==0.5.3" }]
 
 [[package]]
 name = "agent-client-protocol"
-version = "0.9.0"
+version = "0.11.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/eb/13/3b893421369767e7043cc115d6ef0df417c298b84563be3a12df0416158d/agent_client_protocol-0.9.0.tar.gz", hash = "sha256:f744c48ab9af0f0b4452e5ab5498d61bcab97c26dbe7d6feec5fd36de49be30b", size = 71853, upload-time = "2026-03-26T01:21:00.379Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6c/93/396d02c91b387b2678f23081869ca47bd495fc6c78789022c683180cf5f1/agent_client_protocol-0.11.0.tar.gz", hash = "sha256:8920a3b27bdcc852fd7c73066f47ab53257dbfbe57b505e20a40c69f80a5391c", size = 87402, upload-time = "2026-07-05T17:07:56.803Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8f/ed/c284543c08aa443a4ef2c8bd120be51da8433dd174c01749b5d87c333f22/agent_client_protocol-0.9.0-py3-none-any.whl", hash = "sha256:06911500b51d8cb69112544e2be01fc5e7db39ef88fecbc3848c5c6f194798ee", size = 56850, upload-time = "2026-03-26T01:20:59.252Z" },
+    { url = "https://files.pythonhosted.org/packages/a0/48/a1367dded7765f5489f9840389949d5aeac53a73aeb1b4e6c0ab61e1617a/agent_client_protocol-0.11.0-py3-none-any.whl", hash = "sha256:2d8570cd4911f8af9fbab4808f7b05f09204a756f346c7409ecdcae3f37cdb2f", size = 68089, upload-time = "2026-07-05T17:07:55.518Z" },
 ]
 
 [[package]]
@@ -290,15 +290,15 @@ wheels = [
 
 [[package]]
 name = "anyio"
-version = "4.13.0"
+version = "4.14.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "idna" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/19/14/2c5dd9f512b66549ae92767a9c7b330ae88e1932ca57876909410251fe13/anyio-4.13.0.tar.gz", hash = "sha256:334b70e641fd2221c1505b3890c69882fe4a2df910cba14d97019b90b24439dc", size = 231622, upload-time = "2026-03-24T12:59:09.671Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/61/cc/a381afa6efea9f496eff839d4a6a1aed3bfafc7b3ab4b0d1b243a12573dd/anyio-4.14.2.tar.gz", hash = "sha256:cfa139f3ed1a23ee8f88a145ddb5ac7605b8bbfd8592baacd7ce3d8bb4313c7f", size = 260176, upload-time = "2026-07-12T20:29:07.082Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/da/42/e921fccf5015463e32a3cf6ee7f980a6ed0f395ceeaa45060b61d86486c2/anyio-4.13.0-py3-none-any.whl", hash = "sha256:08b310f9e24a9594186fd75b4f73f4a4152069e3853f1ed8bfbf58369f4ad708", size = 114353, upload-time = "2026-03-24T12:59:08.246Z" },
+    { url = "https://files.pythonhosted.org/packages/da/35/f2287558c17e29fafc8ef3daf819bb9834061cfa43bff8014f7df7f63bdc/anyio-4.14.2-py3-none-any.whl", hash = "sha256:9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494", size = 125813, upload-time = "2026-07-12T20:29:05.763Z" },
 ]
 
 [[package]]
@@ -812,6 +812,22 @@ wheels = [
 ]
 
 [[package]]
+name = "fastapi"
+version = "0.139.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "annotated-doc" },
+    { name = "pydantic" },
+    { name = "starlette" },
+    { name = "typing-extensions" },
+    { name = "typing-inspection" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cd/95/d3f0ae10836324a2eab98a52b61210ac609f08200bf4bb0dc8132d32f78a/fastapi-0.139.2.tar.gz", hash = "sha256:333145a6891e9b5b3cfceb69baf817e8240cde4d4588ae5a10bf56ffacb6255e", size = 423428, upload-time = "2026-07-16T15:06:17.912Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5f/c7/cb03251d9dfb177246a9809a76f189d21df32dbd4a845951881d11323b7f/fastapi-0.139.2-py3-none-any.whl", hash = "sha256:b9ad015a835173d59865e2f5d8296fbc2b317bf56a2ba1a5bfbdd03de2fd4b1c", size = 130234, upload-time = "2026-07-16T15:06:19.557Z" },
+]
+
+[[package]]
 name = "fastuuid"
 version = "0.14.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1311,17 +1327,18 @@ wheels = [
 
 [[package]]
 name = "inspect-ai"
-version = "0.3.220"
+version = "0.3.249"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "agent-client-protocol" },
     { name = "aioboto3" },
-    { name = "aiohttp" },
     { name = "anyio" },
     { name = "beautifulsoup4" },
     { name = "boto3" },
     { name = "click" },
     { name = "debugpy" },
     { name = "docstring-parser" },
+    { name = "fastapi" },
     { name = "fsspec" },
     { name = "httpx" },
     { name = "ijson" },
@@ -1348,18 +1365,19 @@ dependencies = [
     { name = "tiktoken" },
     { name = "typing-extensions" },
     { name = "universal-pathlib" },
+    { name = "uvicorn" },
     { name = "zipfile-zstd", marker = "python_full_version < '3.14'" },
     { name = "zipp" },
     { name = "zstandard" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ce/b7/5588fe9c5b58a77a162579d463fa75d5399712482e5d8dba0e0258a47306/inspect_ai-0.3.220.tar.gz", hash = "sha256:1b67fd9aaa203c4dae9e602ce867a6cfafa0df7d4f4884b17e4e85b73bac0816", size = 45636909, upload-time = "2026-05-08T13:32:23.774Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c6/2a/b994c824e233cbc2a7d6154013a0d01fbe7b1911da66646b2dc6ef19de3f/inspect_ai-0.3.249.tar.gz", hash = "sha256:e0b01e92a41c4fb13c006b59e6d0db4d1be0cd27060b909e34098169c0f10036", size = 49387023, upload-time = "2026-07-21T00:35:41.972Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c1/f0/e74a150d58d4ebcb3449a5894834899f61809e7e3d98e86da2caf8863e4f/inspect_ai-0.3.220-py3-none-any.whl", hash = "sha256:1d22c9de47c2f98f847650d77183ba91c02609e618a7725441e6d589d36c01c2", size = 36105199, upload-time = "2026-05-08T13:32:01.737Z" },
+    { url = "https://files.pythonhosted.org/packages/c9/a5/b93b5ebc7f82c04622b3955df7b3575eb935d73047f13b335725106a54ce/inspect_ai-0.3.249-py3-none-any.whl", hash = "sha256:e32907ec09b78b6ed6258233e259020d396b1532d12019231ed840c18e0df9fc", size = 36910040, upload-time = "2026-07-21T00:35:32.7Z" },
 ]
 
 [[package]]
 name = "inspect-swe"
-version = "0.2.54"
+version = "0.2.66"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agent-client-protocol" },
@@ -1373,9 +1391,9 @@ dependencies = [
     { name = "sniffio" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/30/a3/bdcac9cf83ec0b8a17091902d750508b2231ede588cb4626a9e0ae243bde/inspect_swe-0.2.54.tar.gz", hash = "sha256:3b1dbe27e7ede8a7b5278ae081461c7a65f6fa9311bbcbf330b1752befeb2991", size = 73844, upload-time = "2026-05-13T20:07:13.199Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4c/54/b8797e61a264b5585e50367417caf1b2cf2116f05fd46b868fa384035d0e/inspect_swe-0.2.66.tar.gz", hash = "sha256:5136dbebdd645b6f4bae8bc42266d0e0d9f63d13a5126b6e51702730cea717f7", size = 96401, upload-time = "2026-07-14T19:38:24.507Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e9/7a/23054d181dd4a433cd7d685c73160947f86177c6b3a5a8ed56193675bc51/inspect_swe-0.2.54-py3-none-any.whl", hash = "sha256:55c76fdb446f0ca1db736480f837f534c2258ff8d4295cd16862466a8d2e64c7", size = 103915, upload-time = "2026-05-13T20:07:11.85Z" },
+    { url = "https://files.pythonhosted.org/packages/8a/68/804cac69406bc5721146c4bdbce2d6d5a05105c8acc2c471ea9a379ba7ad/inspect_swe-0.2.66-py3-none-any.whl", hash = "sha256:588f6fc6955e2bb7353a0d5c4fad3a7f04341e9467fde3bbde0baa24050b25c9", size = 129173, upload-time = "2026-07-14T19:38:23.065Z" },
 ]
 
 [[package]]
@@ -3597,8 +3615,8 @@ name = "uvicorn"
 version = "0.46.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "click", marker = "sys_platform != 'emscripten'" },
-    { name = "h11", marker = "sys_platform != 'emscripten'" },
+    { name = "click" },
+    { name = "h11" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/1f/93/041fca8274050e40e6791f267d82e0e2e27dd165627bd640d3e0e378d877/uvicorn-0.46.0.tar.gz", hash = "sha256:fb9da0926999cc6cb22dc7cd71a94a632f078e6ae47ff683c5c420750fb7413d", size = 88758, upload-time = "2026-04-23T07:16:00.151Z" }
 wheels = [
@@ -3988,7 +4006,7 @@ name = "zipfile-zstd"
 version = "0.0.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "zstandard", marker = "python_full_version < '3.14'" },
+    { name = "zstandard" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/f7/2a/2e0941bc0058d10ab37d8c578b94a19f611f6ae54f124140f2fb451f0932/zipfile-zstd-0.0.4.tar.gz", hash = "sha256:c1498e15b7922a3d1af0ea55df8b11b2af4e8f7e0e80e414e25d66899f7def89", size = 4603, upload-time = "2021-12-08T07:38:16.245Z" }
 wheels = [
