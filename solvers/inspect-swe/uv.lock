@@ -13,7 +13,7 @@ resolution-markers = [
 [manifest]
 overrides = [
     { name = "anthropic", specifier = ">=0.105.0" },
-    { name = "inspect-ai", specifier = ">=0.3.233" },
+    { name = "inspect-ai", specifier = ">=0.3.235" },
 ]
 
 [[package]]
@@ -32,8 +32,8 @@ astabench = [
 
 [package.metadata]
 requires-dist = [
-    { name = "inspect-ai", specifier = ">=0.3.233" },
-    { name = "inspect-swe", specifier = ">=0.2.54" },
+    { name = "inspect-ai", specifier = ">=0.3.235" },
+    { name = "inspect-swe", specifier = ">=0.2.54,<0.2.65" },
 ]
 
 [package.metadata.requires-dev]
@@ -1380,7 +1380,7 @@ wheels = [
 
 [[package]]
 name = "inspect-swe"
-version = "0.2.66"
+version = "0.2.63"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agent-client-protocol" },
@@ -1394,9 +1394,9 @@ dependencies = [
     { name = "sniffio" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4c/54/b8797e61a264b5585e50367417caf1b2cf2116f05fd46b868fa384035d0e/inspect_swe-0.2.66.tar.gz", hash = "sha256:5136dbebdd645b6f4bae8bc42266d0e0d9f63d13a5126b6e51702730cea717f7", size = 96401, upload-time = "2026-07-14T19:38:24.507Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2a/0c/67e3b2eb35f170754f1f07d3834dcdfd21d4c16c76635ae72f052ab284c1/inspect_swe-0.2.63.tar.gz", hash = "sha256:6aa47f9d5da3f2139637a51662f7698b42645b1c70a61019585091c60501fa48", size = 94331, upload-time = "2026-06-10T17:37:35.333Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8a/68/804cac69406bc5721146c4bdbce2d6d5a05105c8acc2c471ea9a379ba7ad/inspect_swe-0.2.66-py3-none-any.whl", hash = "sha256:588f6fc6955e2bb7353a0d5c4fad3a7f04341e9467fde3bbde0baa24050b25c9", size = 129173, upload-time = "2026-07-14T19:38:23.065Z" },
+    { url = "https://files.pythonhosted.org/packages/ab/eb/0d9e81becac3bf98279f5172af13fa6ae7377fbed9a266a9e892f7bb9906/inspect_swe-0.2.63-py3-none-any.whl", hash = "sha256:9c34cf572a0aaee6fdbad23eccb1ea4c5b57d9e650e8a282db691cd63c965f61", size = 126922, upload-time = "2026-06-10T17:37:33.769Z" },
 ]
 
 [[package]]
