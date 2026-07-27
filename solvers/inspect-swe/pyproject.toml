@@ -42,4 +42,11 @@ default-groups = ["astabench"]
 # letting astabench's own pin (once bumped to ==0.3.233, allenai/asta-bench#156)
 # land the exact version. Public APIs astabench uses are stable across
 # 0.3.203..0.3.233.
-override-dependencies = ["inspect_ai>=0.3.233"]
+#
+# inspect_ai>=0.3.233 refuses to construct the Anthropic model provider unless
+# `anthropic>=0.105.0` is installed (runtime check in its anthropic provider;
+# the floor is declared only under inspect's `dev` extra, so uv won't raise it
+# on its own and the lock otherwise stays on whatever anthropic it first
+# resolved — 0.97.0 here). Force the floor so the solve env satisfies the
+# provider that inspect-swe's Claude Code arm exercises.
+override-dependencies = ["inspect_ai>=0.3.233", "anthropic>=0.105.0"]
