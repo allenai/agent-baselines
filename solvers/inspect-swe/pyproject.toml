@@ -17,31 +17,28 @@ dependencies = [
     # Claude Code emits such a message; 0.3.220 raised
     # `RuntimeError: Unexpected message role: system` and interrupted the
     # arm mid-sample.
-    # >=0.3.235 is additionally required by the inspect_swe cap below:
-    # inspect_swe 0.2.63 (the newest release compatible with a *released*
-    # inspect_ai — see the cap comment) declares `inspect-ai>=0.3.235` and
-    # uses install_skills/read_skills/model_event_sink, which land in
-    # 0.3.235. 0.3.235 is the tightest floor carrying all of the above;
-    # nothing higher (0.3.249 etc.) is required to run this arm, and staying
+    # 0.3.233 is the tightest floor carrying both fixes; nothing higher
+    # (0.3.249 etc.) is required to run this arm. Staying
     # below the additive-log-field releases (model_fallbacks@0.3.240,
     # turn_count@0.3.248) keeps the frozen 0.3.203 scorer able to read the
     # logs this arm writes.
-    "inspect_ai>=0.3.235",
+    "inspect_ai>=0.3.233",
     # >=0.2.54 contains the per-invocation bridge port allocation
     # (claude_code ACP) that unblocks parallel evals — older versions
     # share a fixed port 13131 between concurrent samples and serialize.
     # 0.2.52 introduced the ``opencode`` agent which the wrapper now
     # registers; older versions don't expose that constructor.
-    # <0.2.65 CAP: inspect_swe 0.2.65 started calling
-    # `sandbox_agent_bridge(..., checkpointer=cp)` (claude_code.py), but the
-    # `checkpointer=` kwarg exists in NO released inspect_ai — the latest
-    # release (0.3.249) rejects it with
-    # `TypeError: sandbox_agent_bridge() got an unexpected keyword argument
-    # 'checkpointer'`, which killed the baseline arm. inspect_swe 0.2.65/0.2.66
-    # target an unreleased dev inspect_ai. 0.2.63 is the newest release that
-    # runs against a released inspect_ai; cap here until inspect_ai ships the
-    # checkpointer bridge param and inspect_swe's floor catches up.
-    "inspect_swe>=0.2.54,<0.2.65",
+    # <0.2.60 CAP: the inspect_ai override below replaces inspect_swe's own
+    # inspect_ai floor. Leaving inspect_swe floating therefore paired 0.2.66
+    # (which declares inspect-ai>=0.3.244 and passes `checkpointer=` to
+    # sandbox_agent_bridge) with astabench's exact inspect_ai==0.3.233 pin.
+    # That incompatible pair killed the baseline arm with an unexpected
+    # `checkpointer` keyword. Versions 0.2.60 through 0.2.63 also declare an
+    # inspect_ai floor above the issue's tight 0.3.233 requirement. 0.2.59 is
+    # the newest release whose declared floor (>=0.3.232) supports 0.3.233,
+    # while retaining the per-invocation bridge and skills support this arm
+    # needs.
+    "inspect_swe>=0.2.54,<0.2.60",
 ]
 
 # ``astabench`` ships the public eval tasks (``astabench/litqa2_validation``
@@ -53,18 +50,17 @@ astabench = ["astabench==0.5.3"]
 [tool.uv]
 default-groups = ["astabench"]
 # astabench==0.5.3 pins inspect_ai (==0.3.203 historically), but this arm
-# needs >=0.3.235 for the bridged-MCP list[ContentText] serialization fix
-# (0.3.220), the Anthropic bridge system-role fix (0.3.233), and the
-# install_skills/read_skills/model_event_sink APIs inspect_swe 0.2.63 uses
-# (0.3.235). Override so the resolver can pick an inspect_ai that satisfies
+# needs >=0.3.233 for the bridged-MCP list[ContentText] serialization fix
+# (0.3.220) and the Anthropic bridge system-role fix (0.3.233). Override so
+# the resolver can pick an inspect_ai that satisfies
 # all of these, while still letting astabench's own pin (once bumped to
-# ==0.3.235, allenai/asta-bench#156) land the exact version. Public APIs
-# astabench uses are stable across 0.3.203..0.3.235.
+# ==0.3.233, allenai/asta-bench#156) land the exact version. Public APIs
+# astabench uses are stable across 0.3.203..0.3.233.
 #
-# inspect_ai>=0.3.235 refuses to construct the Anthropic model provider unless
+# inspect_ai>=0.3.233 refuses to construct the Anthropic model provider unless
 # `anthropic>=0.105.0` is installed (runtime check in its anthropic provider;
 # the floor is declared only under inspect's `dev` extra, so uv won't raise it
 # on its own and the lock otherwise stays on whatever anthropic it first
 # resolved — 0.97.0 here). Force the floor so the solve env satisfies the
 # provider that inspect-swe's Claude Code arm exercises.
-override-dependencies = ["inspect_ai>=0.3.235", "anthropic>=0.105.0"]
+override-dependencies = ["inspect_ai>=0.3.233", "anthropic>=0.105.0"]
