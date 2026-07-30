@@ -148,4 +148,4 @@ smoke-solvers:
 	@$(TEST_RUN) ./scripts/smoke_solvers.sh $(SMOKE_SOLVERS)
 
 smoke-solvers-ci:
-	@$(TEST_RUN) ./scripts/smoke_solvers.sh react paper_finder
+	@$(TEST_RUN) ./scripts/smoke_solvers.sh react paper_finder inspect-swe
