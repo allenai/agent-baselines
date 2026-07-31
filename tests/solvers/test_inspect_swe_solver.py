@@ -983,9 +983,12 @@ class TestVersionStamping:
         version, or absent) and strict mode would accept incomplete
         provenance."""
         captured_users: list[str | None] = []
+        captured_timeouts: list[int | None] = []
 
         async def fake_exec(cmd, **kwargs):
             captured_users.append(kwargs.get("user"))
+            if cmd == ["asta", "--version"]:
+                captured_timeouts.append(kwargs.get("timeout"))
             res = MagicMock()
             res.success = cmd == ["asta", "--version"]
             res.stdout = "asta 0.17.0\n" if cmd == ["asta", "--version"] else ""
@@ -1028,6 +1031,7 @@ class TestVersionStamping:
             f"asta_version probe didn't forward user=appuser; "
             f"saw users={captured_users}"
         )
+        assert captured_timeouts == [30]
 
 
 def _fake_docker_inspect(image_id="sha256:fake", digest="", config_image=""):
