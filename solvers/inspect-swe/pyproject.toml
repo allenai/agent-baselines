@@ -37,4 +37,11 @@ default-groups = ["astabench"]
 # the bridged-MCP serialization fix and the Anthropic bridge system-role
 # fix. Override astabench's pin so the resolver picks a newer inspect_ai.
 # Public APIs astabench uses are stable across 0.3.203..0.3.249.
-override-dependencies = ["inspect_ai>=0.3.249"]
+override-dependencies = [
+    "inspect_ai>=0.3.249",
+    # inspect-ai 0.3.249 imports AsyncBedrockOpenAI from the OpenAI client;
+    # that symbol was added in openai 2.40.0. Without this floor the
+    # AstaBench dependency graph resolves openai 2.33.0 and task discovery
+    # fails before an eval starts.
+    "openai>=2.40.0",
+]
