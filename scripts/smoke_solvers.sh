@@ -68,6 +68,13 @@ print("agent_baselines.solvers:", agent_baselines.solvers.__file__)
 print("astabench:", getattr(astabench, "__version__", "unknown"), astabench.__file__)
 print("inspect_ai:", getattr(inspect_ai, "__version__", "unknown"), inspect_ai.__file__)
 
+# Import the OpenAI provider, even when the selected eval model is Anthropic.
+# AstaBench task discovery imports this provider and therefore requires the
+# installed OpenAI client to expose every symbol expected by inspect_ai.
+from inspect_ai.model._providers.openai import OpenAIAPI  # noqa: F401, E402
+
+print("inspect_ai OpenAI provider: imports cleanly")
+
 # Lock-coherence gate. inspect_ai enforces a minimum Anthropic SDK version at
 # provider *construction* — not through package metadata — so an internally
 # incoherent lock (inspect_ai bumped, anthropic left stale) sails past both
