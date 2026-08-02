@@ -25,10 +25,12 @@ AgentName = Literal[
 AstaPlugin = Literal["asta", "asta-preview"]
 
 # Provenance probes run after the agent, when a many-sample eval can have
-# substantial concurrent sandbox load. Ten seconds proved too short for the
-# otherwise-trivial ``asta --version`` command in Cloud Batch, causing strict
-# runs to discard completed samples solely because the stamp timed out.
-_PROVENANCE_PROBE_TIMEOUT = 30
+# substantial concurrent sandbox load. Thirty seconds proved too short for the
+# otherwise-trivial ``asta --version`` command in a 12-sample Cloud Batch run,
+# causing strict runs to discard completed samples solely because the stamp
+# timed out. Leave ample headroom for sandbox contention; this probe runs only
+# after the agent has finished and remains bounded.
+_PROVENANCE_PROBE_TIMEOUT = 120
 
 
 class AgentSpec(NamedTuple):

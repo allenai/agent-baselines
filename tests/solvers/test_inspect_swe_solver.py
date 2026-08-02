@@ -1031,7 +1031,7 @@ class TestVersionStamping:
             f"asta_version probe didn't forward user=appuser; "
             f"saw users={captured_users}"
         )
-        assert captured_timeouts == [30]
+        assert captured_timeouts == [120]
 
 
 def _fake_docker_inspect(image_id="sha256:fake", digest="", config_image=""):
