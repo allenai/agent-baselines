@@ -11,18 +11,35 @@ dependencies = [
     # results that are Pydantic models (e.g. list[ContentText] from real
     # MCP servers). Older versions fail bridged MCP calls with
     # "Object of type ContentText is not JSON serializable".
-    # >=0.3.249 additionally lets the Anthropic sandbox bridge accept a
-    # system-role message in `messages[]` (folds it into ChatMessageSystem
-    # in messages_from_anthropic_input). Current Claude Code emits such a
-    # message; 0.3.220 raised `RuntimeError: Unexpected message role: system`
-    # and interrupted the arm mid-sample.
-    "inspect_ai>=0.3.249",
+    # >=0.3.233 lets the Anthropic sandbox bridge accept a system-role
+    # message in `messages[]` (folds it into ChatMessageSystem in
+    # messages_from_anthropic_input, commit 8829d740 / #4095). Current
+    # Claude Code emits such a message; 0.3.220 raised
+    # `RuntimeError: Unexpected message role: system` and interrupted the
+    # arm mid-sample.
+    # 0.3.233 is the tightest floor carrying both fixes; nothing higher
+    # (0.3.249 etc.) is required to run this arm. The <0.3.240 CAP keeps us
+    # below the additive-log-field releases (model_fallbacks@0.3.240,
+    # turn_count@0.3.248) so the frozen 0.3.203 scorer can still read the
+    # logs this arm writes. Without the cap the resolver floats to the
+    # newest inspect_ai (0.3.249), which breaks that scorer.
+    "inspect_ai>=0.3.233,<0.3.240",
     # >=0.2.54 contains the per-invocation bridge port allocation
     # (claude_code ACP) that unblocks parallel evals — older versions
     # share a fixed port 13131 between concurrent samples and serialize.
     # 0.2.52 introduced the ``opencode`` agent which the wrapper now
     # registers; older versions don't expose that constructor.
-    "inspect_swe>=0.2.54",
+    # <0.2.60 CAP: the inspect_ai override below replaces inspect_swe's own
+    # inspect_ai floor. Leaving inspect_swe floating therefore paired 0.2.66
+    # (which declares inspect-ai>=0.3.244 and passes `checkpointer=` to
+    # sandbox_agent_bridge) with astabench's exact inspect_ai==0.3.233 pin.
+    # That incompatible pair killed the baseline arm with an unexpected
+    # `checkpointer` keyword. Versions 0.2.60 through 0.2.63 also declare an
+    # inspect_ai floor above the issue's tight 0.3.233 requirement. 0.2.59 is
+    # the newest release whose declared floor (>=0.3.232) supports 0.3.233,
+    # while retaining the per-invocation bridge and skills support this arm
+    # needs.
+    "inspect_swe>=0.2.54,<0.2.60",
 ]
 
 # ``astabench`` ships the public eval tasks (``astabench/litqa2_validation``
@@ -33,15 +50,31 @@ astabench = ["astabench==0.5.3"]
 
 [tool.uv]
 default-groups = ["astabench"]
-# astabench==0.5.3 pins inspect_ai==0.3.203, but we need >=0.3.249 for
-# the bridged-MCP serialization fix and the Anthropic bridge system-role
-# fix. Override astabench's pin so the resolver picks a newer inspect_ai.
-# Public APIs astabench uses are stable across 0.3.203..0.3.249.
+# astabench==0.5.3 pins inspect_ai (==0.3.203 historically), but this arm
+# needs >=0.3.233 for the bridged-MCP list[ContentText] serialization fix
+# (0.3.220) and the Anthropic bridge system-role fix (0.3.233). Override so
+# the resolver can pick an inspect_ai that satisfies
+# all of these, while still letting astabench's own pin (once bumped to
+# ==0.3.233, allenai/asta-bench#156) land the exact version. Public APIs
+# astabench uses are stable across 0.3.203..0.3.233.
+#
+# inspect_ai>=0.3.233 refuses to construct the Anthropic model provider unless
+# `anthropic>=0.105.0` is installed (runtime check in its anthropic provider;
+# the floor is declared only under inspect's `dev` extra, so uv won't raise it
+# on its own and the lock otherwise stays on whatever anthropic it first
+# resolved — 0.97.0 here). Force the floor so the solve env satisfies the
+# provider that inspect-swe's Claude Code arm exercises.
+#
+# The <0.3.240 cap mirrors the [project] dependency: it keeps the resolver
+# from floating past the frozen-scorer-safe window (see the inspect_ai note
+# above).
+#
+# inspect-ai 0.3.239 imports AsyncBedrockOpenAI from the OpenAI client; that
+# symbol was added in openai 2.40.0. Without this floor the AstaBench
+# dependency graph resolves openai 2.33.0 and task discovery fails before an
+# eval starts.
 override-dependencies = [
-    "inspect_ai>=0.3.249",
-    # inspect-ai 0.3.249 imports AsyncBedrockOpenAI from the OpenAI client;
-    # that symbol was added in openai 2.40.0. Without this floor the
-    # AstaBench dependency graph resolves openai 2.33.0 and task discovery
-    # fails before an eval starts.
+    "inspect_ai>=0.3.233,<0.3.240",
+    "anthropic>=0.105.0",
     "openai>=2.40.0",
 ]
