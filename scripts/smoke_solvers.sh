@@ -67,6 +67,42 @@ print("agent_baselines:", getattr(agent_baselines, "__version__", "unknown"), li
 print("agent_baselines.solvers:", agent_baselines.solvers.__file__)
 print("astabench:", getattr(astabench, "__version__", "unknown"), astabench.__file__)
 print("inspect_ai:", getattr(inspect_ai, "__version__", "unknown"), inspect_ai.__file__)
+
+# Import the OpenAI provider, even when the selected eval model is Anthropic.
+# AstaBench task discovery imports this provider and therefore requires the
+# installed OpenAI client to expose every symbol expected by inspect_ai.
+from inspect_ai.model._providers.openai import OpenAIAPI  # noqa: F401, E402
+
+print("inspect_ai OpenAI provider: imports cleanly")
+
+# Lock-coherence gate. inspect_ai enforces a minimum Anthropic SDK version at
+# provider *construction* — not through package metadata — so an internally
+# incoherent lock (inspect_ai bumped, anthropic left stale) sails past both
+# ``uv lock --check`` and the plain imports above, then fails only deep inside
+# an eval with "Anthropic API requires at least version X of package anthropic"
+# (allenai/gas2own#430). Construct the provider here so CI trips that gate in
+# seconds instead. Solvers whose env has no anthropic are skipped.
+try:
+    import anthropic
+except ImportError:
+    print("anthropic: not in this solver env; skipping provider-construction gate")
+else:
+    import os
+
+    os.environ.setdefault("ANTHROPIC_API_KEY", "sk-ant-smoke-placeholder-not-a-real-key")
+    from inspect_ai.model import get_model
+
+    try:
+        get_model("anthropic/claude-sonnet-4-6")
+    except Exception as exc:  # noqa: BLE001
+        message = str(exc)
+        # Only the version floor is a lock-coherence failure; a missing key or
+        # network hiccup means we got *past* the gate, which is all we assert.
+        if "at least version" in message or "Upgrade with" in message:
+            raise
+        print("anthropic provider: reached past version gate (non-version note:", message, ")")
+    else:
+        print("anthropic provider: constructs cleanly with anthropic", anthropic.__version__)
 PY
 done
 

@@ -24,6 +24,12 @@ AgentName = Literal[
 ]
 AstaPlugin = Literal["asta", "asta-preview"]
 
+# Provenance probes run after the agent, when a many-sample eval can have
+# substantial concurrent sandbox load. Ten seconds proved too short for the
+# otherwise-trivial ``asta --version`` command in Cloud Batch, causing strict
+# runs to discard completed samples solely because the stamp timed out.
+_PROVENANCE_PROBE_TIMEOUT = 30
+
 
 class AgentSpec(NamedTuple):
     """Per-agent facts the wrapper needs in one place.
@@ -694,7 +700,11 @@ async def _stamp_asta_version(
 
     try:
         sbx = sandbox(sandbox_name) if sandbox_name else sandbox()
-        res = await sbx.exec(["asta", "--version"], timeout=10, user=sandbox_user)
+        res = await sbx.exec(
+            ["asta", "--version"],
+            timeout=_PROVENANCE_PROBE_TIMEOUT,
+            user=sandbox_user,
+        )
     except Exception as e:
         _record_repro_warning(
             state, f"asta_version probe raised {e!r}; slot left unset"
