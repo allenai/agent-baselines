@@ -22,8 +22,7 @@ dependencies = [
     # below the additive-log-field releases (model_fallbacks@0.3.240,
     # turn_count@0.3.248) so the frozen 0.3.203 scorer can still read the
     # logs this arm writes. Without the cap the resolver floats to the
-    # newest inspect_ai (0.3.249), which both breaks that scorer and (via
-    # its AsyncBedrockOpenAI import) forces an openai>=2.40.0 floor.
+    # newest inspect_ai (0.3.249), which breaks that scorer.
     "inspect_ai>=0.3.233,<0.3.240",
     # >=0.2.54 contains the per-invocation bridge port allocation
     # (claude_code ACP) that unblocks parallel evals — older versions
@@ -68,7 +67,14 @@ default-groups = ["astabench"]
 #
 # The <0.3.240 cap mirrors the [project] dependency: it keeps the resolver
 # from floating past the frozen-scorer-safe window (see the inspect_ai note
-# above). It also means we do NOT need the openai>=2.40.0 floor that main
-# added for 0.3.249 — that AsyncBedrockOpenAI import isn't present below
-# 0.3.240.
-override-dependencies = ["inspect_ai>=0.3.233,<0.3.240", "anthropic>=0.105.0"]
+# above).
+#
+# inspect-ai 0.3.239 imports AsyncBedrockOpenAI from the OpenAI client; that
+# symbol was added in openai 2.40.0. Without this floor the AstaBench
+# dependency graph resolves openai 2.33.0 and task discovery fails before an
+# eval starts.
+override-dependencies = [
+    "inspect_ai>=0.3.233,<0.3.240",
+    "anthropic>=0.105.0",
+    "openai>=2.40.0",
+]
