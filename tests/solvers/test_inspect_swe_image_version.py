@@ -1,8 +1,6 @@
 import pytest
 
-from agent_baselines.solvers.inspect_swe.agent import (
-    _check_plugin_image_version_match,
-)
+from agent_baselines.skills.image_version import _check_plugin_image_version_match
 
 
 @pytest.fixture
@@ -20,7 +18,7 @@ def skill_dir(tmp_path):
 )
 def test_mismatched_tag_raises(monkeypatch, skill_dir, image):
     monkeypatch.setenv("ASTA_IMAGE", image)
-    with pytest.raises(ValueError, match=r"v0\.104\.1"):
+    with pytest.raises(ValueError, match=r"0\.104\.1"):
         _check_plugin_image_version_match([skill_dir])
 
 
@@ -32,6 +30,10 @@ def test_mismatched_tag_raises(monkeypatch, skill_dir, image):
         "ghcr.io/allenai/asta:latest",
         "ghcr.io/allenai/asta:latest-tex",
         "ghcr.io/allenai/asta@sha256:" + "0" * 64,
+        "ghcr.io/allenai/asta:v0.104.1@sha256:" + "0" * 64,
+        "ghcr.io/allenai/asta:v0.104.1-rc1",
+        "ghcr.io/allenai/asta:v0.104.1-beta.1",
+        "ghcr.io/allenai/asta:v0.104.1-tex\n",
     ],
 )
 def test_matching_or_unversioned_tag_passes(monkeypatch, skill_dir, image):

@@ -14,6 +14,7 @@ from inspect_ai.agent import BridgedToolsSpec
 from inspect_ai.solver import Generate, Solver, TaskState, solver
 from inspect_ai.tool import ToolDef
 
+from agent_baselines.skills.image_version import _check_plugin_image_version_match
 from agent_baselines.skills.resolver import resolve_skills
 from agent_baselines.solvers.inspect_swe._filters import deny_external_web_tools
 
@@ -218,55 +219,6 @@ _ASTA_MCP_PAPER_TOOL_NAMES: frozenset[str] = frozenset(
         "get_author_papers",
     }
 )
-
-
-_PLUGIN_VERSION_RE = re.compile(r"PLUGIN_VERSION=([\d.]+)")
-# Variant tags (``:vX.Y.Z-tex``) carry the same plugin version as ``:vX.Y.Z``.
-_ASTA_IMAGE_VERSION_RE = re.compile(r":v(\d+(?:\.\d+)*)(?:-[A-Za-z0-9.]+)?$")
-
-
-def _check_plugin_image_version_match(skill_dirs: list[Path]) -> None:
-    """Raise if ``ASTA_IMAGE`` carries a parseable semver tag that differs
-    from the ``PLUGIN_VERSION`` baked into the loaded skill files.
-
-    Skipped (no raise) when:
-    - No skills are loaded.
-    - ``ASTA_IMAGE`` isn't set or isn't a ``:vX.Y.Z[-variant]`` tag (e.g. ``:latest``,
-      ``@sha256:...``) — there's nothing to compare against.
-    - Skill files don't declare ``PLUGIN_VERSION`` (older trees).
-    - Multiple skill versions co-exist (caller is mid-iteration; let them
-      figure it out rather than block).
-    """
-    if not skill_dirs:
-        return
-    image = os.environ.get("ASTA_IMAGE", "")
-    m = _ASTA_IMAGE_VERSION_RE.search(image)
-    if not m:
-        return
-    image_version = m.group(1)
-
-    # ``skill_dirs`` is the list of individual skill directories (parents of
-    # SKILL.md), not the skill-tree root. Read SKILL.md from each directly.
-    plugin_versions: set[str] = set()
-    for skill_dir in skill_dirs:
-        skill_md = Path(skill_dir) / "SKILL.md"
-        try:
-            text = skill_md.read_text()
-        except Exception:
-            continue
-        if match := _PLUGIN_VERSION_RE.search(text):
-            plugin_versions.add(match.group(1))
-
-    if len(plugin_versions) != 1:
-        return
-    plugin_version = plugin_versions.pop()
-    if plugin_version != image_version:
-        raise ValueError(
-            f"asta image version (v{image_version}) doesn't match skill "
-            f"PLUGIN_VERSION ({plugin_version}); the skills' bash snippets "
-            f"would bail to a slow self-upgrade inside the sandbox. "
-            f"Pin matching versions (e.g. `ASTA_IMAGE=ghcr.io/allenai/asta:v{plugin_version}`)."
-        )
 
 
 def _asta_plugin_skills_ref(plugin: AstaPlugin) -> str:

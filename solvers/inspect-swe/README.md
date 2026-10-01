@@ -235,7 +235,7 @@ otherwise silently produce misleading numbers:
   so callers can supply the token via either. Set `ASTA_TOKEN` (see
   [Auth](#auth)) or remove paper-search skills.
 - **`ASTA_IMAGE` semver tag doesn't match skill `PLUGIN_VERSION`.**
-  When `ASTA_IMAGE=…:vX.Y.Z` (or a variant tag such as `:vX.Y.Z-tex`)
+  When `ASTA_IMAGE=…:vX.Y.Z` or `…:vX.Y.Z-tex`
   and the loaded skill files declare a
   different `PLUGIN_VERSION`, the skill bash snippets bail to a slow
   self-upgrade inside the sandbox. The check is skipped when the tag
