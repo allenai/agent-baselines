@@ -24,6 +24,7 @@ AgentName = Literal[
     "claude_code", "codex_cli", "gemini_cli", "mini_swe_agent", "opencode"
 ]
 AstaPlugin = Literal["asta-tools", "asta-assistant", "asta-flows", "asta-dev"]
+_LEGACY_ASTA_PLUGINS = frozenset({"asta", "asta-preview"})
 
 # Provenance probes run after the agent, when a many-sample eval can have
 # substantial concurrent sandbox load. Ten seconds proved too short for the
@@ -225,11 +226,12 @@ def _asta_plugin_skills_ref(plugin: str) -> str:
     groups = get_args(AstaPlugin)
     plugin_dir = _VENDOR_ASTA_PLUGINS / "plugins" / plugin / "skills"
     if plugin not in groups:
-        if plugin in ("asta", "asta-preview"):
+        if plugin in _LEGACY_ASTA_PLUGINS:
             if plugin_dir.is_dir():
                 return str(plugin_dir)
-            raise ValueError(
-                f"Legacy Asta plugin group {plugin!r} is absent from this image. Choose one of: {', '.join(groups)}."
+            raise FileNotFoundError(
+                f"Legacy Asta plugin group {plugin!r} is absent from this image. "
+                f"Choose one of: {', '.join(groups)}."
             )
         raise ValueError(
             f"Unknown Asta plugin group {plugin!r}. "
@@ -244,17 +246,20 @@ def _asta_plugin_skills_ref(plugin: str) -> str:
     return str(plugin_dir)
 
 
-def _asta_plugin_skills_refs(plugins: str | list[str]) -> list[str]:
+def _asta_plugin_skills_refs(
+    plugins: str | list[str], *, include_base: bool = True
+) -> list[str]:
     """Resolve selected groups with asta-tools first, as their shared base."""
     names = plugins.split(",") if isinstance(plugins, str) else plugins
+    if any(not isinstance(name, str) for name in names):
+        raise ValueError("Asta plugin group names must be strings.")
     names = [name.strip() for name in names]
     if not names or any(not name for name in names):
         raise ValueError("Choose at least one Asta plugin group.")
     if len(names) != len(set(names)):
         raise ValueError("Asta plugin groups must not be repeated.")
-    legacy = {"asta", "asta-preview"}
-    if any(name in legacy for name in names):
-        if len(names) != 1:
+    if any(name in _LEGACY_ASTA_PLUGINS for name in names):
+        if len(names) != 1 or not include_base:
             raise ValueError(
                 "Legacy Asta plugin groups cannot be combined with other groups."
             )
@@ -262,9 +267,19 @@ def _asta_plugin_skills_refs(plugins: str | list[str]) -> list[str]:
     # Validate before adding the base so invalid selections keep their own error.
     for name in names:
         if name not in get_args(AstaPlugin):
-            _asta_plugin_skills_ref(name)
-    ordered = ["asta-tools", *(name for name in names if name != "asta-tools")]
+            raise ValueError(
+                f"Unknown Asta plugin group {name!r}. "
+                f"Choose one of: {', '.join(get_args(AstaPlugin))}."
+            )
+    ordered = (["asta-tools"] if include_base else []) + [
+        name for name in names if name != "asta-tools"
+    ]
     return [_asta_plugin_skills_ref(name) for name in ordered]
+
+
+def _is_local_asta_tools_ref(ref: str) -> bool:
+    path = Path(ref)
+    return path.name == "skills" and path.parent.name == "asta-tools"
 
 
 def _resolve_env_image_id() -> str | None:
@@ -397,13 +412,21 @@ def inspect_swe_solver(
             "it and ambiguates which service the post-run probes target."
         )
 
-    refs: list[str] = []
-    if install_asta_skills is not None:
-        refs.extend(_asta_plugin_skills_refs(install_asta_skills))
+    local_refs: list[str] = []
     if isinstance(skills, str):
-        refs.append(skills)
+        local_refs.append(skills)
     elif skills:
-        refs.extend(skills)
+        local_refs.extend(skills)
+    local_base = any(_is_local_asta_tools_ref(ref) for ref in local_refs)
+    refs: list[str] = []
+    if local_base:
+        refs.extend(local_refs)
+    if install_asta_skills is not None:
+        refs.extend(
+            _asta_plugin_skills_refs(install_asta_skills, include_base=not local_base)
+        )
+    if not local_base:
+        refs.extend(local_refs)
     # NOTE: skill resolution is deferred to ``execute`` (per-sample) so
     # the stamped ``content_sha256`` / ``path_dirty`` always describe
     # what the inspect_swe constructor sees for *that* sample. inspect_swe

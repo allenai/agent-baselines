@@ -102,6 +102,16 @@ git -C ../asta-plugins checkout <your-ref>
 #   -S skills=../asta-plugins/plugins/asta-assistant/skills
 ```
 
+To test changes to the base skills instead, select the supervising layer and
+point `skills=` at the checkout's `asta-tools/skills` directory. The solver
+uses that directory in place of the image's base skills:
+
+```bash
+# In the astabench eval command above:
+#   -S install_asta_skills=asta-assistant \
+#   -S skills=../asta-plugins/plugins/asta-tools/skills
+```
+
 `-S skills=` only swaps skill content (the SKILL.md prose + scripts).
 If you're patching the asta CLI itself, rebuild the image and re-run
 with that `ASTA_IMAGE` pinned.
@@ -159,7 +169,6 @@ default `:latest` / `:vX.Y.Z` images have no TeX.
     [Skill provenance lock](#skill-provenance-lock) for what's stamped
     per sample and [Skills support per agent](#skills-support-per-agent)
     for which inspect_swe agents accept the kwarg.
-
 - **Model-provider-side web tools** (claude_code's `WebSearch`/`WebFetch`,
   provider equivalents): stripped from every model API request by a
   bridge `GenerateFilter`. The provider can't see them, so they can't

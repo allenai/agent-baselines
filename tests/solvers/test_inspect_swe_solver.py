@@ -599,6 +599,25 @@ class TestSkillsResolution:
             f"/fake/.vendor/asta-plugins/plugins/{group}/skills" for group in groups
         ]
 
+    def test_checkout_base_replaces_bundled_base(self, monkeypatch):
+        monkeypatch.setenv("ASTA_TOKEN", "abc")
+        local_base = "../asta-plugins/plugins/asta-tools/skills"
+        _, _, m_resolve = _run_solver(
+            skills=local_base, install_asta_skills="asta-assistant"
+        )
+        assert m_resolve.call_args.args[0] == [
+            local_base,
+            "/fake/.vendor/asta-plugins/plugins/asta-assistant/skills",
+        ]
+
+    def test_checkout_base_alone_is_not_repeated(self, monkeypatch):
+        monkeypatch.setenv("ASTA_TOKEN", "abc")
+        local_base = "../asta-plugins/plugins/asta-tools/skills"
+        _, _, m_resolve = _run_solver(
+            skills=local_base, install_asta_skills="asta-tools"
+        )
+        assert m_resolve.call_args.args[0] == [local_base]
+
     def test_provenance_lock_stamped_to_state_metadata(self):
         """The lock is the load-bearing piece — it lets you trace from an
         eval log to exactly which sources/shas were used."""
@@ -1189,7 +1208,7 @@ class TestAstaPluginShortcutMissingVendor:
         from agent_baselines.solvers.inspect_swe import agent
 
         monkeypatch.setattr(agent, "_VENDOR_ASTA_PLUGINS", tmp_path)
-        with pytest.raises(ValueError, match="absent from this image"):
+        with pytest.raises(FileNotFoundError, match="absent from this image"):
             agent._asta_plugin_skills_refs(group)
 
         skill_root = tmp_path / "plugins" / group / "skills"
@@ -1202,11 +1221,20 @@ class TestAstaPluginShortcutMissingVendor:
         with pytest.raises(ValueError, match="cannot be combined"):
             _asta_plugin_skills_refs("asta,asta-assistant")
 
+        with pytest.raises(ValueError, match="cannot be combined"):
+            _asta_plugin_skills_refs("asta", include_base=False)
+
     def test_unknown_plugin_group_is_rejected(self):
         from agent_baselines.solvers.inspect_swe.agent import _asta_plugin_skills_ref
 
         with pytest.raises(ValueError, match="Unknown Asta plugin group"):
             _asta_plugin_skills_ref("../../elsewhere")  # type: ignore[arg-type]
+
+    def test_non_string_group_is_rejected(self):
+        from agent_baselines.solvers.inspect_swe.agent import _asta_plugin_skills_refs
+
+        with pytest.raises(ValueError, match="must be strings"):
+            _asta_plugin_skills_refs(["asta-tools", None])  # type: ignore[list-item]
 
     def test_missing_vendor_dir_raises(self):
         """If setup.sh wasn't run, ``install_asta_skills="asta-tools"`` fails loudly
