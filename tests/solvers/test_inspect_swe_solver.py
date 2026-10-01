@@ -583,6 +583,22 @@ class TestSkillsResolution:
             "/fake/.vendor/asta-plugins/plugins/asta-tools/skills",
         ]
 
+    @pytest.mark.parametrize(
+        "selection,groups",
+        [
+            ("asta-assistant", ["asta-tools", "asta-assistant"]),
+            ("asta-flows", ["asta-tools", "asta-flows"]),
+            ("asta-assistant,asta-dev", ["asta-tools", "asta-assistant", "asta-dev"]),
+            (["asta-dev", "asta-tools"], ["asta-tools", "asta-dev"]),
+        ],
+    )
+    def test_plugin_groups_include_shared_base(self, monkeypatch, selection, groups):
+        monkeypatch.setenv("ASTA_TOKEN", "abc")
+        _, _, m_resolve = _run_solver(install_asta_skills=selection)
+        assert m_resolve.call_args.args[0] == [
+            f"/fake/.vendor/asta-plugins/plugins/{group}/skills" for group in groups
+        ]
+
     def test_provenance_lock_stamped_to_state_metadata(self):
         """The lock is the load-bearing piece — it lets you trace from an
         eval log to exactly which sources/shas were used."""
@@ -1149,6 +1165,13 @@ class TestMCPPaperSearchFiltering:
 
 
 class TestAstaPluginShortcutMissingVendor:
+    @pytest.mark.parametrize("selection", ["", "asta-assistant,", "asta-dev,asta-dev"])
+    def test_empty_or_repeated_group_is_rejected(self, selection):
+        from agent_baselines.solvers.inspect_swe.agent import _asta_plugin_skills_refs
+
+        with pytest.raises(ValueError):
+            _asta_plugin_skills_refs(selection)
+
     @pytest.mark.parametrize(
         "group", ("asta-tools", "asta-assistant", "asta-flows", "asta-dev")
     )
@@ -1162,11 +1185,22 @@ class TestAstaPluginShortcutMissingVendor:
         assert agent._asta_plugin_skills_ref(group) == str(skill_root)
 
     @pytest.mark.parametrize("group", ("asta", "asta-preview"))
-    def test_removed_plugin_group_is_rejected(self, group):
-        from agent_baselines.solvers.inspect_swe.agent import _asta_plugin_skills_ref
+    def test_legacy_group_requires_matching_image(self, monkeypatch, tmp_path, group):
+        from agent_baselines.solvers.inspect_swe import agent
 
-        with pytest.raises(ValueError, match="no longer exists"):
-            _asta_plugin_skills_ref(group)  # type: ignore[arg-type]
+        monkeypatch.setattr(agent, "_VENDOR_ASTA_PLUGINS", tmp_path)
+        with pytest.raises(ValueError, match="absent from this image"):
+            agent._asta_plugin_skills_refs(group)
+
+        skill_root = tmp_path / "plugins" / group / "skills"
+        skill_root.mkdir(parents=True)
+        assert agent._asta_plugin_skills_refs(group) == [str(skill_root)]
+
+    def test_legacy_and_current_groups_cannot_mix(self):
+        from agent_baselines.solvers.inspect_swe.agent import _asta_plugin_skills_refs
+
+        with pytest.raises(ValueError, match="cannot be combined"):
+            _asta_plugin_skills_refs("asta,asta-assistant")
 
     def test_unknown_plugin_group_is_rejected(self):
         from agent_baselines.solvers.inspect_swe.agent import _asta_plugin_skills_ref

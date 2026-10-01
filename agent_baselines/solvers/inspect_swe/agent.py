@@ -221,19 +221,20 @@ _ASTA_MCP_PAPER_TOOL_NAMES: frozenset[str] = frozenset(
 )
 
 
-def _asta_plugin_skills_ref(plugin: AstaPlugin) -> str:
+def _asta_plugin_skills_ref(plugin: str) -> str:
     groups = get_args(AstaPlugin)
+    plugin_dir = _VENDOR_ASTA_PLUGINS / "plugins" / plugin / "skills"
     if plugin not in groups:
         if plugin in ("asta", "asta-preview"):
+            if plugin_dir.is_dir():
+                return str(plugin_dir)
             raise ValueError(
-                f"Asta plugin group {plugin!r} no longer exists. "
-                f"Choose one of: {', '.join(groups)}."
+                f"Legacy Asta plugin group {plugin!r} is absent from this image. Choose one of: {', '.join(groups)}."
             )
         raise ValueError(
             f"Unknown Asta plugin group {plugin!r}. "
             f"Choose one of: {', '.join(groups)}."
         )
-    plugin_dir = _VENDOR_ASTA_PLUGINS / "plugins" / plugin / "skills"
     if not plugin_dir.is_dir():
         raise FileNotFoundError(
             f"Bundled skills not found at {plugin_dir}. "
@@ -241,6 +242,29 @@ def _asta_plugin_skills_ref(plugin: AstaPlugin) -> str:
             "from the asta image."
         )
     return str(plugin_dir)
+
+
+def _asta_plugin_skills_refs(plugins: str | list[str]) -> list[str]:
+    """Resolve selected groups with asta-tools first, as their shared base."""
+    names = plugins.split(",") if isinstance(plugins, str) else plugins
+    names = [name.strip() for name in names]
+    if not names or any(not name for name in names):
+        raise ValueError("Choose at least one Asta plugin group.")
+    if len(names) != len(set(names)):
+        raise ValueError("Asta plugin groups must not be repeated.")
+    legacy = {"asta", "asta-preview"}
+    if any(name in legacy for name in names):
+        if len(names) != 1:
+            raise ValueError(
+                "Legacy Asta plugin groups cannot be combined with other groups."
+            )
+        return [_asta_plugin_skills_ref(names[0])]
+    # Validate before adding the base so invalid selections keep their own error.
+    for name in names:
+        if name not in get_args(AstaPlugin):
+            _asta_plugin_skills_ref(name)
+    ordered = ["asta-tools", *(name for name in names if name != "asta-tools")]
+    return [_asta_plugin_skills_ref(name) for name in ordered]
 
 
 def _resolve_env_image_id() -> str | None:
@@ -301,7 +325,7 @@ def _check_image_stamps_match_env(lock: list[dict], env_image_id: str | None) ->
 def inspect_swe_solver(
     agent: AgentName = "claude_code",
     skills: str | list[str] | None = None,
-    install_asta_skills: AstaPlugin | None = None,
+    install_asta_skills: str | list[str] | None = None,
     bridge_astabench_tools: bool = True,
     deny_external_web: bool = True,
     system_prompt: str | None = None,
@@ -321,7 +345,8 @@ def inspect_swe_solver(
             plus git origin/sha/path_in_repo/path_dirty when the path is
             inside a git working tree) is written to
             ``state.metadata["skills"]``.
-        install_asta_skills: Sugar for ``skills="<.vendor>/plugins/<plugin>/skills"``.
+        install_asta_skills: Plugin group(s), comma-separated or as a list.
+            ``asta-tools`` is included first for every selection.
         bridge_astabench_tools: Forward state.tools to the agent as
             ``mcp__astabench_*``. Set False for agent-only mode.
         deny_external_web: Strip provider-side WebSearch/WebFetch from every
@@ -374,7 +399,7 @@ def inspect_swe_solver(
 
     refs: list[str] = []
     if install_asta_skills is not None:
-        refs.append(_asta_plugin_skills_ref(install_asta_skills))
+        refs.extend(_asta_plugin_skills_refs(install_asta_skills))
     if isinstance(skills, str):
         refs.append(skills)
     elif skills:

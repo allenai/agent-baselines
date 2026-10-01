@@ -73,7 +73,7 @@ uv run --project solvers/inspect-swe --frozen -- astabench eval \
     --model anthropic/claude-sonnet-4-6 \
     -S agent=claude_code \
     -S version=2.1.128 \
-    -S install_asta_skills=asta-tools \
+    -S install_asta_skills=asta-assistant \
     --log-dir logs/main
 ```
 
@@ -88,17 +88,18 @@ swap `astabench eval --split validation` for `inspect eval <task-spec>`.
 ### Swapping in local skills
 
 For skill iteration (or just running against a non-tagged ref), clone
-asta-plugins and point `-S skills=` at its canonical skill tree
-(`plugins/asta-tools/skills`) instead of `-S install_asta_skills=`:
+asta-plugins and point `-S skills=` at the group under test. To test
+`asta-assistant`, keep the base `asta-tools` from the image and swap the
+supervising layer from the checkout:
 
 ```bash
-# Skip if already cloned. plugins/asta-tools/skills is the canonical
-# source — edit it directly, no build step.
+# Skip if already cloned. Edit the SKILL.md files directly, no build step.
 git clone https://github.com/allenai/asta-plugins.git ../asta-plugins
 git -C ../asta-plugins checkout <your-ref>
 
 # Then in the astabench eval command above:
-#   -S skills=../asta-plugins/plugins/asta-tools/skills
+#   -S install_asta_skills=asta-tools \
+#   -S skills=../asta-plugins/plugins/asta-assistant/skills
 ```
 
 `-S skills=` only swaps skill content (the SKILL.md prose + scripts).
@@ -127,7 +128,8 @@ uv run --project solvers/inspect-swe --frozen -- astabench eval \
     --model anthropic/claude-sonnet-4-6 \
     -S agent=claude_code \
     -S version="$AGENT_VERSION" \
-    -S skills=../asta-plugins/plugins/asta-tools/skills \
+    -S install_asta_skills=asta-tools \
+    -S skills=../asta-plugins/plugins/asta-assistant/skills \
     --log-dir logs/arm-b
 
 inspect view --log-dir logs --recursive
@@ -148,7 +150,7 @@ default `:latest` / `:vX.Y.Z` images have no TeX.
   - Default: the task's MCP tools (`snippet_search`, `get_paper`,
     `table_editor`, `python_session`, …) reach the agent as
     `mcp__astabench_*` via the bridge.
-  - `-S skills=<path>` (or `-S install_asta_skills=asta-tools`):
+  - `-S skills=<path>` (or `-S install_asta_skills=asta-assistant`):
     install SKILL.md trees into the agent's discovery path, giving the
     agent a native `asta papers` / `asta documents` / ... CLI surface
     plus skill prose. When `semantic-scholar` resolves, MCP tools with
@@ -175,9 +177,15 @@ default `:latest` / `:vX.Y.Z` images have no TeX.
   chosen image so any `ASTA_IMAGE` (including `:latest`) is
   self-consistent.
 
-`install_asta_skills` accepts the current Asta plugin groups:
-`asta-tools`, `asta-assistant`, `asta-flows`, and `asta-dev`. The former
-`asta` and `asta-preview` group names are no longer in the Asta image.
+`install_asta_skills=asta-assistant` installs the usual stack:
+`asta-tools` as the base plus `asta-assistant` as the supervising layer.
+Use `asta-tools` alone for base-skill tests, `asta-flows` for the alternative
+workflow layer, or `asta-assistant,asta-dev` to add the internal development
+skills. The argument also accepts a list when calling the solver in Python.
+`asta-tools` is included first for every current-group selection. The legacy
+`asta` and `asta-preview` names remain available only when testing an older
+pinned image that actually contains those directories; they cannot be mixed
+with current groups.
 
 ## Reproducibility
 
