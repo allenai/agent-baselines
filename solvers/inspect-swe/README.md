@@ -93,8 +93,7 @@ asta-plugins and point `-S skills=` at its canonical skill tree
 
 ```bash
 # Skip if already cloned. plugins/asta-tools/skills is the canonical
-# source — edit it directly, no build step. (`make build-plugins` only
-# regenerates the core `plugins/asta` subset, if you're testing that.)
+# source — edit it directly, no build step.
 git clone https://github.com/allenai/asta-plugins.git ../asta-plugins
 git -C ../asta-plugins checkout <your-ref>
 
@@ -159,9 +158,6 @@ default `:latest` / `:vX.Y.Z` images have no TeX.
     per sample and [Skills support per agent](#skills-support-per-agent)
     for which inspect_swe agents accept the kwarg.
 
-`install_asta_skills` accepts the current Asta plugin groups:
-`asta-tools`, `asta-assistant`, `asta-flows`, and `asta-dev`. The former
-`asta` and `asta-preview` group names are no longer in the Asta image.
 - **Model-provider-side web tools** (claude_code's `WebSearch`/`WebFetch`,
   provider equivalents): stripped from every model API request by a
   bridge `GenerateFilter`. The provider can't see them, so they can't
@@ -178,6 +174,10 @@ default `:latest` / `:vX.Y.Z` images have no TeX.
   digest is required. `setup.sh` extracts skills directly from the
   chosen image so any `ASTA_IMAGE` (including `:latest`) is
   self-consistent.
+
+`install_asta_skills` accepts the current Asta plugin groups:
+`asta-tools`, `asta-assistant`, `asta-flows`, and `asta-dev`. The former
+`asta` and `asta-preview` group names are no longer in the Asta image.
 
 ## Reproducibility
 
@@ -254,14 +254,13 @@ resolved ref:
 
 ```json
 {
-  "source": "/Users/me/dev/asta-plugins/plugins/asta-tools/skills",
+  "source": "/Users/me/dev/asta-plugins/plugins/asta-tools/skills/semantic-scholar",
   "content_sha256": "b3509822047f2ece…",
-  "skills": ["asta-documents", "literature-report", "preview",
-             "research-step", "semantic-scholar", "workspace"],
+  "skills": ["semantic-scholar"],
   "git": {
     "origin": "git@github.com:allenai/asta-plugins.git",
     "sha": "6fcf83a663dcfc26c1ce897af3622e4cc472e8ef",
-    "path_in_repo": "plugins/asta-tools/skills",
+    "path_in_repo": "plugins/asta-tools/skills/semantic-scholar",
     "path_dirty": false
   }
 }
@@ -309,7 +308,8 @@ clones.
 duplicates while the lock listed both. The resolver rejects up front,
 whether the duplicates come from two `-S skills=` refs or from a single
 parent ref containing two skill trees with the same basename
-(e.g. two refs both pointing at `plugins/asta-tools/skills/semantic-scholar`).
+(e.g. one `plugins/` ref containing `group-a/skills/demo` and
+`group-b/skills/demo`).
 
 **`image_id`: image-derived alternative to git provenance.** When the
 resolved path lives under a tree carrying a `.image-id` stamp (written

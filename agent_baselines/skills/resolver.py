@@ -295,8 +295,9 @@ def resolve_skills(refs: list[str]) -> ResolvedSkills:
         ValueError: if the same skill name appears more than once across
             all resolved refs — whether two refs each contain a
             ``semantic-scholar`` skill or a single ref points at a parent
-            with two ``semantic-scholar`` subtrees (e.g. two refs to
-            ``asta-tools/skills/``). inspect_swe's ``install_skills``
+            with two same-named skill subtrees (e.g.
+            ``group-a/skills/demo`` and ``group-b/skills/demo``).
+            inspect_swe's ``install_skills``
             keys by skill name, so duplicates silently overwrite each
             other while the lock claims both shipped.
     """

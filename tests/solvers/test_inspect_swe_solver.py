@@ -1149,16 +1149,30 @@ class TestMCPPaperSearchFiltering:
 
 
 class TestAstaPluginShortcutMissingVendor:
-    def test_current_plugin_group_resolves(self, monkeypatch, tmp_path):
+    @pytest.mark.parametrize(
+        "group", ("asta-tools", "asta-assistant", "asta-flows", "asta-dev")
+    )
+    def test_current_plugin_group_resolves(self, monkeypatch, tmp_path, group):
         from agent_baselines.solvers.inspect_swe import agent
 
-        skill_root = tmp_path / "plugins" / "asta-tools" / "skills"
+        skill_root = tmp_path / "plugins" / group / "skills"
         skill_root.mkdir(parents=True)
         monkeypatch.setattr(agent, "_VENDOR_ASTA_PLUGINS", tmp_path)
 
-        assert agent._asta_plugin_skills_ref("asta-tools") == str(skill_root)
-        with pytest.raises(FileNotFoundError, match="current plugin groups"):
-            agent._asta_plugin_skills_ref("asta-preview")
+        assert agent._asta_plugin_skills_ref(group) == str(skill_root)
+
+    @pytest.mark.parametrize("group", ("asta", "asta-preview"))
+    def test_removed_plugin_group_is_rejected(self, group):
+        from agent_baselines.solvers.inspect_swe.agent import _asta_plugin_skills_ref
+
+        with pytest.raises(ValueError, match="no longer exists"):
+            _asta_plugin_skills_ref(group)  # type: ignore[arg-type]
+
+    def test_unknown_plugin_group_is_rejected(self):
+        from agent_baselines.solvers.inspect_swe.agent import _asta_plugin_skills_ref
+
+        with pytest.raises(ValueError, match="Unknown Asta plugin group"):
+            _asta_plugin_skills_ref("../../elsewhere")  # type: ignore[arg-type]
 
     def test_missing_vendor_dir_raises(self):
         """If setup.sh wasn't run, ``install_asta_skills="asta-tools"`` fails loudly

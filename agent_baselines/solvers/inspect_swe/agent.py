@@ -8,7 +8,7 @@ import os
 import re
 import subprocess
 from pathlib import Path
-from typing import Any, Callable, Literal, NamedTuple
+from typing import Any, Callable, Literal, NamedTuple, get_args
 
 from inspect_ai.agent import BridgedToolsSpec
 from inspect_ai.solver import Generate, Solver, TaskState, solver
@@ -222,13 +222,23 @@ _ASTA_MCP_PAPER_TOOL_NAMES: frozenset[str] = frozenset(
 
 
 def _asta_plugin_skills_ref(plugin: AstaPlugin) -> str:
+    groups = get_args(AstaPlugin)
+    if plugin not in groups:
+        if plugin in ("asta", "asta-preview"):
+            raise ValueError(
+                f"Asta plugin group {plugin!r} no longer exists. "
+                f"Choose one of: {', '.join(groups)}."
+            )
+        raise ValueError(
+            f"Unknown Asta plugin group {plugin!r}. "
+            f"Choose one of: {', '.join(groups)}."
+        )
     plugin_dir = _VENDOR_ASTA_PLUGINS / "plugins" / plugin / "skills"
     if not plugin_dir.is_dir():
         raise FileNotFoundError(
             f"Bundled skills not found at {plugin_dir}. "
             "Run solvers/inspect-swe/setup.sh to extract bundled skills "
-            "from the asta image, or select one of the current plugin groups: "
-            "asta-tools, asta-assistant, asta-flows, asta-dev."
+            "from the asta image."
         )
     return str(plugin_dir)
 
