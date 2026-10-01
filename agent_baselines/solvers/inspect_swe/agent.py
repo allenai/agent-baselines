@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 AgentName = Literal[
     "claude_code", "codex_cli", "gemini_cli", "mini_swe_agent", "opencode"
 ]
-AstaPlugin = Literal["asta", "asta-preview"]
+AstaPlugin = Literal["asta-tools", "asta-assistant", "asta-flows", "asta-dev"]
 
 # Provenance probes run after the agent, when a many-sample eval can have
 # substantial concurrent sandbox load. Ten seconds proved too short for the
@@ -226,8 +226,9 @@ def _asta_plugin_skills_ref(plugin: AstaPlugin) -> str:
     if not plugin_dir.is_dir():
         raise FileNotFoundError(
             f"Bundled skills not found at {plugin_dir}. "
-            f"Run solvers/inspect-swe/setup.sh to extract bundled skills "
-            f"from the asta image."
+            "Run solvers/inspect-swe/setup.sh to extract bundled skills "
+            "from the asta image, or select one of the current plugin groups: "
+            "asta-tools, asta-assistant, asta-flows, asta-dev."
         )
     return str(plugin_dir)
 

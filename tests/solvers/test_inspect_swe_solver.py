@@ -351,7 +351,7 @@ class TestStrictReproducibility:
                     "git": {
                         "origin": "git@example.com:o/r.git",
                         "sha": "a" * 40,
-                        "path_in_repo": "plugins/asta/skills",
+                        "path_in_repo": "plugins/asta-tools/skills",
                         "path_dirty": False,
                     },
                 }
@@ -454,7 +454,7 @@ class TestStrictReproducibility:
             skill_dirs=[Path("/fake/semantic-scholar")],
             lock=[
                 {
-                    "source": "/fake/.vendor/asta-plugins/plugins/asta/skills",
+                    "source": "/fake/.vendor/asta-plugins/plugins/asta-tools/skills",
                     "content_sha256": "abc",
                     "skills": ["semantic-scholar"],
                     "image_id": stamped_id,
@@ -471,7 +471,7 @@ class TestStrictReproducibility:
         )
         monkeypatch.setenv("ASTA_TOKEN", "abc")
         _, state, _ = _run_solver(
-            install_asta_skills="asta",
+            install_asta_skills="asta-tools",
             resolved=resolved,
             strict_reproducibility=True,
             version="2.1.128",
@@ -494,7 +494,7 @@ class TestStrictReproducibility:
             skill_dirs=[Path("/fake/semantic-scholar")],
             lock=[
                 {
-                    "source": "/fake/.vendor/asta-plugins/plugins/asta/skills",
+                    "source": "/fake/.vendor/asta-plugins/plugins/asta-tools/skills",
                     "content_sha256": "abc",
                     "skills": ["semantic-scholar"],
                     "image_id": "sha256:" + "b" * 64,
@@ -514,7 +514,7 @@ class TestStrictReproducibility:
         monkeypatch.setenv("ASTA_TOKEN", "abc")
         with pytest.raises(ValueError, match="unverified .image-id"):
             _run_solver(
-                install_asta_skills="asta",
+                install_asta_skills="asta-tools",
                 resolved=resolved,
                 strict_reproducibility=True,
                 version="2.1.128",
@@ -570,15 +570,17 @@ class TestSkillsResolution:
         assert kwargs["skills"] == [Path("/tmp/fake-dir")]
 
     def test_install_asta_skills_sugar(self, monkeypatch):
-        """``install_asta_skills="asta"`` resolves to the bundled plugin path
+        """``install_asta_skills="asta-tools"`` resolves to the bundled plugin path
         and goes through the same resolver as explicit ``skills=`` refs."""
         monkeypatch.setenv("ASTA_TOKEN", "abc")
         resolved = ResolvedSkills(
             skill_dirs=[Path("/fake/semantic-scholar")], lock=[{"source": "x"}]
         )
-        _, _, m_resolve = _run_solver(install_asta_skills="asta", resolved=resolved)
+        _, _, m_resolve = _run_solver(
+            install_asta_skills="asta-tools", resolved=resolved
+        )
         assert m_resolve.call_args.args[0] == [
-            "/fake/.vendor/asta-plugins/plugins/asta/skills",
+            "/fake/.vendor/asta-plugins/plugins/asta-tools/skills",
         ]
 
     def test_provenance_lock_stamped_to_state_metadata(self):
@@ -1147,8 +1149,19 @@ class TestMCPPaperSearchFiltering:
 
 
 class TestAstaPluginShortcutMissingVendor:
+    def test_current_plugin_group_resolves(self, monkeypatch, tmp_path):
+        from agent_baselines.solvers.inspect_swe import agent
+
+        skill_root = tmp_path / "plugins" / "asta-tools" / "skills"
+        skill_root.mkdir(parents=True)
+        monkeypatch.setattr(agent, "_VENDOR_ASTA_PLUGINS", tmp_path)
+
+        assert agent._asta_plugin_skills_ref("asta-tools") == str(skill_root)
+        with pytest.raises(FileNotFoundError, match="current plugin groups"):
+            agent._asta_plugin_skills_ref("asta-preview")
+
     def test_missing_vendor_dir_raises(self):
-        """If setup.sh wasn't run, ``install_asta_skills="asta"`` fails loudly
+        """If setup.sh wasn't run, ``install_asta_skills="asta-tools"`` fails loudly
         before the eval starts."""
         from agent_baselines.solvers.inspect_swe.agent import inspect_swe_solver
 
@@ -1160,7 +1173,7 @@ class TestAstaPluginShortcutMissingVendor:
             ),
         ):
             with pytest.raises(FileNotFoundError):
-                inspect_swe_solver(install_asta_skills="asta")
+                inspect_swe_solver(install_asta_skills="asta-tools")
 
 
 class TestPreflightAuthCheck:

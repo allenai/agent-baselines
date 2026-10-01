@@ -73,7 +73,7 @@ uv run --project solvers/inspect-swe --frozen -- astabench eval \
     --model anthropic/claude-sonnet-4-6 \
     -S agent=claude_code \
     -S version=2.1.128 \
-    -S install_asta_skills=asta-preview \
+    -S install_asta_skills=asta-tools \
     --log-dir logs/main
 ```
 
@@ -89,17 +89,17 @@ swap `astabench eval --split validation` for `inspect eval <task-spec>`.
 
 For skill iteration (or just running against a non-tagged ref), clone
 asta-plugins and point `-S skills=` at its canonical skill tree
-(`plugins/asta-preview/skills`) instead of `-S install_asta_skills=`:
+(`plugins/asta-tools/skills`) instead of `-S install_asta_skills=`:
 
 ```bash
-# Skip if already cloned. plugins/asta-preview/skills is the canonical
+# Skip if already cloned. plugins/asta-tools/skills is the canonical
 # source — edit it directly, no build step. (`make build-plugins` only
 # regenerates the core `plugins/asta` subset, if you're testing that.)
 git clone https://github.com/allenai/asta-plugins.git ../asta-plugins
 git -C ../asta-plugins checkout <your-ref>
 
 # Then in the astabench eval command above:
-#   -S skills=../asta-plugins/plugins/asta-preview/skills
+#   -S skills=../asta-plugins/plugins/asta-tools/skills
 ```
 
 `-S skills=` only swaps skill content (the SKILL.md prose + scripts).
@@ -128,7 +128,7 @@ uv run --project solvers/inspect-swe --frozen -- astabench eval \
     --model anthropic/claude-sonnet-4-6 \
     -S agent=claude_code \
     -S version="$AGENT_VERSION" \
-    -S skills=../asta-plugins/plugins/asta-preview/skills \
+    -S skills=../asta-plugins/plugins/asta-tools/skills \
     --log-dir logs/arm-b
 
 inspect view --log-dir logs --recursive
@@ -149,7 +149,7 @@ default `:latest` / `:vX.Y.Z` images have no TeX.
   - Default: the task's MCP tools (`snippet_search`, `get_paper`,
     `table_editor`, `python_session`, …) reach the agent as
     `mcp__astabench_*` via the bridge.
-  - `-S skills=<path>` (or `-S install_asta_skills=asta|asta-preview`):
+  - `-S skills=<path>` (or `-S install_asta_skills=asta-tools`):
     install SKILL.md trees into the agent's discovery path, giving the
     agent a native `asta papers` / `asta documents` / ... CLI surface
     plus skill prose. When `semantic-scholar` resolves, MCP tools with
@@ -158,6 +158,10 @@ default `:latest` / `:vX.Y.Z` images have no TeX.
     [Skill provenance lock](#skill-provenance-lock) for what's stamped
     per sample and [Skills support per agent](#skills-support-per-agent)
     for which inspect_swe agents accept the kwarg.
+
+`install_asta_skills` accepts the current Asta plugin groups:
+`asta-tools`, `asta-assistant`, `asta-flows`, and `asta-dev`. The former
+`asta` and `asta-preview` group names are no longer in the Asta image.
 - **Model-provider-side web tools** (claude_code's `WebSearch`/`WebFetch`,
   provider equivalents): stripped from every model API request by a
   bridge `GenerateFilter`. The provider can't see them, so they can't
@@ -250,14 +254,14 @@ resolved ref:
 
 ```json
 {
-  "source": "/Users/me/dev/asta-plugins/plugins/asta/skills",
+  "source": "/Users/me/dev/asta-plugins/plugins/asta-tools/skills",
   "content_sha256": "b3509822047f2ece…",
   "skills": ["asta-documents", "literature-report", "preview",
              "research-step", "semantic-scholar", "workspace"],
   "git": {
     "origin": "git@github.com:allenai/asta-plugins.git",
     "sha": "6fcf83a663dcfc26c1ce897af3622e4cc472e8ef",
-    "path_in_repo": "plugins/asta/skills",
+    "path_in_repo": "plugins/asta-tools/skills",
     "path_dirty": false
   }
 }
@@ -305,8 +309,7 @@ clones.
 duplicates while the lock listed both. The resolver rejects up front,
 whether the duplicates come from two `-S skills=` refs or from a single
 parent ref containing two skill trees with the same basename
-(e.g. `plugins/asta/skills/semantic-scholar` *and*
-`plugins/asta-preview/skills/semantic-scholar`).
+(e.g. two refs both pointing at `plugins/asta-tools/skills/semantic-scholar`).
 
 **`image_id`: image-derived alternative to git provenance.** When the
 resolved path lives under a tree carrying a `.image-id` stamp (written
