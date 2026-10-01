@@ -134,6 +134,15 @@ uv run --project solvers/inspect-swe --frozen -- astabench eval \
 inspect view --log-dir logs --recursive
 ```
 
+Both arms run the same image, so a skills comparison never exercises an
+image change (a Dockerfile edit in an asta-plugins PR). To test one, hold
+`-S skills=` fixed and point the second arm's `ASTA_IMAGE` at the image
+built from that PR.
+
+Cases that build a LaTeX paper (the workspace skill's paper mode) need
+the TeX variant, e.g. `ASTA_IMAGE=ghcr.io/allenai/asta:vX.Y.Z-tex`; the
+default `:latest` / `:vX.Y.Z` images have no TeX.
+
 ## What gets wired
 
 - **Asta access** — two surfaces:
@@ -226,7 +235,8 @@ otherwise silently produce misleading numbers:
   so callers can supply the token via either. Set `ASTA_TOKEN` (see
   [Auth](#auth)) or remove paper-search skills.
 - **`ASTA_IMAGE` semver tag doesn't match skill `PLUGIN_VERSION`.**
-  When `ASTA_IMAGE=…:vX.Y.Z` and the loaded skill files declare a
+  When `ASTA_IMAGE=…:vX.Y.Z` or `…:vX.Y.Z-tex`
+  and the loaded skill files declare a
   different `PLUGIN_VERSION`, the skill bash snippets bail to a slow
   self-upgrade inside the sandbox. The check is skipped when the tag
   isn't a parseable semver (`:latest`, `@sha256:…`, unset) since there's
