@@ -73,7 +73,7 @@ uv run --project solvers/inspect-swe --frozen -- astabench eval \
     --model anthropic/claude-sonnet-4-6 \
     -S agent=claude_code \
     -S version=2.1.128 \
-    -S install_asta_skills=asta-assistant \
+    -S install_asta_skills=asta-tools,asta-assistant \
     --log-dir logs/main
 ```
 
@@ -150,7 +150,7 @@ default `:latest` / `:vX.Y.Z` images have no TeX.
   - Default: the task's MCP tools (`snippet_search`, `get_paper`,
     `table_editor`, `python_session`, …) reach the agent as
     `mcp__astabench_*` via the bridge.
-  - `-S skills=<path>` (or `-S install_asta_skills=asta-assistant`):
+  - `-S skills=<path>` (or `-S install_asta_skills=asta-tools,asta-assistant`):
     install SKILL.md trees into the agent's discovery path, giving the
     agent a native `asta papers` / `asta documents` / ... CLI surface
     plus skill prose. When `semantic-scholar` resolves, MCP tools with
@@ -177,8 +177,12 @@ default `:latest` / `:vX.Y.Z` images have no TeX.
   chosen image so any `ASTA_IMAGE` (including `:latest`) is
   self-consistent.
 
-`install_asta_skills=asta-assistant` installs the usual stack:
+`install_asta_skills=asta-tools,asta-assistant` installs the usual stack:
 `asta-tools` as the base plus `asta-assistant` as the supervising layer.
+`asta-assistant`, `asta-flows` and `asta-dev` call `asta-tools:*` skills but
+asta-plugins does not declare or install that dependency, so never test one
+of them without `asta-tools` — including when swapping a layer in with
+`-S skills=<path>`.
 Use `asta-tools` alone for base-skill tests, `asta-flows` for the alternative
 workflow layer, or `asta-assistant,asta-dev` to add the internal development
 skills. The argument also accepts a list when calling the solver in Python.
