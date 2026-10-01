@@ -8,7 +8,7 @@ import os
 import re
 import subprocess
 from pathlib import Path
-from typing import Any, Callable, Literal, NamedTuple
+from typing import Any, Callable, Literal, NamedTuple, get_args
 
 from inspect_ai.agent import BridgedToolsSpec
 from inspect_ai.solver import Generate, Solver, TaskState, solver
@@ -23,7 +23,8 @@ logger = logging.getLogger(__name__)
 AgentName = Literal[
     "claude_code", "codex_cli", "gemini_cli", "mini_swe_agent", "opencode"
 ]
-AstaPlugin = Literal["asta", "asta-preview"]
+AstaPlugin = Literal["asta-tools", "asta-assistant", "asta-flows", "asta-dev"]
+_LEGACY_ASTA_PLUGINS = frozenset({"asta", "asta-preview"})
 
 # Provenance probes run after the agent, when a many-sample eval can have
 # substantial concurrent sandbox load. Ten seconds proved too short for the
@@ -221,15 +222,64 @@ _ASTA_MCP_PAPER_TOOL_NAMES: frozenset[str] = frozenset(
 )
 
 
-def _asta_plugin_skills_ref(plugin: AstaPlugin) -> str:
+def _asta_plugin_skills_ref(plugin: str) -> str:
+    groups = get_args(AstaPlugin)
     plugin_dir = _VENDOR_ASTA_PLUGINS / "plugins" / plugin / "skills"
+    if plugin not in groups:
+        if plugin in _LEGACY_ASTA_PLUGINS:
+            if plugin_dir.is_dir():
+                return str(plugin_dir)
+            raise FileNotFoundError(
+                f"Legacy Asta plugin group {plugin!r} is absent from this image. "
+                f"Choose one of: {', '.join(groups)}."
+            )
+        raise ValueError(
+            f"Unknown Asta plugin group {plugin!r}. "
+            f"Choose one of: {', '.join(groups)}."
+        )
     if not plugin_dir.is_dir():
         raise FileNotFoundError(
             f"Bundled skills not found at {plugin_dir}. "
-            f"Run solvers/inspect-swe/setup.sh to extract bundled skills "
-            f"from the asta image."
+            "Run solvers/inspect-swe/setup.sh to extract bundled skills "
+            "from the asta image."
         )
     return str(plugin_dir)
+
+
+def _asta_plugin_skills_refs(
+    plugins: str | list[str], *, include_base: bool = True
+) -> list[str]:
+    """Resolve selected groups with asta-tools first, as their shared base."""
+    names = plugins.split(",") if isinstance(plugins, str) else plugins
+    if any(not isinstance(name, str) for name in names):
+        raise ValueError("Asta plugin group names must be strings.")
+    names = [name.strip() for name in names]
+    if not names or any(not name for name in names):
+        raise ValueError("Choose at least one Asta plugin group.")
+    if len(names) != len(set(names)):
+        raise ValueError("Asta plugin groups must not be repeated.")
+    if any(name in _LEGACY_ASTA_PLUGINS for name in names):
+        if len(names) != 1 or not include_base:
+            raise ValueError(
+                "Legacy Asta plugin groups cannot be combined with other groups."
+            )
+        return [_asta_plugin_skills_ref(names[0])]
+    # Validate before adding the base so invalid selections keep their own error.
+    for name in names:
+        if name not in get_args(AstaPlugin):
+            raise ValueError(
+                f"Unknown Asta plugin group {name!r}. "
+                f"Choose one of: {', '.join(get_args(AstaPlugin))}."
+            )
+    ordered = (["asta-tools"] if include_base else []) + [
+        name for name in names if name != "asta-tools"
+    ]
+    return [_asta_plugin_skills_ref(name) for name in ordered]
+
+
+def _is_local_asta_tools_ref(ref: str) -> bool:
+    path = Path(ref)
+    return path.name == "skills" and path.parent.name == "asta-tools"
 
 
 def _resolve_env_image_id() -> str | None:
@@ -290,7 +340,7 @@ def _check_image_stamps_match_env(lock: list[dict], env_image_id: str | None) ->
 def inspect_swe_solver(
     agent: AgentName = "claude_code",
     skills: str | list[str] | None = None,
-    install_asta_skills: AstaPlugin | None = None,
+    install_asta_skills: str | list[str] | None = None,
     bridge_astabench_tools: bool = True,
     deny_external_web: bool = True,
     system_prompt: str | None = None,
@@ -310,7 +360,8 @@ def inspect_swe_solver(
             plus git origin/sha/path_in_repo/path_dirty when the path is
             inside a git working tree) is written to
             ``state.metadata["skills"]``.
-        install_asta_skills: Sugar for ``skills="<.vendor>/plugins/<plugin>/skills"``.
+        install_asta_skills: Plugin group(s), comma-separated or as a list.
+            ``asta-tools`` is included first for every selection.
         bridge_astabench_tools: Forward state.tools to the agent as
             ``mcp__astabench_*``. Set False for agent-only mode.
         deny_external_web: Strip provider-side WebSearch/WebFetch from every
@@ -361,13 +412,21 @@ def inspect_swe_solver(
             "it and ambiguates which service the post-run probes target."
         )
 
-    refs: list[str] = []
-    if install_asta_skills is not None:
-        refs.append(_asta_plugin_skills_ref(install_asta_skills))
+    local_refs: list[str] = []
     if isinstance(skills, str):
-        refs.append(skills)
+        local_refs.append(skills)
     elif skills:
-        refs.extend(skills)
+        local_refs.extend(skills)
+    local_base = any(_is_local_asta_tools_ref(ref) for ref in local_refs)
+    refs: list[str] = []
+    if local_base:
+        refs.extend(local_refs)
+    if install_asta_skills is not None:
+        refs.extend(
+            _asta_plugin_skills_refs(install_asta_skills, include_base=not local_base)
+        )
+    if not local_base:
+        refs.extend(local_refs)
     # NOTE: skill resolution is deferred to ``execute`` (per-sample) so
     # the stamped ``content_sha256`` / ``path_dirty`` always describe
     # what the inspect_swe constructor sees for *that* sample. inspect_swe

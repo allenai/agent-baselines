@@ -184,7 +184,7 @@ def _find_image_stamp(root: Path) -> tuple[str | None, Path | None]:
     callers can check whether files under it have been modified since
     the stamp was written. Walks all the way to the filesystem root so
     callers pointing at a sub-tree of the vendor dir
-    (``plugins/asta/skills``) still find the stamp at the vendor root.
+    (``plugins/asta-tools/skills``) still find the stamp at the vendor root.
     """
     for parent in (root, *root.parents):
         stamp = parent / ".image-id"

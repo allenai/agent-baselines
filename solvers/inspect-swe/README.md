@@ -73,7 +73,7 @@ uv run --project solvers/inspect-swe --frozen -- astabench eval \
     --model anthropic/claude-sonnet-4-6 \
     -S agent=claude_code \
     -S version=2.1.128 \
-    -S install_asta_skills=asta-preview \
+    -S install_asta_skills=asta-tools,asta-assistant \
     --log-dir logs/main
 ```
 
@@ -88,18 +88,28 @@ swap `astabench eval --split validation` for `inspect eval <task-spec>`.
 ### Swapping in local skills
 
 For skill iteration (or just running against a non-tagged ref), clone
-asta-plugins and point `-S skills=` at its canonical skill tree
-(`plugins/asta-preview/skills`) instead of `-S install_asta_skills=`:
+asta-plugins and point `-S skills=` at the group under test. To test
+`asta-assistant`, keep the base `asta-tools` from the image and swap the
+supervising layer from the checkout:
 
 ```bash
-# Skip if already cloned. plugins/asta-preview/skills is the canonical
-# source — edit it directly, no build step. (`make build-plugins` only
-# regenerates the core `plugins/asta` subset, if you're testing that.)
+# Skip if already cloned. Edit the SKILL.md files directly, no build step.
 git clone https://github.com/allenai/asta-plugins.git ../asta-plugins
 git -C ../asta-plugins checkout <your-ref>
 
 # Then in the astabench eval command above:
-#   -S skills=../asta-plugins/plugins/asta-preview/skills
+#   -S install_asta_skills=asta-tools \
+#   -S skills=../asta-plugins/plugins/asta-assistant/skills
+```
+
+To test changes to the base skills instead, select the supervising layer and
+point `skills=` at the checkout's `asta-tools/skills` directory. The solver
+uses that directory in place of the image's base skills:
+
+```bash
+# In the astabench eval command above:
+#   -S install_asta_skills=asta-assistant \
+#   -S skills=../asta-plugins/plugins/asta-tools/skills
 ```
 
 `-S skills=` only swaps skill content (the SKILL.md prose + scripts).
@@ -128,7 +138,8 @@ uv run --project solvers/inspect-swe --frozen -- astabench eval \
     --model anthropic/claude-sonnet-4-6 \
     -S agent=claude_code \
     -S version="$AGENT_VERSION" \
-    -S skills=../asta-plugins/plugins/asta-preview/skills \
+    -S install_asta_skills=asta-tools \
+    -S skills=../asta-plugins/plugins/asta-assistant/skills \
     --log-dir logs/arm-b
 
 inspect view --log-dir logs --recursive
@@ -149,7 +160,7 @@ default `:latest` / `:vX.Y.Z` images have no TeX.
   - Default: the task's MCP tools (`snippet_search`, `get_paper`,
     `table_editor`, `python_session`, …) reach the agent as
     `mcp__astabench_*` via the bridge.
-  - `-S skills=<path>` (or `-S install_asta_skills=asta|asta-preview`):
+  - `-S skills=<path>` (or `-S install_asta_skills=asta-tools,asta-assistant`):
     install SKILL.md trees into the agent's discovery path, giving the
     agent a native `asta papers` / `asta documents` / ... CLI surface
     plus skill prose. When `semantic-scholar` resolves, MCP tools with
@@ -174,6 +185,20 @@ default `:latest` / `:vX.Y.Z` images have no TeX.
   digest is required. `setup.sh` extracts skills directly from the
   chosen image so any `ASTA_IMAGE` (including `:latest`) is
   self-consistent.
+
+`install_asta_skills=asta-tools,asta-assistant` installs the usual stack:
+`asta-tools` as the base plus `asta-assistant` as the supervising layer.
+`asta-assistant`, `asta-flows` and `asta-dev` call `asta-tools:*` skills but
+asta-plugins does not declare or install that dependency, so never test one
+of them without `asta-tools` — including when swapping a layer in with
+`-S skills=<path>`.
+Use `asta-tools` alone for base-skill tests, `asta-flows` for the alternative
+workflow layer, or `asta-assistant,asta-dev` to add the internal development
+skills. The argument also accepts a list when calling the solver in Python.
+`asta-tools` is included first for every current-group selection. The legacy
+`asta` and `asta-preview` names remain available only when testing an older
+pinned image that actually contains those directories; they cannot be mixed
+with current groups.
 
 ## Reproducibility
 
@@ -250,14 +275,13 @@ resolved ref:
 
 ```json
 {
-  "source": "/Users/me/dev/asta-plugins/plugins/asta/skills",
+  "source": "/Users/me/dev/asta-plugins/plugins/asta-tools/skills/semantic-scholar",
   "content_sha256": "b3509822047f2ece…",
-  "skills": ["asta-documents", "literature-report", "preview",
-             "research-step", "semantic-scholar", "workspace"],
+  "skills": ["semantic-scholar"],
   "git": {
     "origin": "git@github.com:allenai/asta-plugins.git",
     "sha": "6fcf83a663dcfc26c1ce897af3622e4cc472e8ef",
-    "path_in_repo": "plugins/asta/skills",
+    "path_in_repo": "plugins/asta-tools/skills/semantic-scholar",
     "path_dirty": false
   }
 }
@@ -305,8 +329,8 @@ clones.
 duplicates while the lock listed both. The resolver rejects up front,
 whether the duplicates come from two `-S skills=` refs or from a single
 parent ref containing two skill trees with the same basename
-(e.g. `plugins/asta/skills/semantic-scholar` *and*
-`plugins/asta-preview/skills/semantic-scholar`).
+(e.g. one `plugins/` ref containing `group-a/skills/demo` and
+`group-b/skills/demo`).
 
 **`image_id`: image-derived alternative to git provenance.** When the
 resolved path lives under a tree carrying a `.image-id` stamp (written

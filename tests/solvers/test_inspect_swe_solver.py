@@ -351,7 +351,7 @@ class TestStrictReproducibility:
                     "git": {
                         "origin": "git@example.com:o/r.git",
                         "sha": "a" * 40,
-                        "path_in_repo": "plugins/asta/skills",
+                        "path_in_repo": "plugins/asta-tools/skills",
                         "path_dirty": False,
                     },
                 }
@@ -454,7 +454,7 @@ class TestStrictReproducibility:
             skill_dirs=[Path("/fake/semantic-scholar")],
             lock=[
                 {
-                    "source": "/fake/.vendor/asta-plugins/plugins/asta/skills",
+                    "source": "/fake/.vendor/asta-plugins/plugins/asta-tools/skills",
                     "content_sha256": "abc",
                     "skills": ["semantic-scholar"],
                     "image_id": stamped_id,
@@ -471,7 +471,7 @@ class TestStrictReproducibility:
         )
         monkeypatch.setenv("ASTA_TOKEN", "abc")
         _, state, _ = _run_solver(
-            install_asta_skills="asta",
+            install_asta_skills="asta-tools",
             resolved=resolved,
             strict_reproducibility=True,
             version="2.1.128",
@@ -494,7 +494,7 @@ class TestStrictReproducibility:
             skill_dirs=[Path("/fake/semantic-scholar")],
             lock=[
                 {
-                    "source": "/fake/.vendor/asta-plugins/plugins/asta/skills",
+                    "source": "/fake/.vendor/asta-plugins/plugins/asta-tools/skills",
                     "content_sha256": "abc",
                     "skills": ["semantic-scholar"],
                     "image_id": "sha256:" + "b" * 64,
@@ -514,7 +514,7 @@ class TestStrictReproducibility:
         monkeypatch.setenv("ASTA_TOKEN", "abc")
         with pytest.raises(ValueError, match="unverified .image-id"):
             _run_solver(
-                install_asta_skills="asta",
+                install_asta_skills="asta-tools",
                 resolved=resolved,
                 strict_reproducibility=True,
                 version="2.1.128",
@@ -570,16 +570,53 @@ class TestSkillsResolution:
         assert kwargs["skills"] == [Path("/tmp/fake-dir")]
 
     def test_install_asta_skills_sugar(self, monkeypatch):
-        """``install_asta_skills="asta"`` resolves to the bundled plugin path
+        """``install_asta_skills="asta-tools"`` resolves to the bundled plugin path
         and goes through the same resolver as explicit ``skills=`` refs."""
         monkeypatch.setenv("ASTA_TOKEN", "abc")
         resolved = ResolvedSkills(
             skill_dirs=[Path("/fake/semantic-scholar")], lock=[{"source": "x"}]
         )
-        _, _, m_resolve = _run_solver(install_asta_skills="asta", resolved=resolved)
+        _, _, m_resolve = _run_solver(
+            install_asta_skills="asta-tools", resolved=resolved
+        )
         assert m_resolve.call_args.args[0] == [
-            "/fake/.vendor/asta-plugins/plugins/asta/skills",
+            "/fake/.vendor/asta-plugins/plugins/asta-tools/skills",
         ]
+
+    @pytest.mark.parametrize(
+        "selection,groups",
+        [
+            ("asta-assistant", ["asta-tools", "asta-assistant"]),
+            ("asta-flows", ["asta-tools", "asta-flows"]),
+            ("asta-assistant,asta-dev", ["asta-tools", "asta-assistant", "asta-dev"]),
+            (["asta-dev", "asta-tools"], ["asta-tools", "asta-dev"]),
+        ],
+    )
+    def test_plugin_groups_include_shared_base(self, monkeypatch, selection, groups):
+        monkeypatch.setenv("ASTA_TOKEN", "abc")
+        _, _, m_resolve = _run_solver(install_asta_skills=selection)
+        assert m_resolve.call_args.args[0] == [
+            f"/fake/.vendor/asta-plugins/plugins/{group}/skills" for group in groups
+        ]
+
+    def test_checkout_base_replaces_bundled_base(self, monkeypatch):
+        monkeypatch.setenv("ASTA_TOKEN", "abc")
+        local_base = "../asta-plugins/plugins/asta-tools/skills"
+        _, _, m_resolve = _run_solver(
+            skills=local_base, install_asta_skills="asta-assistant"
+        )
+        assert m_resolve.call_args.args[0] == [
+            local_base,
+            "/fake/.vendor/asta-plugins/plugins/asta-assistant/skills",
+        ]
+
+    def test_checkout_base_alone_is_not_repeated(self, monkeypatch):
+        monkeypatch.setenv("ASTA_TOKEN", "abc")
+        local_base = "../asta-plugins/plugins/asta-tools/skills"
+        _, _, m_resolve = _run_solver(
+            skills=local_base, install_asta_skills="asta-tools"
+        )
+        assert m_resolve.call_args.args[0] == [local_base]
 
     def test_provenance_lock_stamped_to_state_metadata(self):
         """The lock is the load-bearing piece — it lets you trace from an
@@ -1147,8 +1184,60 @@ class TestMCPPaperSearchFiltering:
 
 
 class TestAstaPluginShortcutMissingVendor:
+    @pytest.mark.parametrize("selection", ["", "asta-assistant,", "asta-dev,asta-dev"])
+    def test_empty_or_repeated_group_is_rejected(self, selection):
+        from agent_baselines.solvers.inspect_swe.agent import _asta_plugin_skills_refs
+
+        with pytest.raises(ValueError):
+            _asta_plugin_skills_refs(selection)
+
+    @pytest.mark.parametrize(
+        "group", ("asta-tools", "asta-assistant", "asta-flows", "asta-dev")
+    )
+    def test_current_plugin_group_resolves(self, monkeypatch, tmp_path, group):
+        from agent_baselines.solvers.inspect_swe import agent
+
+        skill_root = tmp_path / "plugins" / group / "skills"
+        skill_root.mkdir(parents=True)
+        monkeypatch.setattr(agent, "_VENDOR_ASTA_PLUGINS", tmp_path)
+
+        assert agent._asta_plugin_skills_ref(group) == str(skill_root)
+
+    @pytest.mark.parametrize("group", ("asta", "asta-preview"))
+    def test_legacy_group_requires_matching_image(self, monkeypatch, tmp_path, group):
+        from agent_baselines.solvers.inspect_swe import agent
+
+        monkeypatch.setattr(agent, "_VENDOR_ASTA_PLUGINS", tmp_path)
+        with pytest.raises(FileNotFoundError, match="absent from this image"):
+            agent._asta_plugin_skills_refs(group)
+
+        skill_root = tmp_path / "plugins" / group / "skills"
+        skill_root.mkdir(parents=True)
+        assert agent._asta_plugin_skills_refs(group) == [str(skill_root)]
+
+    def test_legacy_and_current_groups_cannot_mix(self):
+        from agent_baselines.solvers.inspect_swe.agent import _asta_plugin_skills_refs
+
+        with pytest.raises(ValueError, match="cannot be combined"):
+            _asta_plugin_skills_refs("asta,asta-assistant")
+
+        with pytest.raises(ValueError, match="cannot be combined"):
+            _asta_plugin_skills_refs("asta", include_base=False)
+
+    def test_unknown_plugin_group_is_rejected(self):
+        from agent_baselines.solvers.inspect_swe.agent import _asta_plugin_skills_ref
+
+        with pytest.raises(ValueError, match="Unknown Asta plugin group"):
+            _asta_plugin_skills_ref("../../elsewhere")  # type: ignore[arg-type]
+
+    def test_non_string_group_is_rejected(self):
+        from agent_baselines.solvers.inspect_swe.agent import _asta_plugin_skills_refs
+
+        with pytest.raises(ValueError, match="must be strings"):
+            _asta_plugin_skills_refs(["asta-tools", None])  # type: ignore[list-item]
+
     def test_missing_vendor_dir_raises(self):
-        """If setup.sh wasn't run, ``install_asta_skills="asta"`` fails loudly
+        """If setup.sh wasn't run, ``install_asta_skills="asta-tools"`` fails loudly
         before the eval starts."""
         from agent_baselines.solvers.inspect_swe.agent import inspect_swe_solver
 
@@ -1160,7 +1249,7 @@ class TestAstaPluginShortcutMissingVendor:
             ),
         ):
             with pytest.raises(FileNotFoundError):
-                inspect_swe_solver(install_asta_skills="asta")
+                inspect_swe_solver(install_asta_skills="asta-tools")
 
 
 class TestPreflightAuthCheck:

@@ -236,7 +236,7 @@ class TestGitStateInLock:
         repo.mkdir()
         subprocess.run(["git", "init", "-q", str(repo)], check=True)
         _git_configure_test_repo(repo)
-        skills_dir = repo / "plugins" / "asta" / "skills"
+        skills_dir = repo / "plugins" / "asta-tools" / "skills"
         skills_dir.mkdir(parents=True)
         _make_skill(skills_dir, "alpha")
         subprocess.run(["git", "-C", str(repo), "add", "."], check=True)
@@ -244,7 +244,7 @@ class TestGitStateInLock:
             ["git", "-C", str(repo), "commit", "-q", "-m", "init"], check=True
         )
         result = resolve_skills([str(skills_dir)])
-        assert result.lock[0]["git"]["path_in_repo"] == "plugins/asta/skills"
+        assert result.lock[0]["git"]["path_in_repo"] == "plugins/asta-tools/skills"
 
     def test_path_in_repo_empty_when_at_root(self, tmp_path: Path) -> None:
         repo = tmp_path / "repo"
@@ -743,12 +743,12 @@ class TestConflictDetection:
         """inspect_swe's ``install_skills`` keys by skill name and silently
         overwrites duplicates. A single ref that happens to contain two
         SKILL.md trees with the same basename (e.g. pointing ``skills=``
-        at a parent of ``plugins/asta/skills/semantic-scholar`` AND
-        ``plugins/asta-preview/skills/semantic-scholar``) would otherwise
+        at a parent of ``plugins/group-a/skills/semantic-scholar`` AND
+        ``plugins/group-b/skills/semantic-scholar``) would otherwise
         ship a lock listing both while only one actually installs."""
         parent = tmp_path / "plugins"
-        _make_skill(parent / "asta" / "skills", "semantic-scholar")
-        _make_skill(parent / "asta-preview" / "skills", "semantic-scholar")
+        _make_skill(parent / "group-a" / "skills", "semantic-scholar")
+        _make_skill(parent / "group-b" / "skills", "semantic-scholar")
         with pytest.raises(ValueError, match="two locations"):
             resolve_skills([str(parent)])
 
