@@ -221,7 +221,8 @@ _ASTA_MCP_PAPER_TOOL_NAMES: frozenset[str] = frozenset(
 
 
 _PLUGIN_VERSION_RE = re.compile(r"PLUGIN_VERSION=([\d.]+)")
-_ASTA_IMAGE_VERSION_RE = re.compile(r":v([\d.]+)$")
+# Variant tags (``:vX.Y.Z-tex``) carry the same plugin version as ``:vX.Y.Z``.
+_ASTA_IMAGE_VERSION_RE = re.compile(r":v(\d+(?:\.\d+)*)(?:-[A-Za-z0-9.]+)?$")
 
 
 def _check_plugin_image_version_match(skill_dirs: list[Path]) -> None:
@@ -230,7 +231,7 @@ def _check_plugin_image_version_match(skill_dirs: list[Path]) -> None:
 
     Skipped (no raise) when:
     - No skills are loaded.
-    - ``ASTA_IMAGE`` isn't set or isn't a ``:vX.Y.Z`` tag (e.g. ``:latest``,
+    - ``ASTA_IMAGE`` isn't set or isn't a ``:vX.Y.Z[-variant]`` tag (e.g. ``:latest``,
       ``@sha256:...``) — there's nothing to compare against.
     - Skill files don't declare ``PLUGIN_VERSION`` (older trees).
     - Multiple skill versions co-exist (caller is mid-iteration; let them
