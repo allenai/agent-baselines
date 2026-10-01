@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-FROM python:3.11.3 AS agent-baselines-base
+FROM python:3.11-slim-bookworm AS agent-baselines-base
 
 LABEL name="agent-baselines" \
     org="allenai" \
